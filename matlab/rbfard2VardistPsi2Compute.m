@@ -1,4 +1,4 @@
-function [K, outKern, sumKern, Kgvar] = rbfardVardistPsi2Compute(rbfardKern, vardist, Z)
+function [K, outKern, sumKern, Kgvar] = rbfard2VardistPsi2Compute(rbfardKern, vardist, Z)
 
 % RBFARD2XGAUSSIANVARIATIONALDISTKERNCOMPUTE Compute a cross kernel after convolution of the rbfard2 (rbfard with the traditional 
 %   parametrizatiion) and a variational Gaussian distribution (a separate Gaussina for each row of X)
@@ -83,4 +83,36 @@ K = rbfardKern.variance*Kgvar;
 %Kgvar = rbfardKern.variance*(outKern2.*sumKern2); 
 %K = rbfardKern.variance*Kgvar;
 
-
+% third way 
+%zmAzm = sum((Z.*Z).*repmat(A,[M 1]),2);
+%Azm = Z.*repmat(A,[M 1]);
+%outKern2 = repmat(zmAzm,[1 M]) + repmat(zmAzm',[M 1]);
+%outKern2 = (rbfardKern.variance^2)*exp(-0.5*outKern2); 
+%
+%sumKern2 = zeros(M,M); 
+%for n=1:N
+%    %    
+%    AS_n = (1 + 2*A.*vardist.covars(n,:)).^0.5;  
+%    
+%    mu_n = vardist.means(n,:);
+%    mmun = mu_n*(inv(diag(vardist.covars(n,:)))*mu_n'); 
+%    
+%    normfactor =  1./prod(AS_n);
+%    for m=1:M
+%    for mp=1:M 
+%        argExp = Z(m,:).*A + Z(mp,:).*A + vardist.means(n,:)./vardist.covars(n,:); 
+%        argExp = argExp*(inv(2*diag(A) + diag(1./vardist.covars(n,:)))*argExp'); 
+%        tmpKern(m,mp) = exp(-0.5*(mmun) +0.5*argExp); 
+%    end
+%    end
+%    sumKern2 = sumKern2 + normfactor*tmpKern;
+%    %
+%end
+%
+%KK = outKern2.*sumKern2;
+%sum(sum(abs(KK - K)))
+%K
+%KK
+%pause
+%sum(sum(abs(outKern - outKern2)))
+    

@@ -10,8 +10,7 @@ function model = vargplvmExpandParam(model, params)
 % ARG params : parameter vector containing the parameters to put in
 % the FGPLVM structure.
 % 
-% COPYRIGHT : Neil D. Lawrence, 2005, 2006, 2009
-% MODIFICATION: Carl Henrik Ek, 2009
+% COPYRIGHT : Michalis K. Titsias, 2009
 % 
 % SEEALSO : vargplvmCreate, vargplvmExtractParam, modelExpandParam
 
@@ -53,3 +52,6 @@ if model.optimiseBeta
 end
 
 model.nParams = endVal;
+
+% Update statistics
+model = vargplvmUpdateStats(model, model.X_u);

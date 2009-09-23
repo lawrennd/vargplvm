@@ -1,4 +1,4 @@
-function k0 = rbfardVardistPsi0Compute(rbfardKern, vardist)
+function k0 = rbfard2VardistPsi0Compute(rbfardKern, vardist)
 
 % RBFARD2XGAUSSIANVARIATIONALDISTKERNCOMPUTE Compute a cross kernel after convolution of the rbfard2 (rbfard with the traditional 
 %   parametrizatiion) and a variational Gaussian distribution (a separate Gaussina for each row of X)

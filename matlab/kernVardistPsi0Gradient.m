@@ -1,4 +1,4 @@
-function gk0 = kernVardistPsi0Gradient(kern, vardist)
+function [gKern, gVarmeans, gVarcovars] = kernVardistPsi0Gradient(kern, vardist, covGrad)
 % GGWHITEXGAUSSIANWHITEKERNGRADIENT Compute gradient between the GG white
 %                                   and GAUSSIAN white kernels.
 % FORMAT
@@ -29,21 +29,18 @@ function gk0 = kernVardistPsi0Gradient(kern, vardist)
 % SEEALSO : multiKernParamInit, multiKernCompute, ggwhiteKernParamInit,
 % gaussianwhiteKernParamInit
 %
-% COPYRIGHT : Mauricio A. Alvarez and Neil D. Lawrence, 2008
-%
-% MODIFICATIONS : Mauricio A. Alvarez, 2009.
-
+% COPYRIGHT : Michalis K. Titsias, 2009
 
 fhandle = str2func([kern.type 'VardistPsi0Gradient']);
-gk0 = fhandle(kern, vardist);
+[gKern, gVarmeans, gVarcovars] = fhandle(kern, vardist, covGrad);
 
 % Transformations 
 % /~Michalis this must be done similar to kernGradient at some point 
 if strcmp(kern.type,'rbfard2')
-  gk0 = gk0*kern.variance;
-elseif strcmp(kerntype,'linard2')
-   %covars = vardist.covars'; 
-   %gVarcovars = (gVarcovars(:).*covars(:))'; 
+   gKern(1) = gKern(1)*kern.variance;
+elseif strcmp(kern.type,'linard2')
+   gKern(1:end) = gKern(1:end).*kern.inputScales;
+   gVarcovars = (gVarcovars(:).*vardist.covars(:))'; 
 end
 
 

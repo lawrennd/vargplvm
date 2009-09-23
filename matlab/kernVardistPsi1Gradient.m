@@ -43,13 +43,13 @@ fhandle = str2func([kern.type 'VardistPsi1Gradient']);
 if strcmp(kern.type,'rbfard2')
    gKern(1) = gKern(1)*kern.variance;
    gKern(2:end) = gKern(2:end).*kern.inputScales;
-elseif strcmp(kerntype,'linard2')
-    % to be done 
+elseif strcmp(kern.type,'linard2')
+   gKern(1:end) = gKern(1:end).*kern.inputScales;
 end
 
 % variational variances are positive 
-covars = vardist.covars'; 
-gVarcovars = (gVarcovars(:).*covars(:))'; 
+%covars = vardist.covars'; 
+gVarcovars = (gVarcovars(:).*vardist.covars(:))'; 
 
 
 

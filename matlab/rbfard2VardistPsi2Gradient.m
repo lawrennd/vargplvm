@@ -1,4 +1,4 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2Gradient(rbfard2Kern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2Gradient(rbfardKern, vardist, Z, covGrad)
 % GGWHITEXGAUSSIANWHITEKERNGRADIENT Compute gradient between the GG white
 %                                   and GAUSSIAN white kernels.
 % FORMAT
@@ -29,83 +29,120 @@ function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2Gradient(rbfar
 % SEEALSO : multiKernParamInit, multiKernCompute, ggwhiteKernParamInit,
 % gaussianwhiteKernParamInit
 %
-% COPYRIGHT : Mauricio A. Alvarez and Neil D. Lawrence, 2008
+% COPYRIGHT : Michalis K. Titsias, 2009
 %
-% MODIFICATIONS : Mauricio A. Alvarez, 2009.
 
-
-% KERN
 % variational means
 N = size(vardist.means,1);
 %  inducing variables 
-M = size(Z,1); 
+[M Q] = size(Z); 
 
 
 % evaluate the kernel matrix 
-[K_fu Knovar] = rbfard2VardistPsi2Compute(rbfard2Kern, vardist, Z);
+[K, outKern, sumKern, Kgvar] = rbfard2VardistPsi2Compute(rbfardKern, vardist, Z);
 
 % inverse variances
-A = rbfard2Kern.inputScales;
+A = rbfardKern.inputScales;
 
 % gradient wrt variance of the kernel 
-gKernvar = sum(sum(Knovar.*covGrad));  
+gKernvar = 2*sum(sum(Kgvar.*covGrad));  
 
-% compute the gradient wrt lengthscales, variational means and variational variances  
-for q=1:vardist.latentDimension
-%
-    S_q = vardist.covars(:,q);  
-    Mu_q = vardist.means(:,q); 
-    Z_q = Z(:,q)'; 
+
+% 1) line compute 0.5*(z_mq + z_m'q) for any q and store the result in a "M x Q x M" 
+%  matrix where M is the number of inducing points and Q the latent dimension
+% 2) line compute the z_mq - z_m'q, for any q
+for q=1:size(Z,2)
+  ZmZm(:,q,:) = 0.5*(repmat(Z(:,q),[1 1 M]) + repmat(reshape(Z(:,q),[1 1 M]),[M 1 1]));
+  ZmDZm(:,q,:) = repmat(Z(:,q),[1 1 M]) - repmat(reshape(Z(:,q),[1 1 M]),[M 1 1]);
+end
+
+% compute the terms 2 a_q s_nq^2 + 1, for n and q and srore the result in a 
+% "N x Q" matrix
+asPlus1 = 2*(repmat(A,[N 1]).*vardist.covars) + 1; 
+% compute the terms a_q/(2 a_q s_nq^2 + 1), for n and q and store the result in a 
+% "N x Q" matrix
+aDasPlus1 = repmat(A,[N 1])./asPlus1; 
+
+covGrad = (rbfardKern.variance^2)*(covGrad.*outKern);
+covGrad = reshape(covGrad,[M 1 M]);
+sumKern = reshape(sumKern,[M 1 M]);
+Amq = repmat(A,[M 1]);
+partInd1 = - Amq.*sum(ZmDZm.*repmat(sumKern.*covGrad,[1 Q 1]),3);
+partInd2 = zeros(M,Q);
+
+partA1 = - 0.25*sum(sum((ZmDZm.*ZmDZm).*repmat(sumKern.*covGrad,[1 Q 1]),3),1);
+partA2 = zeros(1,Q);
+
+% Compute the gradient wrt lengthscales, variational means and variational variances  
+% /~For loop over training points  
+for n=1:N
+    %
+    %  
+    mu_n = vardist.means(n,:); 
+    s2_n = vardist.covars(n,:); 
+    AS_n = asPlus1(n,:);  
+     
+    MunZmZm = repmat(mu_n, [M 1 M]) - ZmZm;
+    MunZmZmA = MunZmZm./repmat(AS_n,[M 1 M]);
     
-    % B3_q term (without A(q); see report)
-    B_q = repmat(1./(A(q)*S_q + 1), [1 M]).*(repmat(Mu_q,[1 M]) - repmat(Z_q,[N 1]));
- 
-    % derivatives wrt variational means and inducing inputs 
-    tmp = A(q)*((K_fu.*B_q).*covGrad);
+    k2Kern_n = sum((MunZmZm.^2).*repmat(aDasPlus1(n,:),[M 1 M]),2);
+    k2Kern_n = exp(-k2Kern_n)/prod(sqrt(AS_n));
     
-    % variational means: you sum out the columns (see report)
-    gVarmeans(:,q) = -sum(tmp,2); 
+    % derivatives wrt to variational means
+    k2ncovG = repmat(k2Kern_n.*covGrad,[1 Q 1]); 
+    %tmp2 = tmp + reshape(diag(diag(squeeze(tmp))),[M 1 M]);
+    %diagCorr = diag(diag(squeeze(tmp))); 
+    tmp = MunZmZmA.*k2ncovG;
+    gVarmeans(n,:) = - 2*A.*(sum(sum(tmp,3),1));
     
-    % inducing inputs: you sum out the rows 
-    gInd(:,q) = sum(tmp,1)'; 
+    % derivatives wrt inducing inputs 
+    %diagCorr = diagCorr*(repmat(mu_n,[M 1]) - Z).*repmat(aDasPlus1(n,:),[M 1]);
+    %partInd2 = partInd2 + Amq.*(sum(tmp,3) + diagCorr);
+    partInd2 = partInd2 + Amq.*sum(tmp,3);
     
-    % 
-    %B_q = repmat(1./(A(q)*S_q + 1), [1 M]).*dist2(Mu_q, repmat(Z_q);
-    B_q = (B_q.*(repmat(Mu_q,[1 M]) - repmat(Z_q,[N 1])));
     
-    % B1_q term (see report)
-    B1_q = -(0.5./repmat((A(q)*S_q + 1), [1 M])).*(repmat(S_q, [1 M]) + B_q);
+    % Derivative wrt input scales  
+    MunZmZmA = MunZmZmA.*MunZmZm; 
+    partA2 = partA2 + sum(sum(((MunZmZmA + repmat(s2_n,[M 1 M])).*k2ncovG)./repmat(AS_n,[M 1 M]),1),3);
     
-    % gradients wrt kernel hyperparameters (lengthscales) 
-    gKernlengcs(q) = sum(sum((K_fu.*B1_q).*covGrad)); 
+    % derivatives wrt variational diagonal covariances 
+    MunZmZmA = MunZmZmA.*repmat(A,[M 1 M]);
+    gVarcovars(n,:) = sum(sum(repmat(aDasPlus1(n,:),[M 1 M]).*(2*MunZmZmA - 1).*k2ncovG,1),3);
     
-    % B2_q term (see report)  
-    %B1_q = ((0.5*A(q))./repmat((A(q)*S_q + 1), [1 M])).*(B_q - 1); 
-  
-    B1_q = ((0.5*A(q))./repmat((A(q)*S_q + 1), [1 M])).*(A(q)*B_q - 1); 
-    
-    % gradient wrt variational covars (diagonal covariance matrices) 
-    gVarcovars(:,q) = sum((K_fu.*B1_q).*covGrad,2);
-  
+    %ZmZm1 = k2kernCompute(A, mu_n, cov_n, Z); 
+    %
+    %AS_n = (1 + 2*A.*vardist.covars(n,:)).^0.5;  
+    %
+    %normfactor =  1./prod(AS_n);
+    %
+    %Z_n = (repmat(vardist.means(n,:),[M 1]) - Z)*0.5; 
+    %Z_n = Z_n.*repmat(sqrt(A)./AS_n,[M 1]);
+    %distZ = dist2(Z_n,-Z_n); 
+    %
+    %sumKern = sumKern + normfactor*exp(-distZ);  
     %
 end
-     
+
+gInd = partInd1 + 2*partInd2; 
+
+gKernlengcs = partA1 - partA2; 
 gKern = [gKernvar gKernlengcs];
 
 % gVarmeans is N x Q matrix (N:number of data, Q:latent dimension)
-% this will unfold this matrix row-wise 
-gVarmeans = gVarmeans'; 
+% this will unfold this matrix column-wise 
+%gVarmeans = gVarmeans'; 
 gVarmeans = gVarmeans(:)'; 
 
 % gVarcovars is N x Q matrix (N:number of data, Q:latent dimension)
-% this will unfold this matrix row-wise 
-gVarcovars = gVarcovars'; 
+% this will unfold this matrix column-wise 
+%gVarcovars = gVarcovars'; 
 gVarcovars = gVarcovars(:)';
 
 % gInd is M x Q matrix (M:number of inducing variables, Q:latent dimension)
-% this will unfold this matrix row-wise 
-gInd = gInd'; 
+% this will unfold this matrix column-wise 
+%gInd = gInd'; 
 gInd = gInd(:)'; 
+
 
 
 

@@ -1,4 +1,4 @@
-function gk0 = rbfard2VardistPsi0Gradient(rbfard2Kern, vardist)
+function [gKern, gVarmeans, gVarcovars] = rbfard2VardistPsi0Gradient(rbfard2Kern, vardist, covGrad)
 % GGWHITEXGAUSSIANWHITEKERNGRADIENT Compute gradient between the GG white
 %                                   and GAUSSIAN white kernels.
 % FORMAT
@@ -26,12 +26,16 @@ function gk0 = rbfard2VardistPsi0Gradient(rbfard2Kern, vardist)
 % ARG x1 : row inputs for which kernel is to be computed.
 % ARG x2 : column inputs for which kernel is to be computed.
 %
-% SEEALSO : multiKernParamInit, multiKernCompute, ggwhiteKernParamInit,
-% gaussianwhiteKernParamInit
+% SEEALSO :
+% COPYRIGHT : Michalis K. Titsias
 %
-% COPYRIGHT : Mauricio A. Alvarez and Neil D. Lawrence, 2008
-%
-% MODIFICATIONS : Mauricio A. Alvarez, 2009.
 
-gk0 = vardist.numData;
+gKern = zeros(1,rbfard2Kern.nParams); 
+gKern(1) = covGrad*vardist.numData;
+ 
+gVarmeans = zeros(1,prod(size(vardist.means))); 
+gVarcovars = zeros(1,prod(size(vardist.means))); 
+
+
+
 

@@ -1,4 +1,4 @@
-function [K P] = kernVardistPsi2Compute(kern, vardist)
+function [K P] = kernVardistPsi2Compute(kern, vardist, Z)
 
 % RBFARD2XGAUSSIANVARIATIONALDISTKERNCOMPUTE Compute a cross kernel after convolution of the rbfard2 (rbfard with the traditional 
 %   parametrizatiion) and a variational Gaussian distribution (a separate Gaussina for each row of X)
@@ -30,6 +30,6 @@ function [K P] = kernVardistPsi2Compute(kern, vardist)
 % KERN
 
 fhandle = str2func([kern.type 'VardistPsi2Compute']);
-[K P] = fhandle(kern, vardist);
+[K P] = fhandle(kern, vardist, Z);
 
 

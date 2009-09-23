@@ -23,7 +23,8 @@ vardist.transforms(1).type = optimiDefaultConstraint('positive');
 
 % initialize the parameters
 vardist.means  = X;
-vardist.covars = ones(N,Q);
+vardist.covars = 0.1*ones(N,Q) +  0.005*randn(N,Q);
+vardist.covars(vardist.covars<0.1) = 0.1;
 %pmeans = randn(Q,N);
 %pcovars = randn(Q,N);
 %params = [pmeans(:)' pcovars(:)']; 
