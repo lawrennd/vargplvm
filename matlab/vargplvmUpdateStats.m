@@ -1,6 +1,20 @@
 function model = vargplvmUpdateStats(model, X_u)
-%
 
+% VARGPLVMUPDATESTATS updatesx the statistics of the variational GPLVM.
+% FORMAT
+% DESC updates the statistics of Psi for the GPLVM.
+% ARG model : the model to be updated.
+% ARG X_u : the inducing input locations.
+% RETURN model : the updated model.
+%
+% SEEALSO : vargplvmExpandParam
+%
+% COPYRIGHT : Michalis K. Titsias, 2009
+%
+% COPYRIGHT : Neil D. Lawrence, 2009
+
+% VARGPLVM
+  
 jitter = 1e-6;
 
 model.K_uu = kernCompute(model.kern, X_u);
@@ -14,6 +28,7 @@ end
 model.Psi0 = kernVardistPsi0Compute(model.kern, model.vardist);
 model.Psi1 = kernVardistPsi1Compute(model.kern, model.vardist, X_u);
 model.Psi2 = kernVardistPsi2Compute(model.kern, model.vardist, X_u);
+
 [model.invK_uu, model.sqrtK_uu] = pdinv(model.K_uu);
 model.logDetK_uu = logdet(model.K_uu, model.sqrtK_uu);
 

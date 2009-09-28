@@ -3,7 +3,7 @@
 randn('seed', 1e5);
 rand('seed', 1e5);
 
-dataSetName = 'oil';
+dataSetName = 'oil100';
 experimentNo = 1;
 printDiagram = 1;
 
@@ -19,11 +19,12 @@ options.kern = 'rbfard2';
 options.numActive = 50; 
 
 options.optimiser = 'scg';
-latentDim = 2;
+latentDim = 4;
 d = size(Y, 2);
 
 % demo using the variational inference method for the gplvm model
 model = vargplvmCreate(latentDim, d, Y, options);
+%model.X = model.y;
 model = vargplvmParamInit(model, model.y, model.X); 
 %model.beta = 1;
 

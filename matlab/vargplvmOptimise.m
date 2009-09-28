@@ -1,8 +1,8 @@
 function model = vargplvmOptimise(model, display, iters);
 
-% FGPLVMOPTIMISE Optimise the FGPLVM.
+% VARGPLVMOPTIMISE Optimise the variational GPLVM.
 % FORMAT
-% DESC takes a given GP-LVM model structure and optimises with
+% DESC takes a given variational GP-LVM model structure and optimises with
 % respect to parameters and latent positions. 
 % ARG model : the model to be optimised.
 % ARG display : flag dictating whether or not to display
@@ -12,11 +12,13 @@ function model = vargplvmOptimise(model, display, iters);
 % RETURN model : the optimised model.
 %
 % SEEALSO : vargplvmCreate, vargplvmLogLikelihood,
-% fgplvmLogLikeGradients, fgplvmObjective, fgplvmGradient
+% vargplvmLogLikeGradients, vargplvmObjective, fgplvmGradient
 % 
 % COPYRIGHT : Neil D. Lawrence, 2005, 2006
+%
+% COPYRIGHT : Michalis K. Titsias, 2009
 
-% FGPLVM
+% VARGPLVM
 
 
 if nargin < 3

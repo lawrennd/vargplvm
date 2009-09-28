@@ -1,8 +1,8 @@
 function [params, names] = vargplvmExtractParam(model)
 
-% FGPLVMEXTRACTPARAM Extract a parameter vector from a GP-LVM model.
+% VARGPLVMEXTRACTPARAM Extract a parameter vector from a VARGPLVM model.
 % FORMAT
-% DESC extracts a parameter vector from a given FGPLVM structure.
+% DESC extracts a parameter vector from a given VARGPLVM structure.
 % ARG model : the model from which parameters are to be extracted.
 % RETURN params : the parameter vector extracted from the model.
 %
@@ -12,7 +12,9 @@ function [params, names] = vargplvmExtractParam(model)
 % RETURN params : a vector of parameters from the model.
 % RETURN names : cell array of parameter names.
 %
-% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009
+% COPYRIGHT : Michalis K. Titsias, 2009
+%
+% COPYRIGHT : Neil D. Lawrence, 2009
 %
 % SEEALSO : vargplvmCreate, vargplvmExpandParam, modelExtractParam
 

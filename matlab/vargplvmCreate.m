@@ -1,6 +1,6 @@
 function model = vargplvmCreate(q, d, Y, options)
 
-% FGPLVMCREATE Create a GPLVM model with inducing variables.
+% VARGPLVMCREATE Create a GPLVM model with inducing variables.
 % FORMAT
 % DESC creates a GP-LVM model with the possibility of using
 % inducing variables to speed up computation.
@@ -9,7 +9,7 @@ function model = vargplvmCreate(q, d, Y, options)
 % ARG Y : the data to be modelled in design matrix format (as many
 % rows as there are data points).
 % ARG options : options structure as returned from
-% FGPLVMOPTIONS. This structure determines the type of
+% vargplvmOptions. This structure determines the type of
 % approximations to be used (if any).
 % RETURN model : the GP-LVM model.
 %

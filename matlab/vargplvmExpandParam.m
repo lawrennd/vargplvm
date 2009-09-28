@@ -1,16 +1,18 @@
 function model = vargplvmExpandParam(model, params)
 
-% FGPLVMEXPANDPARAM Expand a parameter vector into a GP-LVM model.
+% VARGPLVMEXPANDPARAM Expand a parameter vector into a VARGPLVM model.
 % FORMAT
-% DESC takes an FGPLVM structure and a vector of parameters, and
+% DESC takes an VARGPLVM structure and a vector of parameters, and
 % fills the structure with the given parameters. Also performs any
 % necessary precomputation for likelihood and gradient
 % computations, so can be computationally intensive to call.
-% ARG model : the FGPLVM structure to put the parameters in.
+% ARG model : the VARGPLVM structure to put the parameters in.
 % ARG params : parameter vector containing the parameters to put in
-% the FGPLVM structure.
+% the VARGPLVM structure.
 % 
 % COPYRIGHT : Michalis K. Titsias, 2009
+%
+% COPYRIGHT : Neil D. Lawrence, 2009
 % 
 % SEEALSO : vargplvmCreate, vargplvmExtractParam, modelExpandParam
 
