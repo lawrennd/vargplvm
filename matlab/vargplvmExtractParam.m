@@ -67,11 +67,13 @@ end
 
 % Variational parameters 
 if returnNames
-  [varParams, varNames] = vardistExtractParam(model.vardist);
+  %[varParams, varNames] = vardistExtractParam(model.vardist);
+  [varParams, varNames] = modelExtractParam(model.vardist);
   params = [varParams params];
   names = {varNames{:}, names{:}}; 
 else
-  varParams = vardistExtractParam(model.vardist);
+  %varParams = vardistExtractParam(model.vardist);
+  varParams = modelExtractParam(model.vardist);
   params = [varParams params];
 end
 

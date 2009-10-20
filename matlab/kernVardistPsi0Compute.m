@@ -1,4 +1,4 @@
-function k0 = kernVardistPsi0Compute(kern, vardist)
+function Psi0 = kernVardistPsi0Compute(kern, vardist)
 
 % RBFARD2XGAUSSIANVARIATIONALDISTKERNCOMPUTE Compute a cross kernel after convolution of the rbfard2 (rbfard with the traditional 
 %   parametrizatiion) and a variational Gaussian distribution (a separate Gaussina for each row of X)
@@ -29,7 +29,23 @@ function k0 = kernVardistPsi0Compute(kern, vardist)
 
 % KERN
 
-fhandle = str2func([kern.type 'VardistPsi0Compute']);
-k0 = fhandle(kern, vardist);
 
+if ~strcmp(kern.type,'cmpnd')
+  %  
+  fhandle = str2func([kern.type 'VardistPsi0Compute']);
+  Psi0 = fhandle(kern, vardist);
+  %
+else  % the kernel is cmpnd
+  % 
+  fhandle = str2func([kern.comp{1}.type 'VardistPsi0Compute']);
+  Psi0 = fhandle(kern.comp{1}, vardist);
+  %
+  for i = 2:length(kern.comp)
+      %
+      fhandle = str2func([kern.comp{i}.type 'VardistPsi0Compute']);
+      Psi0 = Psi0 + fhandle(kern.comp{i}, vardist);
+      %
+  end
+  %
+end
 

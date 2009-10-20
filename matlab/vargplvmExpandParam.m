@@ -26,8 +26,9 @@ function model = vargplvmExpandParam(model, params)
 
 % variational parameters (means and covariances)
 startVal = 1;
-endVal = 2*model.N*model.q;
-model.vardist = vardistExpandParam(model.vardist, params(startVal:endVal)); 
+endVal = model.vardist.nParams;
+%model.vardist = vardistExpandParam(model.vardist, params(startVal:endVal)); 
+model.vardist = modelExpandParam(model.vardist, params(startVal:endVal)); 
 
 % inducing inputs 
 startVal = endVal+1;

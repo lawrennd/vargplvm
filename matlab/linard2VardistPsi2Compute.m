@@ -35,9 +35,11 @@ function [Psi2 P] = linard2VardistPsi2Compute(linard2kern, vardist, Z)
 %Psi2 = P + Zsc*Zsc';
 
 ZA = Z*sparse(diag(linard2kern.inputScales));
-Psi2 = ZA*(vardist.means'*vardist.means + diag(sum(vardist.covars,1)))*ZA';
 
-P = [];
+P = vardist.means'*vardist.means + diag(sum(vardist.covars,1)); 
+
+Psi2 = ZA*P*ZA';
+
 
 
 

@@ -10,7 +10,8 @@ function vardist = vardistCreate(X, Q, type)
 % The structure of the vardist is similar to the structure of a kernel
 
 
-vardist.type = 'gaussian'; 
+vardist.type = 'vardist';
+vardist.vartype = type; 
 
 vardist.numData = size(X,1); 
 vardist.latentDimension = Q; 
@@ -23,8 +24,9 @@ vardist.transforms(1).type = optimiDefaultConstraint('positive');
 
 % initialize the parameters
 vardist.means  = X;
-vardist.covars = 0.1*ones(N,Q) +  0.005*randn(N,Q);
+vardist.covars = 0.1*ones(N,Q) + 0.01*randn(N,Q);
 vardist.covars(vardist.covars<0.1) = 0.1;
+%vardist.means = randn(N,Q);
 %pmeans = randn(Q,N);
 %pcovars = randn(Q,N);
 %params = [pmeans(:)' pcovars(:)']; 

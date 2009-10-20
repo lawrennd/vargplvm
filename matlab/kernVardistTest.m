@@ -7,9 +7,10 @@ x = randn(numData, numIn);
 x2 = randn(numData/2, numIn);
     
 kern = kernCreate(x,kernType);
+
 params = 0.2*randn(1,kern.nParams)./sqrt(randn(1,kern.nParams).^2);
 kern = kernExpandParam(kern, params);
-  
+
 vardist = vardistCreate(x, numIn, 'gaussian');
 
 params = randn(1,(numData*numIn*2));
@@ -28,7 +29,7 @@ covGradPsi2 = ones(size(KPsi2));
 [gKernPsi2, gVarmeansPsi2, gVarcovarsPsi2, gIndPsi2] = kernVardistPsi2Gradient(kern, vardist, x2, covGradPsi2);
 %
 psi0 = kernVardistPsi0Compute(kern, vardist);
-[gKernPsi0, gVarmeansPsi0, gVarcovarsPsi0] = kernVardistPsi0Gradient(kern, vardist);
+[gKernPsi0, gVarmeansPsi0, gVarcovarsPsi0] = kernVardistPsi0Gradient(kern, vardist, 1);
 
 
 epsilon = 1e-6;
@@ -52,9 +53,11 @@ for i = 1:length(params);
   x2 = reshape(xx2,[numData/2 numIn]);
   Lminus(i) = full(sum(sum(kernVardistPsi1Compute(kern, vardist, x2))));
 end
+
 params = origParams;
 gLDiff = .5*(Lplus - Lminus)/epsilon;
 g = [gKern gVarmeans gVarcovars gInd];
+
 % check firstly the kernel hyperparameters 
 kerndiff = abs(g(1:kern.nParams) - gLDiff(1:kern.nParams));
 [g(1:kern.nParams); gLDiff(1:kern.nParams)]

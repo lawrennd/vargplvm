@@ -1,4 +1,4 @@
-function Psi0 = linard2VardistPsi0Compute(linard2kern, vardist, Z)
+function Psi0 = linard2VardistPsi0Compute(linard2kern, vardist)
 
 % RBFARD2XGAUSSIANVARIATIONALDISTKERNCOMPUTE Compute a cross kernel after convolution of the rbfard2 (rbfard with the traditional 
 %   parametrizatiion) and a variational Gaussian distribution (a separate Gaussina for each row of X)

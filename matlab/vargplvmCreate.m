@@ -13,7 +13,7 @@ function model = vargplvmCreate(q, d, Y, options)
 % approximations to be used (if any).
 % RETURN model : the GP-LVM model.
 %
-% COPYRIGHT : Michalis K. Titsias, 2009
+% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009
 %
 % SEEALSO : vargplvmOptions
 
@@ -21,18 +21,6 @@ function model = vargplvmCreate(q, d, Y, options)
 
 if size(Y, 2) ~= d
   error(['Input matrix Y does not have dimension ' num2str(d)]);
-end
-
-if isstr(options.initX)
-  initFunc = str2func([options.initX 'Embed']);
-  X = initFunc(Y, q);
-else
-  if size(options.initX, 1) == size(Y, 1) ...
-        & size(options.initX, 2) == q
-    X = options.initX;
-  else
-    error('options.initX not in recognisable form.');
-  end
 end
 
 model.type = 'vargplvm';
@@ -44,30 +32,17 @@ model.learnScales = options.learnScales;
 model.optimiseBeta = options.optimiseBeta;
 model.betaTransform =  optimiDefaultConstraint('positive');  
 
-model.X = X;
-model.y = Y;
-
-model.q = size(X, 2);
+model.q = q;
 model.d = size(Y, 2);
 model.N = size(Y, 1);
 
 model.optimiser = options.optimiser;
-
-%model.isMissingData = options.isMissingData;
-%if model.isMissingData
-%  for i = 1:model.d
-%    model.indexPresent{i} = find(~isnan(y(:, i)));
-% end
-%end
-%model.isSpherical = options.isSpherical;
-
-%if ~model.isMissingData
 model.bias = mean(Y);
 model.scale = ones(1, model.d);
 
 if(isfield(options,'scale2var1'))
   if(options.scale2var1)
-    model.scale = std(model.y);
+    model.scale = std(Y);
     model.scale(find(model.scale==0)) = 1;
     if(model.learnScales)
       warning('Both learn scales and scale2var1 set for GP');
@@ -81,14 +56,38 @@ if(isfield(options, 'scaleVal'))
   model.scale = repmat(options.scaleVal, 1, model.d);
 end
 
+model.y = Y;
 model.m = gpComputeM(model);
-
 %if options.computeS 
 %  model.S = model.m*model.m';
 %  if ~strcmp(model.approx, 'ftc')
 %    error('If compute S is set, approximation type must be ''ftc''')
 %  end
 %end
+
+
+if isstr(options.initX)
+  initFunc = str2func([options.initX 'Embed']);
+  X = initFunc(model.m, q);
+else
+  if size(options.initX, 1) == size(Y, 1) ...
+        & size(options.initX, 2) == q
+    X = options.initX;
+  else
+    error('options.initX not in recognisable form.');
+  end
+end
+
+model.X = X;
+
+
+%model.isMissingData = options.isMissingData;
+%if model.isMissingData
+%  for i = 1:model.d
+%    model.indexPresent{i} = find(~isnan(y(:, i)));
+% end
+%end
+%model.isSpherical = options.isSpherical;
 
 
 if isstruct(options.kern) 
@@ -169,6 +168,25 @@ else
 end
 
 model.vardist = vardistCreate(X, q, 'gaussian');
+
+if isfield(options, 'tieParam') & ~isempty(options.tieParam)
+%
+  if strcmp(options.tieParam,'free')
+      % paramsList =  
+  else
+      startVal = model.vardist.latentDimension*model.vardist.numData + 1;
+      endVal = model.vardist.latentDimension*model.vardist.numData; 
+      for q=1:model.vardist.latentDimension
+          endVal = endVal + model.vardist.numData;
+          index = startVal:endVal;
+          paramsList{q} = index; 
+          startVal = endVal + 1; 
+      end
+      model.vardist = modelTieParam(model.vardist, paramsList); 
+  end
+%
+end
+%  if isstruct(options.back)
 
 %if isstruct(options.inducingPrior)
 %  model.inducingPrior = options.inducingPrior;
