@@ -1,6 +1,6 @@
 % DEMBRENDANFGPLVM7 Reconstruction of partial observed test data in Brendan faces using sparse GP-LVM (with dtcvar) and 5 latent dimensions
 
-% FGPLVM
+% VARGPLVM
 
 % Fix seeds
 randn('seed', 1e6);
