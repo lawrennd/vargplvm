@@ -3,9 +3,9 @@
 importLatest('netlab');
 importLatest('prior');
 importLatest('optimi');
-importTool('datasets');
+importLatest('datasets');
 importLatest('mltools');
-importTool('kern');
+importLatest('kern');
 importLatest('ndlutil');
 importLatest('mocap');
 importLatest('gp');

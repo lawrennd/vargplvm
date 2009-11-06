@@ -1,3 +1,3 @@
 # These are files that should be packaged for the vargplvm software
 dir: html
-~/mlprojects/multigp/html/index.html
+~/mlprojects/vargplvm/html/index.html
