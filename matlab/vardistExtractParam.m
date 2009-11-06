@@ -1,8 +1,23 @@
 function [params, names] = vardistExtractParam(vardist)
+
+% VARDISTEXTRACTPARAM Extract a parameter vector from a vardist structure.
+% FORMAT
+% DESC extracts a parameter vector from a given VARDIST structure.
+% ARG model : the model from which parameters are to be extracted.
+% RETURN params : the parameter vector extracted from the model.
 %
+% DESC does the same as above, but also returns parameter names.
+% ARG model : the model structure containing the information about
+% the model.
+% RETURN params : a vector of parameters from the model.
+% RETURN names : cell array of parameter names.
 %
-%  Extracts the parameters of the variational distribution used for the
-%  latent variables of the GP-LVM 
+% COPYRIGHT : Neil D. Lawrence, 2005, 2006
+%
+% SEEALSO : vardistCreate, vardistExpandParam, modelExtractParam
+
+% VARGPLVM
+
 
 
 %means = vardist.means'; 

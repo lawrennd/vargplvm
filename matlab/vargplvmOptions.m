@@ -13,9 +13,9 @@ function options = vargplvmOptions(varargin);
 %
 % SEEALSO : vargplvmCreate
 %
-% COPYRIGHT : Neil D. Lawrence, 2005, 2009
+% COPYRIGHT : Michalis K. Titsias, 2009
 %
-% COPYRIGHT : Michalis Titsias, 2009
+% COPYRIGHT : Neil D. Lawrence, 2005, 2009
 
 % VARGPLVM
 

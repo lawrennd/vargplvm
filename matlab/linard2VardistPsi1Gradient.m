@@ -1,50 +1,35 @@
 function [gKern, gVarmeans, gVarcovars, gInd] = linard2VardistPsi1Gradient(linard2Kern, vardist, Z, covGrad)
-% GGWHITEXGAUSSIANWHITEKERNGRADIENT Compute gradient between the GG white
-%                                   and GAUSSIAN white kernels.
-% FORMAT
-% DESC computes the
-%	gradient of an objective function with respect to cross kernel terms
-%	between GG white and GAUSSIAN white kernels for the multiple output kernel.
-% RETURN g1 : gradient of objective function with respect to kernel
-%	   parameters of GG white kernel.
-% RETURN g2 : gradient of objective function with respect to kernel
-%	   parameters of GAUSSIAN white kernel.
-% ARG ggwhitekern : the kernel structure associated with the GG white kernel.
-% ARG gaussianwhiteKern :  the kernel structure associated with the GAUSSIAN white kernel.
-% ARG x : inputs for which kernel is to be computed.
-%
-% FORMAT
-% DESC  computes
-%	the gradient of an objective function with respect to cross kernel
-%	terms between GG white and GAUSSIAN white kernels for the multiple output kernel.
-% RETURN g1 : gradient of objective function with respect to kernel
-%	   parameters of GG white kernel.
-% RETURN g2 : gradient of objective function with respect to kernel
-%	   parameters of GAUSSIAN white kernel.
-% ARG ggwhiteKern : the kernel structure associated with the GG white kernel.
-% ARG gaussianwhiteKern : the kernel structure associated with the GAUSSIAN white kernel.
-% ARG x1 : row inputs for which kernel is to be computed.
-% ARG x2 : column inputs for which kernel is to be computed.
-%
-% SEEALSO : multiKernParamInit, multiKernCompute, ggwhiteKernParamInit,
-% gaussianwhiteKernParamInit
-%
-% COPYRIGHT : Michalis K. Titsias, 2009
 
-%
+% LINARD2VARDISTPSI1GRADIENT description.
+
+% VARGPLVM
 
 A = linard2Kern.inputScales;
 %
-for q=1:vardist.latentDimension
-   gKern(q) = sum(sum((vardist.means(:,q)*(Z(:,q)')).*covGrad));
-   
-   gVarmeans(:,q) = A(q)*sum((ones(vardist.numData,1)*Z(:,q)').*covGrad,2);
-   gInd(:,q) = A(q)*sum((vardist.means(:,q)*ones(1,size(Z,1))).*covGrad,1)';
-   
-   %gVarmeans2(:,q) = A(q)*sum(repmat(Z(:,q)',vardist.numData,1).*covGrad,2);
-   %gInd2(:,q) = A(q)*sum(repmat(vardist.means(:,q),1,size(Z,1)).*covGrad,1)';
-end
-%
+% TYPICAL WAY
+%for q=1:vardist.latentDimension
+%   % 
+%   gKern(q) = sum(sum((vardist.means(:,q)*(Z(:,q)')).*covGrad));
+%   
+%   gVarmeans(:,q) = A(q)*sum((ones(vardist.numData,1)*Z(:,q)').*covGrad,2);
+%   gInd(:,q) = A(q)*sum((vardist.means(:,q)*ones(1,size(Z,1))).*covGrad,1)';
+%   %
+%end
+%%% end of typical way 
+
+
+% FAST WAY
+AA = ones(size(vardist.means,1),1)*A; 
+covVarm = covGrad'*vardist.means;
+gKern = sum(covVarm.*Z,1); 
+gVarmeans = AA.*(covGrad*Z);
+AA = ones(size(Z,1),1)*A;
+gInd = AA.*covVarm;
+
+%sum(sum(abs(gKern1-gKern)))
+%sum(sum(abs(gVarmeans1 - gVarmeans)))
+%sum(sum(abs(gInd1 - gInd)))
+%pause
 
 gKern = gKern(:)';  
 % gVarmeans is N x Q matrix (N:number of data, Q:latent dimension)

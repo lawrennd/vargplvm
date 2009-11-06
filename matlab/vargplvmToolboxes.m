@@ -3,7 +3,7 @@
 importLatest('netlab');
 importLatest('prior');
 importLatest('optimi');
-importLatest('datasets');
+importTool('datasets');
 importLatest('mltools');
 importTool('kern');
 importLatest('ndlutil');

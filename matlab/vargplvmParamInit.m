@@ -1,19 +1,67 @@
-function model = vargplvmParamInit(model, Y, X)
+function model = vargplvmParamInit(model,Y,X)
 
-% VARGPLVMPARAMINIT Initialize the variational GPLVM from the data.
-% FORMAT
-% DESC initializes the variational GP-LVM from the data.
-% ARG model : the model to initialize.
-% ARG Y : the data set.
-% ARG X : the latent variable positions.
-%
-% COPYRIGHT : Michalis K. Titsias, 2009
-%
-% SEEALSO : vargplvmCreate
+% VARGPLVMPARAMINIT Initialize the variational GPLVM from the data
 
 % VARGPLVM
+  
+  
+% if input dimension is equal to the latent dimension, 
+% then  initialize the variational mean to the normalzed training data
+%if model.d == model.q 
+%    X = Y; 
+%    model.vardist.means = X;  
+%    % inducing points 
+%    ind = randperm(model.N);
+%    ind = ind(1:model.k);
+%    model.X_u = X(ind, :);
+%end
 
-  model.kern.inputScales = 5./(((max(X)-min(X))).^2);
-  model.kern.variance = max(var(Y));
-  model.beta = 100/max(var(Y));
+if ~strcmp(model.kern.type,'cmpnd')
+   % 
+   if strcmp(model.kern.type,'rbfard2') 
+      % 
+       model.kern.inputScales = 5./(((max(X)-min(X))).^2);
+      model.kern.variance = max(var(Y));
+      %
+   elseif strcmp(model.kern.type,'linard2')
+      %
+      model.kern.inputScales = 5./(((max(X)-min(X))).^2);
+      %   
+   end
+   %
+else
+   %
+   for i = 1:length(model.kern.comp)
+      %
+      if strcmp(model.kern.comp{i}.type,'rbfard2') 
+      % 
+         model.kern.comp{i}.inputScales = 5./(((max(X)-min(X))).^2);
+         model.kern.comp{i}.variance = max(var(Y));
+      %
+      elseif strcmp(model.kern.comp{i}.type,'linard2')
+      %
+       model.kern.comp{i}.inputScales = 0.01*max(var(Y))*ones(1,size(X,2));% %5./(((max(X)-min(X))).^2);
+      %   
+      end
+      %
+   end
+   %
 end
+
+% initialize inducing inputs by kmeans 
+%kmeansops = foptions;
+%kmeansops(14) = 10;
+%kmeansops(5) = 1;
+%kmeansops(1) = 0;
+%ch = randperm(model.N);
+%centres = model.vardist.means(ch(1:model.k),:);
+%model.X_u = kmeans(centres, model.vardist.means, kmeansops);
+
+model.beta = 1000;%/max(var(Y));
+
+
+initParams = vargplvmExtractParam(model);
+model.numParams = length(initParams);
+% This forces kernel computation.
+model = vargplvmExpandParam(model, initParams);
+

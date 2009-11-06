@@ -1,0 +1,32 @@
+<head>
+<title>Bayesian GP-LVM Model - MATLAB Software</title>
+</head>
+
+<body><div class="section">
+
+<h1>Bayesian GP-LVM model</h1>
+
+<p>This page describes examples of how to use the variational approximation to the Bayesian GP-LVM model.
+
+RELEASEINFORMATION
+
+<h2>Release Notes</h2>
+
+<h3>Current Release</h3>
+
+This release is for the AISTATS 2010 submission.
+
+
+<h2>Examples</h2>
+
+
+<h3></h3>
+
+<p>
+
+<p><code>
+&gt;&gt; dem...
+</code>
+
+</div>
+</body>

@@ -1,0 +1,11 @@
+addpath ../../datasets/matlab/
+addpath ../../gp/matlab/
+addpath ../../optimi/matlab/
+addpath ../../kern/matlab/
+addpath ../../prior/matlab/
+addpath ../../noise/matlab/
+addpath ../../mltools/matlab/
+addpath ../../multigp/matlab/
+addpath ../../sgplvm/matlab/
+addpath ../../ndlutil/matlab/
+addpath ../../matlab/netlab/NETLAB3p3

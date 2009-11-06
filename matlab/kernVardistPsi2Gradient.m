@@ -1,40 +1,12 @@
 function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi2Gradient(kern, vardist, Z, covGrad)
-% GGWHITEXGAUSSIANWHITEKERNGRADIENT Compute gradient between the GG white
-%                                   and GAUSSIAN white kernels.
-% FORMAT
-% DESC computes the
-%	gradient of an objective function with respect to cross kernel terms
-%	between GG white and GAUSSIAN white kernels for the multiple output kernel.
-% RETURN g1 : gradient of objective function with respect to kernel
-%	   parameters of GG white kernel.
-% RETURN g2 : gradient of objective function with respect to kernel
-%	   parameters of GAUSSIAN white kernel.
-% ARG ggwhitekern : the kernel structure associated with the GG white kernel.
-% ARG gaussianwhiteKern :  the kernel structure associated with the GAUSSIAN white kernel.
-% ARG x : inputs for which kernel is to be computed.
-%
-% FORMAT
-% DESC  computes
-%	the gradient of an objective function with respect to cross kernel
-%	terms between GG white and GAUSSIAN white kernels for the multiple output kernel.
-% RETURN g1 : gradient of objective function with respect to kernel
-%	   parameters of GG white kernel.
-% RETURN g2 : gradient of objective function with respect to kernel
-%	   parameters of GAUSSIAN white kernel.
-% ARG ggwhiteKern : the kernel structure associated with the GG white kernel.
-% ARG gaussianwhiteKern : the kernel structure associated with the GAUSSIAN white kernel.
-% ARG x1 : row inputs for which kernel is to be computed.
-% ARG x2 : column inputs for which kernel is to be computed.
-%
-% SEEALSO : multiKernParamInit, multiKernCompute, ggwhiteKernParamInit,
-% gaussianwhiteKernParamInit
-%
-% COPYRIGHT : Mauricio A. Alvarez and Neil D. Lawrence, 2008
-%
-% MODIFICATIONS : Mauricio A. Alvarez, 2009.
+
+% KERNVARDISTPSI2GRADIENT description.  
+
+% VARGPLVM
 
 
-
+%% compute first the "square" terms of Psi2 
+%
 if ~strcmp(kern.type,'cmpnd')
    % 
    fhandle = str2func([kern.type 'VardistPsi2Gradient']);
@@ -67,13 +39,51 @@ else % the kernel is cmpnd
    % 
 end
 
+
+%% compute the cross-kernel terms of Psi2 
+%
+if strcmp(kern.type,'cmpnd') & (length(kern.comp)>1)
+  % 
+  index{1}=1:kern.comp{1}.nParams; 
+  for i=2:length(kern.comp)
+       index{i} = (index{i-1}(end)+1):index{i-1}(end)+kern.comp{i}.nParams;
+  end
+  %
+  for i=1:length(kern.comp)  
+    for j=i+1:length(kern.comp)
+       
+       [gKerni, gKernj, gVarm, gVarc, gI] = kernkernVardistPsi2Gradient(kern.comp{i}, kern.comp{j}, vardist, Z, covGrad);  
+      
+       % Transformations
+       gKerni = paramTransformPsi2(kern.comp{i}, gKerni);
+       gKernj = paramTransformPsi2(kern.comp{j}, gKernj);
+       
+       %index{i}
+       %index{j}
+       %gKerni
+       %gKernj
+       %gKern
+       %pause
+       
+       gKern(index{i}) = gKern(index{i}) + gKerni;
+       gKern(index{j}) = gKern(index{j}) + gKernj;  
+       
+       gVarmeans = gVarmeans + gVarm; 
+       gVarcovars = gVarcovars + gVarc;
+       gInd = gInd + gI;
+       %
+   end
+  end
+end
+
+
 % variational variances are positive  
 gVarcovars = (gVarcovars(:).*vardist.covars(:))';
 
 
 %-----------------------------------------------------
 % This applies transformations 
-% /~This must be done similar to kernGradient at some point 
+% This must be done similar to kernGradient at some point 
 function gKern = paramTransformPsi2(kern, gKern)
 %
 %

@@ -1,4 +1,9 @@
 function vardist = vardistCreate(X, Q, type)
+
+% VARDISTCREATE description.
+  
+% VARGPLVM 
+  
 %
 % creates the structure of the variational distirbution over the latent
 % values in the GP-LVM 
@@ -24,8 +29,9 @@ vardist.transforms(1).type = optimiDefaultConstraint('positive');
 
 % initialize the parameters
 vardist.means  = X;
-vardist.covars = 0.1*ones(N,Q) + 0.01*randn(N,Q);
-vardist.covars(vardist.covars<0.1) = 0.1;
+vardist.covars = 0.1*ones(N,Q) + 0.001*randn(N,Q);
+vardist.covars(vardist.covars<0.05) = 0.05;
+%vardist.covars = (eps^2)*ones(size(vardist.covars));
 %vardist.means = randn(N,Q);
 %pmeans = randn(Q,N);
 %pcovars = randn(Q,N);
