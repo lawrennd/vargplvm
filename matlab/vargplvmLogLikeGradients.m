@@ -72,16 +72,16 @@ gKX = kernGradX(model.kern, model.X_u, model.X_u);
 gKX = gKX*2;
 dgKX = kernDiagGradX(model.kern, model.X_u);
 for i = 1:model.k
-    gKX(i, :, i) = dgKX(i, :);
+  gKX(i, :, i) = dgKX(i, :);
 end
 
 % Allocate space for gX_u
 gX_u = zeros(model.k, model.q);
 % Compute portion associated with gK_u
 for i = 1:model.k
-    for j = 1:model.q
-        gX_u(i, j) = gKX(:, j, i)'*gK_uu(:, i);
-    end
+  for j = 1:model.q
+    gX_u(i, j) = gKX(:, j, i)'*gK_uu(:, i);
+  end
 end
 
 % This should work much faster 

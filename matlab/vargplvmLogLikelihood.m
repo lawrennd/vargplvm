@@ -20,17 +20,17 @@ function ll = vargplvmLogLikelihood(model)
 E = model.Psi1'*model.m;
 EET = E*E';
 if length(model.beta)==1
-    %
-    ll =  -0.5*(model.d*(-(model.N-model.k)*log(model.beta) ...
-        - model.logDetK_uu +model.logdetA) ...
-        - (sum(sum(model.Ainv.*EET)) ...
-        -sum(sum(model.m.*model.m)))*model.beta);
-    %
-    %if strcmp(model.approx, 'dtcvar')
-    ll = ll - 0.5*model.beta*model.d*model.Psi0 - 0.5*model.d*sum(model.diagD);
-    %end
+  %
+  ll =  -0.5*(model.d*(-(model.N-model.k)*log(model.beta) ...
+                       - model.logDetK_uu +model.logdetA) ...
+              - (sum(sum(model.Ainv.*EET)) ...
+                 -sum(sum(model.m.*model.m)))*model.beta);
+  %
+  %if strcmp(model.approx, 'dtcvar')
+  ll = ll - 0.5*model.beta*model.d*model.Psi0 - 0.5*model.d*sum(model.diagD);
+  %end
 else
-    error('Not implemented variable length beta yet.');
+  error('Not implemented variable length beta yet.');
 end
 
 ll = ll - model.d*model.N/2*log(2*pi);
