@@ -1,6 +1,6 @@
 % DEMBRENDANFGPLVM6 Reconstruction of partial observed test data in Brendan faces using sparse GP-LVM (with dtcvar) and 2 latent dimensions
 
-% MULTIGP
+% VARGPLVM
 
 % Fix seeds
 randn('seed', 1e6);
@@ -88,3 +88,4 @@ capName(1) = upper(capName(1));
 modelType = model.type;
 modelType(1) = upper(modelType(1));
 save(['dem' capName modelType num2str(experimentNo) '.mat'], 'model', 'Ferror', 'perm', 'indexP', 'Fmu', 'Fsigma');
+x
