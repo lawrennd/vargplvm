@@ -14,7 +14,8 @@ printDiagram = 1;
 % load data
 [Y, lbls] = lvmLoadData(dataSetName);
 
-load ../../vargplvm/matlab/demBrendanVargplvm3.mat
+%load ../../vargplvm/matlab/demBrendanVargplvm3.mat
+load demBrendanVargplvm3.mat
 % training and test sets
 Ntr = 1000; 
 Ytr = Y(perm(1:Ntr),:);      %lblsTr = lbls(perm(1:Ntr),:);
