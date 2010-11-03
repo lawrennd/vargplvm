@@ -24,10 +24,10 @@ This release is for the AISTATS 2010 submission.
 <p>The 'oil data' is commonly used as a bench mark for visualisation algorithms. For more details on the data see <a href="http://www.ncrg.aston.ac.uk/GTM/3PhaseData.html">this page</a>. In all of the following examples 50 inducing points were used.
 
 <h4>Standard dataset</h4>
-The script <code>demOilVargplvm1.m</code> runs the Bayesian GP-LVM Model on this dataset, giving the results shown on the right of the figure shown below. The visualization was achieved by keeping the most dominant latent dimensions (2 and 3) which have the largest inverse lengthscale value. Dimension 2 is plotted on the <i>y</i>-axis and 3 and on the <i>x</i>-axis. The script <code>demOilVargplvm2.m</code> is similar but there are missing outputs from test points and the model attempts to reconstruct the missing outputs. The result is shown on the right of the figure.
+The script <code>demOilVargplvm1.m</code> runs the Bayesian GP-LVM Model on this dataset, giving the results shown on the left of the figure that follows. The visualization was achieved by keeping the most dominant latent dimensions (2 and 3) which have the largest inverse lengthscale value. Dimension 2 is plotted on the <i>y</i>-axis and 3 and on the <i>x</i>-axis. The script <code>demOilVargplvm2.m</code> is similar but there are missing outputs from test points; the model attempts to reconstruct these missing outputs. The result is shown on the right of the figure.
 
 <p><center><img src="demOilVargplvm1.png" width="49%"><img src="demOilVargplvm2.png" width="49%"><br>
-<i>Left</i>: Bayesian GP-LVM on the oil data without missing outputs. The phases of flow are shown as green circles, red crosses and blue plusses.  <i>Right</i>: Similar but in this case 50% of the outputs are missing and the model attempts to reconstruct them.</center>
+<i>Left</i>: Bayesian GP-LVM on the oil data without missing outputs. The phases of flow are shown as green circles, blue crosses and red plusses.  <i>Right</i>: Similar but in this case 50% of the outputs are missing and the model attempts to reconstruct them.</center>
 
 
 <h4>100 points in the active set</h4>
@@ -46,7 +46,7 @@ Use of the Bayesian GP-LVM Model to obtain loop closure in a robot navigation ex
 
 <h3>Frey Faces Data</h3>
 
-In this dataset, we try to exploit the ability of the model to reconstruct partially observed test data. Therefore, when the model is trained only half of the image pixels are assumed to be observed. After training on 1000 images, each partially observed test image was processed separately and the missing pixels were predicted as shown on the figures below.
+In this dataset, we try to exploit the ability of the model to reconstruct partially observed test data. Therefore, when the model is trained only half of the image pixels are assumed to be observed. After training on 1000 images, each partially observed test image was processed separately and the missing pixels were predicted as shown on the figures below. The code to obtain the following figures was based on the <code>demBrendanVargplvm3.m</code> script.
 
 <p><center><img src="demBrendanTestImag1_3.png" width="7%"><img src="demBrendanTestImag2_3.png" width="7%"><img src="demBrendanTestImag4_3.png" width="7%"><img src="demBrendanTestImag127_3.png" width="7%"><img src="demBrendanTestImag11_3.png" width="7%"><img src="demBrendanTestImag24_3.png" width="7%"><img src="demBrendanTestImag51_3.png" width="7%"><img src="demBrendanTestImag62_3.png" width="7%"><br>
 
