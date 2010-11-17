@@ -1,8 +1,9 @@
-
 % DEMROBOTWIRELESSVARGPLVM1 Run variational GPLVM on robot wireless data.
 %
 %	Description:
 %	
+
+% VARGPLVM
 
 % Fix seeds
 randn('seed', 1e5);

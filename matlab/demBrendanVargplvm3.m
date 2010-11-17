@@ -10,7 +10,7 @@ dataSetName = 'brendan';
 experimentNo = 3;
 printDiagram = 1;
 
-%/~
+%{
 if 0
 % load data
 [Y, lbls] = lvmLoadData(dataSetName);
@@ -45,7 +45,7 @@ model = vargplvmOptimise(model, display, iters);
 iters = 100;
 display = 0;
 end
-%~/
+%}
 
 % 50% missing outputs from the each test point
 numIndPresent = round(0.5*model.d);
