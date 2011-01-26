@@ -8,32 +8,29 @@ function ll = vargplvmLogLikelihood(model)
 % being computed in the 'y' component of the structure.
 % RETURN ll : the log likelihood of the data given the model.
 %
-% COPYRIGHT : Michalis K. Titsias, 2009
+% COPYRIGHT : Michalis K. Titsias, 2009, 2010
 %
-% COPYRIGHT : Neil D. Lawrence, 2009
+% COPYRIGHT : Neil D. Lawrence, 2009, 2010
+%
+% COPYRIGHT : Andreas Damianou, 2010
 
   
 % VARGPLVM
 
- 
-%if ~isfield(model, 'isSpherical') | model.isSpherical
-E = model.Psi1'*model.m;
-EET = E*E';
+% Likelihood term
 if length(model.beta)==1
-  %
-  ll =  -0.5*(model.d*(-(model.N-model.k)*log(model.beta) ...
-                       - model.logDetK_uu +model.logdetA) ...
-              - (sum(sum(model.Ainv.*EET)) ...
-                 -sum(sum(model.m.*model.m)))*model.beta);
-  %
+  ll = -0.5*(model.d*(-(model.N-model.k)*log(model.beta) ...
+				  + model.logDetAt) ...
+	      - (model.TrPP ...
+	      - model.TrYY)*model.beta);
   %if strcmp(model.approx, 'dtcvar')
-  ll = ll - 0.5*model.beta*model.d*model.Psi0 - 0.5*model.d*sum(model.diagD);
+  ll = ll - 0.5*model.beta*model.d*model.Psi0 + 0.5*model.d*model.beta*model.TrC;
   %end
 else
   error('Not implemented variable length beta yet.');
 end
 
-ll = ll - model.d*model.N/2*log(2*pi);
+ll = ll-model.d*model.N/2*log(2*pi);
 
 % KL divergence term 
 varmeans = sum(sum(model.vardist.means.*model.vardist.means)); 
@@ -41,5 +38,6 @@ varcovs = sum(sum(model.vardist.covars - log(model.vardist.covars)));
 
 KLdiv = -0.5*(varmeans + varcovs) + 0.5*model.q*model.N; 
 
+% Obtain the final value of the bound by adding the likelihood
+% and the KL term.
 ll = ll + KLdiv; 
-%

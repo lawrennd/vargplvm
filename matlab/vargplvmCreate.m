@@ -80,6 +80,9 @@ end
 
 model.X = X;
 
+% Trace(Y*Y) is a constant, so it can be calculated just once and stored
+% in memory to be used whenever needed.
+model.TrYY = sum(sum(model.m .* model.m));
 
 %model.isMissingData = options.isMissingData;
 %if model.isMissingData

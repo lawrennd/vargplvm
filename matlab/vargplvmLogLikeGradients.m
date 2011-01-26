@@ -20,12 +20,13 @@ function g = vargplvmLogLikeGradients(model)
 % constraint's parameters).
 % RETURN gParam : gradients of the parameters of the GP-LVM model.
 %
-% COPYRIGHT : Michalis K. Titsias, 2009
+% COPYRIGHT : Michalis K. Titsias, 2009, 2010
 %
-% COPYRIGHT :  Mauricio Alvarez, 2009
+% COPYRIGHT :  Mauricio Alvarez, 2009, 2010
 %
-% COPYRIGHT :  Neil D. Lawrence, 2009
-
+% COPYRIGHT :  Neil D. Lawrence, 2009, 2010
+%
+% COPYRIGHT : Andreas Damianou, 2010
 
 % SEEALSO : vargplvmLogLikelihood, vargplvmCreate, modelLogLikeGradients
 
@@ -100,44 +101,28 @@ g = [gVar gInd gKern gBeta];
 %g = [gVarmeans2 gVarcovs2 (gX_u(:)'+ gInd2) (gKern3+gKern2) 0*gBeta];
 
 
-
-%~
 function [gK_uu, gPsi0, gPsi1, gPsi2, g_Lambda, gBeta] = vargpCovGrads(model)
-%
-%
 
-%if ~isfield(model, 'isSpherical') | model.isSpherical
-E = model.Psi1'*model.m;
-EET = E*E';
-AinvEET = model.Ainv*EET;
-AinvEETAinv = AinvEET*model.Ainv;
-gK_uu = 0.5*(model.d*(model.invK_uu-(1/model.beta)*model.Ainv) ...
-    - AinvEETAinv);
+gPsi1 = model.beta * model.m * model.B';
+    gPsi1 = gPsi1'; % because it is passed to "kernVardistPsi1Gradient" as gPsi1'...
 
-K_uuInvPsi2K_uuInv = model.invK_uu*model.Psi2*model.invK_uu;
-gK_uu = gK_uu - 0.5*model.d*model.beta*K_uuInvPsi2K_uuInv;
+gPsi2 = (model.beta/2) * model.T1;
 
-gPsi1 = model.beta*(model.Ainv*E*model.m');
-%gK_uf = gK_uf + model.d*model.beta*K_uuInvK_uf;
+gPsi0 = -0.5 * model.beta * model.d;
 
+gK_uu = 0.5 * (model.T1 - (model.beta * model.d) * model.invLmT * model.C * model.invLm);
 
-gPsi2 = - 0.5*(model.d*model.Ainv + model.beta*AinvEETAinv) ...
-    + 0.5*model.d*model.beta*model.invK_uu;
+PLm = model.P1 * model.Lm;
+PLmTP = PLm' * model.P;
+sigm = 1/model.beta; % beta^-1
 
-gBeta = 0.5*(model.d*((model.N-model.k)/model.beta ...
-    +sum(sum(model.Ainv.*model.K_uu))/(model.beta*model.beta))...
-    +sum(sum(AinvEETAinv.*model.K_uu))/model.beta ...
-    +(trace(AinvEET)-sum(sum(model.m.*model.m))));
-
-gBeta = gBeta -0.5*model.d*model.Psi0 - 0.5*model.d*sum(model.diagD)/model.beta;
+gBeta = 0.5*(model.d*((sigm*sigm) * sum(sum(PLm .* PLm)) ...
+    + model.TrC ...
+    + (model.N-model.k)*sigm - model.Psi0) ...
+    - model.TrYY + model.TrPP ...
+    + sigm * sum(sum(PLmTP .* PLmTP)));
 
 fhandle = str2func([model.betaTransform 'Transform']);
 gBeta = gBeta*fhandle(model.beta, 'gradfact');
 
-gPsi0 = -0.5*model.beta*model.d;
-
 g_Lambda = repmat(-0.5*model.beta*model.d, 1, model.N);
-
-% delete afterwards
-%gK_uu = model.invK_uu + model.Ainv/model.beta;
-%gPsi2 = model.Ainv;

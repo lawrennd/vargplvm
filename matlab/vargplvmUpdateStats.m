@@ -6,7 +6,9 @@ function model = vargplvmUpdateStats(model, X_u)
 % VARGPLVM
   
 jitter = 1e-6;
+%model.jitter = 1e-6;
 
+%%% Precomputations for (the likelihood term of) the bound %%%
 
 model.K_uu = kernCompute(model.kern, X_u);
 
@@ -22,118 +24,40 @@ model.Psi0 = kernVardistPsi0Compute(model.kern, model.vardist);
 model.Psi1 = kernVardistPsi1Compute(model.kern, model.vardist, X_u);
 [model.Psi2, AS] = kernVardistPsi2Compute(model.kern, model.vardist, X_u);
 
-% compute the kernel. But be careful when is linear 
-% compute using the matrix inversion lemma 
-% if ~strcmp(model.kern.type,'cmpnd')
-%   %   
-%   if strcmp(model.kern.type,'linard2')
-%       % use matrix inversion lemma for the linear kernel 
-%       % X_u*X_u' + jit = ( I - X_u*( jit*I + X_u'*X_u)*X_u')/jit;
-%       Xu2 = X_u'*X_u; 
-%       XXu = Xu2 + sparseDiag(jitter./(model.kern.inputScales'));
-%       
-%       A = sparse(diag(model.kern.inputScales)); 
-%       
-%       AMS = A*MS*A + (1/model.beta)*A; 
-%     
-%       [AMSinv, sqrtAMS] = pdinv(AMS); 
-%       AMSX_u = (jitter/model.beta)*AMSinv + Xu2;
-%       L_amsx = jitChol(AMSX_u); 
-%       invL_amsx = L_amsx\eye(size(L_amsx, 1));
-%    
-%       XinvL = X_u*invL_amsx; 
-%       model.Ainv = (eye(size(X_u,1)) - XinvL*XinvL')*(model.beta/jitter); 
-%       
-%       model.logdetA = (size(X_u,1)-model.q)*log(jitter/model.beta) + ... 
-%                            2*sum(log(diag(sqrtAMS))) + 2*sum(log(diag(L_amsx)));
-%       
-%       
-%       
-%       X_u'*X_u + sparseDiag(jitter./(model.kern.inputScales'));
-%       
-%       L_uu = jitChol(XXu);
-%       invL_uu = L_uu\eye(size(L_uu, 1));
-%       XinvL_uu = X_u*invL_uu;
-%       % without the jit that is divided 
-%       model.invK_uu = (eye(size(X_u,1)) - XinvL_uu*XinvL_uu')/jitter; 
-%       model.logDetK_uu = (size(X_u,1)-model.q)*log(jitter) + ... 
-%                            sum(log(model.kern.inputScales)) + 2*sum(log(diag(L_uu))); 
-%   else
-%       [model.invK_uu, model.sqrtK_uu] = pdinv(model.K_uu);
-%       model.logDetK_uu = logdet(model.K_uu, model.sqrtK_uu);
-%   end  
-%   %  
-% else % the kernel is cmpnd
-%   %
-% 
-%   %
-% end
+%K_uu_jit = model.K_uu + model.jitter*eye(model.k);
+%model.Lm = chol(K_uu_jit, 'lower');          
+  
+                                      % M is model.k
+%model.Lm = chol(model.K_uu, 'lower'); 
+model.Lm = jitChol(model.K_uu)';      % M x M: L_m (lower triangular)   ---- O(m^3)
+model.invLm = model.Lm\eye(model.k);  % M x M: L_m^{-1}                 ---- O(m^3)
+model.invLmT = model.invLm'; % L_m^{-T}
+model.C = model.invLm * model.Psi2 * model.invLmT;
+model.TrC = sum(diag(model.C)); % Tr(C)
+% Matrix At replaces the matrix A of the old implementation; At is more stable
+% since it has a much smaller condition number than A=sigma^2 K_uu + Psi2
+model.At = (1/model.beta) * eye(size(model.C,1)) + model.C; % At = beta^{-1} I + C
+%model.Lat = chol(model.At, 'lower');
+model.Lat = jitChol(model.At)';
+model.invLat = model.Lat\eye(size(model.Lat,1));  
+model.invLatT = model.invLat';
+model.logDetAt = 2*(sum(log(diag(model.Lat)))); % log |At|
 
-[model.invK_uu, model.sqrtK_uu] = pdinv(model.K_uu);
-model.logDetK_uu = logdet(model.K_uu, model.sqrtK_uu);
- 
-model.A = (1/model.beta)*model.K_uu + model.Psi2;
-%%This can become unstable when K_uf2 is low rank.
-[model.Ainv, model.sqrtA] = pdinv(model.A);
-model.logdetA = logdet(model.A, model.sqrtA);
- 
- 
- 
-% model.K_uu
-% model.invK_uu
-% model1.invK_uu
-% model.Ainv
-% model1.Ainv
-% sum(sum(abs(model1.invK_uu - model.invK_uu)))
-% sum(sum(abs(model1.Ainv - model.Ainv)))
-% [model.logDetK_uu-model1.logDetK_uu]
-% [model.logdetA-model1.logdetA]
-% [model.logdetA model1.logdetA]
-% pause
+model.P1 = model.invLat * model.invLm; % M x M
+
+% First multiply the two last factors; so, the large N is only involved
+% once in the calculations (P1: MxM, Psi1':MxN, Y: NxD)
+model.P = model.P1 * (model.Psi1' * model.m);
+
+% Needed for both, the bound's and the derivs. calculations.
+model.TrPP = sum(sum(model.P .* model.P));
 
 
+%%% Precomputations for the derivatives (of the likelihood term) of the bound %%%
 
-
-
-
-%if ~isfield(model, 'isSpherical') | model.isSpherical
- % compute inner products
-for i = 1:model.d
-    E = model.Psi1'*model.m(:, i);    
-    %model.innerProducts(1, i) = model.beta*(model.m(:, i)'*model.m(:, i) - E'*model.Ainv*E);
-
-    model.sqrtAinv = model.sqrtA\eye(size(model.sqrtA, 1));
-    E = E'*model.sqrtAinv;
-    model.innerProducts(1, i) = model.beta*(model.m(:, i)'*model.m(:, i) - E*E');
-end
-%sum(sum(abs(model.innerProducts - Products)))
-%pause
-
-%if strcmp(model.approx, 'dtcvar')
-%model.diagD = -model.beta*trace(model.invK_uu*model.Psi2);
-model.diagD = -model.beta*sum(model.invK_uu.*model.Psi2,2);
-
-
-
-%[gradient, delta]
-%pause
-
-%invL = model.sqrtK_uu\eye(size(model.sqrtK_uu, 1));
-%diagD = -model.beta*sum(invL*model.Psi2,2);
-%end
-
-%model.K_uu
-%model.kern.comp{1}.inputScales
-%model.kern.comp{2}
-%model.kern.whiteVariance
-%cond(model.K_uu) 
-%cond(model.Psi2)
-%model.beta
-%AS
-%model.Psi0 + sum(model.diagD)/model.beta
-%model.kern.whiteVariance
-%mean(diag(model.K_uu))
-%model.beta
-%g = - vargplvmLogLikeGradients(model);
-%g(end-10:end-1)
-%pause
+%model.B = model.invLmT * model.invLatT * model.P; %next line is better
+model.B = model.P1' * model.P;
+model.invK_uu = model.invLm' * model.invLm;
+model.T1 = model.d * model.invK_uu;
+    model.T1 = model.T1 - (1/model.beta) * model.d * (model.P1' * model.P1);
+    model.T1 = model.T1 - (model.B * model.B');
