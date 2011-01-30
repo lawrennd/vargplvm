@@ -57,7 +57,8 @@ model.TrPP = sum(sum(model.P .* model.P));
 
 %model.B = model.invLmT * model.invLatT * model.P; %next line is better
 model.B = model.P1' * model.P;
-model.invK_uu = model.invLm' * model.invLm;
-model.T1 = model.d * model.invK_uu;
-    model.T1 = model.T1 - (1/model.beta) * model.d * (model.P1' * model.P1);
-    model.T1 = model.T1 - (model.B * model.B');
+model.invK_uu = model.invLmT * model.invLm;
+model.Tb = (1/model.beta) * model.d * (model.P1' * model.P1);
+	model.Tb = model.Tb + (model.B * model.B');
+model.T1 = model.d * model.invK_uu - model.Tb;
+
