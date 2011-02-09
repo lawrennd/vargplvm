@@ -31,22 +31,25 @@ function ll = vargplvmPointLogLikelihood(model, vardistx, y, indexPresent)
 
 indexMissing = setdiff(1:model.d, indexPresent);
 
+
 ll1 = 0;
 if ~isempty(indexMissing)
-dmis = prod(size(indexMissing)); 
-E = model.Psi1'*model.m(:,indexMissing);
-EET = E*E';
+dmis = prod(size(indexMissing));
 
-ll1 =  -0.5*(dmis*(-(model.N-model.k)*log(model.beta) ...
-      - model.logDetK_uu +model.logdetA) ...
-      - (sum(sum(model.Ainv.*EET)) ...
-      -sum(sum(model.m(:,indexMissing).*model.m(:,indexMissing))))*model.beta);
-    
-ll1 = ll1 - 0.5*model.beta*dmis*model.Psi0 - 0.5*dmis*sum(model.diagD);
-  
+% Precompute again the parts that contain Y
+TrYY = sum(sum(model.m(:,indexMissing) .* model.m(:,indexMissing)));
+P = model.P1 * (model.Psi1' * model.m(:,indexMissing));
+TrPP = sum(sum(P .* P));
 
-ll1 = ll1 - dmis*model.N/2*log(2*pi);
+ll1 = -0.5*(dmis*(-(model.N-model.k)*log(model.beta) ...
+				  + model.logDetAt) ...
+	      - (TrPP ...
+	      - TrYY)*model.beta);
+  %if strcmp(model.approx, 'dtcvar')
+ll1 = ll1 - 0.5*model.beta*dmis*model.Psi0 + 0.5*dmis*model.beta*model.TrC;
+ll1 = ll1-dmis*model.N/2*log(2*pi);
 end
+
 
 %---
 % compute the part of lower bound that corresponds to the present indices
@@ -64,10 +67,7 @@ model.d = prod(size(indexPresent));
 model.Psi1 = [pointPsi1; model.Psi1]; 
 model.Psi2 = model.Psi2 + pointPsi2;
 model.Psi0 = model.Psi0 + pointPsi0;
-model.A = (1/model.beta)*model.K_uu + model.Psi2;
-[model.Ainv, model.sqrtA] = pdinv(model.A);
-model.logdetA = logdet(model.A, model.sqrtA);
-model.diagD = -model.beta*sum(model.invK_uu.*model.Psi2,2);
+
 
 % normalize y exactly as model.m is normalized 
 my = y - model.bias(indexPresent);
@@ -77,17 +77,32 @@ my = my./model.scale(indexPresent);
 model.m = model.m(:,indexPresent);
 model.m = [my; model.m]; 
 
-E = model.Psi1'*model.m;
-EET = E*E';
+model.TrYY = sum(sum(model.m .* model.m));
+
+
+model.Lm = jitChol(model.K_uu)';      % M x M: L_m (lower triangular)   ---- O(m^3)
+model.invLm = model.Lm\eye(model.k);  % M x M: L_m^{-1}                 ---- O(m^3)
+model.invLmT = model.invLm'; % L_m^{-T}
+model.C = model.invLm * model.Psi2 * model.invLmT;
+model.TrC = sum(diag(model.C)); % Tr(C)
+model.At = (1/model.beta) * eye(size(model.C,1)) + model.C; % At = beta^{-1} I + C
+model.Lat = jitChol(model.At)';
+model.invLat = model.Lat\eye(size(model.Lat,1));  
+model.invLatT = model.invLat';
+model.logDetAt = 2*(sum(log(diag(model.Lat)))); % log |At|
+model.P1 = model.invLat * model.invLm; % M x M
+model.P = model.P1 * (model.Psi1' * model.m);
+model.TrPP = sum(sum(model.P .* model.P));
+
 
 ll2 = -0.5*(model.d*(-(model.N-model.k)*log(model.beta) ...
-     - model.logDetK_uu +model.logdetA) ...
-     - (sum(sum(model.Ainv.*EET))...
-     -sum(sum(model.m.*model.m)) )*model.beta);
-   
-ll2 = ll2 - 0.5*model.beta*model.d*model.Psi0 - 0.5*model.d*sum(model.diagD);
+				  + model.logDetAt) ...
+	      - (model.TrPP ...
+	      - model.TrYY)*model.beta);
+ll2 = ll2 - 0.5*model.beta*model.d*model.Psi0 + 0.5*model.d*model.beta*model.TrC;
 
-ll2 = ll2 - model.d*model.N/2*log(2*pi);
+
+ll2 = ll2-model.d*model.N/2*log(2*pi);
 
 % KL divergence term 
 model.vardist.means = [vardistx.means; model.vardist.means];

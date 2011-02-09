@@ -56,17 +56,24 @@ pointPsi2 = kernVardistPsi2Compute(model.kern, vardistx, model.X_u);
 
 model.Psi1 = [pointPsi1; model.Psi1]; 
 
-model.A = (1/model.beta)*model.K_uu + model.Psi2 + pointPsi2;
-[model.Ainv, model.sqrtA] = pdinv(model.A);
+model.C = model.invLm * (model.Psi2 + pointPsi2) * model.invLmT;
+model.TrC = sum(diag(model.C)); % Tr(C)
+model.At = (1/model.beta) * eye(size(model.C,1)) + model.C;
+model.Lat = jitChol(model.At)';
+model.invLat = model.Lat\eye(size(model.Lat,1));  
+model.invLatT = model.invLat';
+model.logDetAt = 2*(sum(log(diag(model.Lat)))); % log |At|
+model.P1 = model.invLat * model.invLm; % M x M
+model.P = model.P1 * (model.Psi1' * model.m);
+model.TrPP = sum(sum(model.P .* model.P));
+model.B = model.P1' * model.P;
+P1TP1 = (model.P1' * model.P1);
+model.Tb = (1/model.beta) * d * P1TP1;
+	model.Tb = model.Tb + (model.B * model.B');
+model.T1 = d * model.invK_uu - model.Tb;
 
-E = model.Psi1'*model.m;
-EET = E*E';
-AinvEET = model.Ainv*EET;
-AinvEETAinv = AinvEET*model.Ainv;
+gPsi2 = (model.beta/2) * model.T1;
 
-gPsi1 = model.beta*(model.Ainv*E*my');
+gPsi0 = -0.5 * model.beta * d;
 
-gPsi2 = - 0.5*(d*model.Ainv + model.beta*AinvEETAinv) ...
-    + 0.5*d*model.beta*model.invK_uu;
-
-gPsi0 = -0.5*model.beta*d;
+gPsi1 = model.beta*(P1TP1*model.Psi1'*model.m*my');

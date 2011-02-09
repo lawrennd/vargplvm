@@ -31,10 +31,11 @@ function [mu, varsigma] = vargplvmPosteriorMeanVar(model, vardistX);
 %model.vardist.covars = 0*model.vardist.covars; 
 %model = vargplvmUpdateStats(model, model.X_u);
 
-if ~isfield(model,'alpha')
-   model.alpha = model.Ainv*model.Psi1'*model.m;
-end
+Ainv = model.P1' * model.P1;
 
+if ~isfield(model,'alpha')
+   model.alpha = Ainv*model.Psi1'*model.m;
+end
 Psi1_star = kernVardistPsi1Compute(model.kern, vardistX, model.X_u);
 
 % mean prediction 
@@ -44,7 +45,7 @@ if nargout > 1
    % 
    % precomputations
    vard = vardistCreate(zeros(1,model.q), model.q, 'gaussian');
-   Kinvk = (model.invK_uu - (1/model.beta)*model.Ainv);
+   Kinvk = (model.invK_uu - (1/model.beta)*Ainv);
    %
    for i=1:size(vardistX.means,1)
       %
