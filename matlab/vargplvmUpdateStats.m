@@ -13,12 +13,14 @@ jitter = 1e-6;
 model.K_uu = kernCompute(model.kern, X_u);
 
 % Always add jitter (so that the inducing variables are "jitter" function variables)
-% and the above value represents the minimum jitter value
-if (~isfield(model.kern, 'whiteVariance')) | model.kern.whiteVariance < jitter
+% and the above value represents the minimum jitter value. If jitter is
+% added always (even if there is whiteVariance) then it can be seen as a
+% second (but this time constant) white variance added to the cmpd kernel.
+%if (~isfield(model.kern, 'whiteVariance')) | model.kern.whiteVariance < jitter
    % There is no white noise term so add some jitter.
    model.K_uu = model.K_uu ...
         + sparseDiag(repmat(jitter, size(model.K_uu, 1), 1));
-end
+%end
 
 model.Psi0 = kernVardistPsi0Compute(model.kern, model.vardist);
 model.Psi1 = kernVardistPsi1Compute(model.kern, model.vardist, X_u);
@@ -58,7 +60,8 @@ model.TrPP = sum(sum(model.P .* model.P));
 %model.B = model.invLmT * model.invLatT * model.P; %next line is better
 model.B = model.P1' * model.P;
 model.invK_uu = model.invLmT * model.invLm;
-model.Tb = (1/model.beta) * model.d * (model.P1' * model.P1);
-	model.Tb = model.Tb + (model.B * model.B');
-model.T1 = model.d * model.invK_uu - model.Tb;
+Tb = (1/model.beta) * model.d * (model.P1' * model.P1);
+	Tb = Tb + (model.B * model.B');
+model.T1 = model.d * model.invK_uu - Tb;
 
+model.X = model.vardist.means;

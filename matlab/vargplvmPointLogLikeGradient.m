@@ -68,9 +68,9 @@ model.P = model.P1 * (model.Psi1' * model.m);
 model.TrPP = sum(sum(model.P .* model.P));
 model.B = model.P1' * model.P;
 P1TP1 = (model.P1' * model.P1);
-model.Tb = (1/model.beta) * d * P1TP1;
-	model.Tb = model.Tb + (model.B * model.B');
-model.T1 = d * model.invK_uu - model.Tb;
+Tb = (1/model.beta) * d * P1TP1;
+	Tb = Tb + (model.B * model.B');
+model.T1 = d * model.invK_uu - Tb;
 
 gPsi2 = (model.beta/2) * model.T1;
 

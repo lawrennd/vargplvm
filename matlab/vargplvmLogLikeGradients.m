@@ -114,9 +114,16 @@ gK_uu = 0.5 * (model.T1 - (model.beta * model.d) * model.invLmT * model.C * mode
 
 sigm = 1/model.beta; % beta^-1
 
+
+PLm = model.invLatT*model.P;
 gBeta = 0.5*(model.d*(model.TrC + (model.N-model.k)*sigm -model.Psi0) ...
 	- model.TrYY + model.TrPP ...
-	+ sigm * sum(sum(model.K_uu .* model.Tb))); 
+	+ (1/(model.beta^2)) * model.d * sum(sum(model.invLat.*model.invLat)) + sigm*sum(sum(PLm.*PLm)));
+
+%gBeta = 0.5*(model.d*(model.TrC + (model.N-model.k)*sigm -model.Psi0) ...
+%	- model.TrYY + model.TrPP ...
+%	+ sigm * sum(sum(model.K_uu .* model.Tb))); 
+
 
 fhandle = str2func([model.betaTransform 'Transform']);
 gBeta = gBeta*fhandle(model.beta, 'gradfact');
