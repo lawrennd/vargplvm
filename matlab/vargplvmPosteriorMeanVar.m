@@ -1,4 +1,4 @@
-function [mu, varsigma] = vargplvmPosteriorMeanVar(model, vardistX);
+function [mu, varsigma] = vargplvmPosteriorMeanVar(model, X);
 
 % VARGPLVMPOSTERIORMEANVAR Mean and variances of the posterior at points given by X.
 % FORMAT
@@ -27,8 +27,11 @@ function [mu, varsigma] = vargplvmPosteriorMeanVar(model, vardistX);
 % Find exactly the mean and the variances of the predictive distribution
 % (which is not Gaussian, however its moments can be computed in closed-form)
 
-%vardistX.covars = 0*vardistX.covars;
+vardistX.covars = zeros(size(X, 1), size(X, 2));
+vardistX.latentDimension = size(X, 2);
+vardistX.numData = size(X, 1);
 %model.vardist.covars = 0*model.vardist.covars; 
+vardistX.means = X;
 %model = vargplvmUpdateStats(model, model.X_u);
 
 Ainv = model.P1' * model.P1;
