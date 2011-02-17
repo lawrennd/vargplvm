@@ -75,12 +75,12 @@ for i=1:size(Yts,1)
    
     % optimize mean and vars of the latent point 
     model.vardistx = vardistx;
-    vardistx = vargplvmOptimisePoint(model, vardistx, Yts(i,indexPresent), indexPresent, display, iters);
-    Testmeans(i,:) = vardistx.means; 
-    Testcovars(i,:) = vardistx.covars;
+    [x, varx] = vargplvmOptimisePoint(model, vardistx, Yts(i, indexPresent), indexPresent, display, iters);
+    Testmeans(i,:) = x;
+    Testcovars(i,:) = varx;
     
     % reconstruct the missing outputs  
-    [mu, sigma] = vargplvmPosteriorMeanVar(model, vardistx);
+    [mu, sigma] = vargplvmPosteriorMeanVar(model, x, varx);
     Varmu(i,:) = mu; 
     Varsigma(i,:) = sigma; 
     %

@@ -1,4 +1,4 @@
-function vardistx = vargplvmOptimisePoint(model, vardistx, y, indexPresent, display, iters);
+function [X, varX] = vargplvmOptimisePoint(model, vardistx, y, indexPresent, display, iters);
 
 % VARGPLVMOPTIMISEPOINT Optimise the postion of a latent point.
 % FORMAT
@@ -13,7 +13,9 @@ function vardistx = vargplvmOptimisePoint(model, vardistx, y, indexPresent, disp
 % optimisation (default: true)
 % ARG iters : maximum number of iterations for the optimisation
 % (default 2000).
-% RETURN x : the optimised location in the latent space.
+% RETURN x : the optimised mean in the latent space.
+% RETURN varx : the optimised variance in the latent space.
+
 %
 % COPYRIGHT :  Michalis K. Titsias and Neil D. Lawrence, 2009
 %
@@ -54,3 +56,5 @@ else
 end
 
 vardistx = vardistExpandParam(vardistx,x);
+X = vardistx.means;
+varX = vardisx.covars;

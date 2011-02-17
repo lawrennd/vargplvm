@@ -17,7 +17,7 @@ printDiagram = 1;
 options = vargplvmOptions('dtcvar');
 options.kern = {'rbfard2', 'white'};
 options.numActive = 100; 
-%options.scale2var1 = 1; % scale data to have variance 1
+options.scale2var1 = 1; % scale data to have variance 1
 %options.tieParam = 'tied';  
 
 options.optimiser = 'scg';
@@ -35,19 +35,14 @@ display = 1;
 
 model = vargplvmOptimise(model, display, iters);
 
-capName = dataSetName;;
-capName(1) = upper(capName(1));
-modelType = model.type;
-modelType(1) = upper(modelType(1));
-save(['dem' capName modelType num2str(experimentNo) '.mat'], 'model');
+% Save the results.
+modelWriteResult(model, dataSetName, experimentNo);
 
 if exist('printDiagram') & printDiagram
-  lvmPrintPlot(model, lbls, capName, experimentNo);
+  lvmPrintPlot(model, lbls, dataSetName, experimentNo);
 end
 
-
-%% Load the results and display dynamically.
-%fgplvmResultsDynamic(dataSetName, experimentNo, 'image', [20 28], 1, 0, 1)
-
-%% compute the nearest neighbours errors in latent space.
-%errors = fgplvmNearestNeighbour(model, lbls);
+% load connectivity matrix
+[void, connect] = mocapLoadTextData('run1');
+% Load the results and display dynamically.
+lvmResultsDynamic(model.type, dataSetName, experimentNo, 'image', [20 28], 1, 0, 1)

@@ -15,8 +15,8 @@ experimentNo = 1;
 % Set up model
 options = vargplvmOptions('dtcvar');
 options.kern = {'rbfard2', 'bias', 'white'};
-options.numActive = 50; 
-options.initX = 'isomap';
+options.numActive = 100; 
+%options.initX = 'ppca';
 %options.scale2var1 = 1; % scale data to have variance 1
 options.tieParam = 'tied';  
 
@@ -27,30 +27,33 @@ d = size(Y, 2);
 % demo using the variational inference method for the gplvm model
 model = vargplvmCreate(latentDim, d, Y, options);
 
-% intilialize from the training data 
-%model.X = model.m; 
-%ind = randperm(model.N);
-%ind = ind(1:model.k);
-%model.X_u = model.X(ind, :);
-%model.vardist.means = model.X; 
-%
 model = vargplvmParamInit(model, model.m, model.X); 
 %model.vardist.covars = 10*ones(model.N,model.q) + 0.001*randn(model.N,model.q);
 
 % Optimise the model.
-iters = 1000;
+iters = 1500;
 display = 1;
 
 model = vargplvmOptimise(model, display, iters);
 
-capName = dataSetName;;
-capName(1) = upper(capName(1));
-modelType = model.type;
-modelType(1) = upper(modelType(1));
-save(['dem' capName modelType num2str(experimentNo) '.mat'], 'model');
+% Save the results.
+modelWriteResult(model, dataSetName, experimentNo);
 
-% order wrt to the inputScales
-mm = vargplvmReduceModel(model,2);
+if exist('printDiagram') & printDiagram
+   % order wrt to the inputScales
+  mm = vargplvmReduceModel(model,2);
+  lvmPrintPlot(mm, lbls, dataSetName, experimentNo);
+end
+
+% load connectivity matrix
+[void, connect] = mocapLoadTextData('run1');
+% Load the results and display dynamically.
+lvmResultsDynamic(model.type, dataSetName, experimentNo, 'plot3', model.y)
+
+
+  mm = vargplvmReduceModel(model,2);
+lvmScatterPlotColor(mm, model.y(:, 2));
+
 %% plot the two largest twe latent dimensions 
 if exist('printDiagram') & printDiagram
   lvmPrintPlot(mm, lbls, capName, experimentNo);

@@ -1,18 +1,18 @@
-function [mu, varsigma] = vargplvmPosteriorMeanVar(model, X);
+function [mu, varsigma] = vargplvmPosteriorMeanVar(model, X, varX);
 
 % VARGPLVMPOSTERIORMEANVAR Mean and variances of the posterior at points given by X.
 % FORMAT
 % DESC returns the posterior mean and variance for a given set of
 % points.
 % ARG model : the model for which the posterior will be computed.
-% ARG vardistX : variational distribution on the test latent points 
-%              for which the posterior will be computed.
+% ARG X : variational mean in the latent space for which posterior is computed.
+% ARG varX : variational variances in the latent space for which posterior is computed (assumed zero if not present).
 % RETURN mu : the mean of the posterior distribution.
 % RETURN sigma : the variances of the posterior distributions.
 %
 % SEEALSO : gpPosteriorMeanVar, vargplvmCreate
 %
-% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009
+% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009, 2011
 
 % VARGPLVM
 
@@ -27,7 +27,11 @@ function [mu, varsigma] = vargplvmPosteriorMeanVar(model, X);
 % Find exactly the mean and the variances of the predictive distribution
 % (which is not Gaussian, however its moments can be computed in closed-form)
 
-vardistX.covars = zeros(size(X, 1), size(X, 2));
+if nargin < 3
+  vardistX.covars = repmat(0.0, size(X, 1), size(X, 2));%zeros(size(X, 1), size(X, 2));
+else
+  vardistX.covars = varX;
+end
 vardistX.latentDimension = size(X, 2);
 vardistX.numData = size(X, 1);
 %model.vardist.covars = 0*model.vardist.covars; 
