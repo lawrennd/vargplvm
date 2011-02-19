@@ -1,4 +1,4 @@
-function g = vargplvmPointLogLikeGradient(model, vardistx, y, indexPresent)
+function g = vargplvmPointLogLikeGradient(model, vardistx, y)
 
 % VARGPLVMPOINTLOGLIKEGRADIENT Log-likelihood gradient for of a point of the GP-LVM.
 % FORMAT
@@ -19,6 +19,11 @@ function g = vargplvmPointLogLikeGradient(model, vardistx, y, indexPresent)
 
 % VARGPLVM
 
+%%%%
+    indexMissing = find(isnan(y));
+    indexPresent = setdiff(1:model.d, indexMissing);
+    y = y(indexPresent); 
+%%%%
 
 % normalize y exactly as model.m is normalized 
 my = y - model.bias(indexPresent);

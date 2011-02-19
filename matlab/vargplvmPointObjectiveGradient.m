@@ -1,4 +1,4 @@
-function [f, g] = vargplvmPointObjectiveGradient(x, model, y, indexPresent)
+function [f, g] = vargplvmPointObjectiveGradient(x, model, y)
 
 % VARGPLVMPOINTOBJECTIVEGRADIENT Wrapper function for objective and gradient of a single point in latent space and the output location..
 % FORMAT
@@ -31,10 +31,10 @@ if size(xvec, 1) > size(xvec, 2)
 else
   transpose = false;
 end
-f = - vargplvmPointLogLikelihood(model, x, y, indexPresent);
+f = - vargplvmPointLogLikelihood(model, x, y);
 
 if nargout > 1
-  g = - vargplvmPointLogLikeGradient(model, x, y, indexPresent);
+  g = - vargplvmPointLogLikeGradient(model, x, y);
 end
 if transpose
   g = g';

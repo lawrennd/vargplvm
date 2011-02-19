@@ -1,4 +1,4 @@
-function g = vargplvmPointGradient(x, model, y, indexPresent)
+function g = vargplvmPointGradient(x, model, y)
 
 % VARGPLVMPOINTGRADIENT Wrapper function for gradient of a single point.
 % FORMAT
@@ -20,4 +20,4 @@ function g = vargplvmPointGradient(x, model, y, indexPresent)
 
 vardistx = model.vardistx;
 vardistx = vardistExpandParam(vardistx,x);
-g = - vargplvmPointLogLikeGradient(model, vardistx, y, indexPresent);
+g = - vargplvmPointLogLikeGradient(model, vardistx, y);

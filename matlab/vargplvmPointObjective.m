@@ -1,4 +1,4 @@
-function f = vargplvmPointObjective(x, model, y, indexPresent)
+function f = vargplvmPointObjective(x, model, y)
 
 % VARGPLVMPOINTOBJECTIVE Wrapper function for objective of a single point in latent space and the output location..
 % FORMAT
@@ -20,4 +20,4 @@ function f = vargplvmPointObjective(x, model, y, indexPresent)
 
 vardistx = model.vardistx;
 vardistx = vardistExpandParam(vardistx, x);
-f = - vargplvmPointLogLikelihood(model, vardistx, y, indexPresent);
+f = - vargplvmPointLogLikelihood(model, vardistx, y);

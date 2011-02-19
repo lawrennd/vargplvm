@@ -1,4 +1,4 @@
-function [X, varX] = vargplvmOptimisePoint(model, vardistx, y, indexPresent, display, iters);
+function [X, varX] = vargplvmOptimisePoint(model, vardistx, y, display, iters);
 
 % VARGPLVMOPTIMISEPOINT Optimise the postion of a latent point.
 % FORMAT
@@ -23,7 +23,7 @@ function [X, varX] = vargplvmOptimisePoint(model, vardistx, y, indexPresent, dis
 
 % VARGPLVM
 
-if nargin < 6
+if nargin < 5
   iters = 2000;
   %if nargin < 5
     display = true;
@@ -48,13 +48,13 @@ x = vardistExtractParam(vardistx);
 
 if strcmp(func2str(optim), 'optimiMinimize')
   % Carl Rasmussen's minimize function 
-  x = optim('vargplvmPointObjectiveGradient', x, options, model, y, indexPresent);
+  x = optim('vargplvmPointObjectiveGradient', x, options, model, y);
 else
   % NETLAB style optimization.
   x = optim('vargplvmPointObjective', x,  options, ...
-            'vargplvmPointGradient', model, y, indexPresent);
+            'vargplvmPointGradient', model, y);
 end
 
 vardistx = vardistExpandParam(vardistx,x);
 X = vardistx.means;
-varX = vardisx.covars;
+varX = vardistx.covars;

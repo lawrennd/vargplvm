@@ -1,4 +1,4 @@
-function ll = vargplvmPointLogLikelihood(model, vardistx, y, indexPresent)
+function ll = vargplvmPointLogLikelihood(model, vardistx, y)
 
 % VARGPLVMPOINTLOGLIKELIHOOD Log-likelihood of a point for the GP-LVM.
 % FORMAT
@@ -29,7 +29,10 @@ function ll = vargplvmPointLogLikelihood(model, vardistx, y, indexPresent)
 %  --- this bit of the lower bound does not depend on the vardistx    
 
 
-indexMissing = setdiff(1:model.d, indexPresent);
+%indexMissing = setdiff(1:model.d, indexPresent);
+    indexMissing = find(isnan(y));
+    indexPresent = setdiff(1:model.d, indexMissing);
+    y = y(indexPresent);  
 
 
 ll1 = 0;

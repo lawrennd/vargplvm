@@ -38,6 +38,7 @@ vardistX.numData = size(X, 1);
 vardistX.means = X;
 %model = vargplvmUpdateStats(model, model.X_u);
 
+
 Ainv = model.P1' * model.P1;
 
 if ~isfield(model,'alpha')
