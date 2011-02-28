@@ -25,11 +25,34 @@ function model = vargplvmExpandParam(model, params)
 %  model.X = modelOut(model.back, model.y);
 %else
 
-% variational parameters (means and covariances)
+%%% Parameters must be passed as a vector in the following order (left to right) 
+% - parameter{size} -
+% vardistParams{model.vardist.nParams} % mu, S
+%       OR
+% [dynamicsVardistParams{dynamics.vardist.nParams} dynamics.kernParams{dynamics.kern.nParams}] % mu_bar, lambda
+% inducingInputs{model.q*model.k}
+% kernelParams{model.kern.nParams}
+% beta{prod(size(model.beta))}
+
+
 startVal = 1;
-endVal = model.vardist.nParams;
-%model.vardist = vardistExpandParam(model.vardist, params(startVal:endVal)); 
-model.vardist = modelExpandParam(model.vardist, params(startVal:endVal)); 
+if isfield(model, 'dynamics') & ~isempty(model.dynamics)
+    % variational parameters (reparametrized) AND dyn.kernel's parameters
+    endVal = model.dynamics.nParams;
+    model.dynamics = modelExpandParam(model.dynamics, params(startVal:endVal));
+    
+    %%%% DEBUG_
+    %fprintf(1,'In expandParam, params=%d %d %d\n', model.dynamics.kern.comp{1}.inverseWidth, model.dynamics.kern.comp{1}.variance,model.dynamics.kern.comp{2}.variance );
+    %%% _DEBUG
+    
+    %model.dynamics.X = model.vardist.means;
+else
+    % variational parameters (means and covariances), original ones
+    endVal = model.vardist.nParams;
+    model.vardist = modelExpandParam(model.vardist, params(startVal:endVal)); 
+end
+
+
 
 % inducing inputs 
 startVal = endVal+1;
@@ -56,6 +79,24 @@ if model.optimiseBeta
 end
 
 model.nParams = endVal;
+
+% 
+% %%%
+% % NEW_
+% % Give parameters to dynamics if they are there.
+% if isfield(model, 'dynamics') & ~isempty(model.dynamics)
+%   startVal = endVal + 1;
+%   endVal = length(params);
+% 
+%   % Fill the dynamics model with current latent values.
+%   % model.dynamics = modelSetLatentValues(model.dynamics, model.X); %???
+% 
+%   % Update the dynamics model with parameters (thereby forcing recompute).
+%    model.dynamics = modelExpandParam(model.dynamics, params(startVal:endVal));
+%    model.nParams = model.nParams + model.dynamics.nParams;
+% end
+% %%%
+% % _NEW
 
 % Update statistics
 model = vargplvmUpdateStats(model, model.X_u);

@@ -77,8 +77,9 @@ if strcmp(kern.type,'cmpnd') & (length(kern.comp)>1)
 end
 
 
-% variational variances are positive  
-gVarcovars = (gVarcovars(:).*vardist.covars(:))';
+% variational variances are positive (This should rather go to
+% vargplvmLogLikeGradients) 
+% gVarcovars = (gVarcovars(:).*vardist.covars(:))';
 
 
 %-----------------------------------------------------

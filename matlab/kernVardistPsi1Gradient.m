@@ -37,8 +37,9 @@ else % the kernel is cmpnd
    % 
 end
 
-% variational variances are positive  
-gVarcovars = (gVarcovars(:).*vardist.covars(:))'; 
+% variational variances are positive (This should rather go to
+% vargplvmLogLikeGradients)
+%gVarcovars = (gVarcovars(:).*vardist.covars(:))'; 
 
 
 

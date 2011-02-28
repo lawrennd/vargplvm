@@ -8,14 +8,24 @@ function model = vargplvmUpdateStats(model, X_u)
 jitter = 1e-6;
 %model.jitter = 1e-6;
 
+
+% %%% Precomputations for the KL term %%%
+%%% Maybe we should add something like model.dynamics.X =
+%%% model.dynamics.vardist.means (if visualisation requires that).
+ if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+     model = vargplvmDynamicsUpdateStats(model);
+ end
+
+
+
 %%% Precomputations for (the likelihood term of) the bound %%%
 
 model.K_uu = kernCompute(model.kern, X_u);
 
 % Always add jitter (so that the inducing variables are "jitter" function variables)
-% and the above value represents the minimum jitter value. If jitter is
-% added always (even if there is whiteVariance) then it can be seen as a
-% second (but this time constant) white variance added to the cmpd kernel.
+% and the above value represents the minimum jitter value
+% Putting jitter always ("if" in comments) is like having a second
+% whiteVariance in the kernel which is constant.
 %if (~isfield(model.kern, 'whiteVariance')) | model.kern.whiteVariance < jitter
    % There is no white noise term so add some jitter.
    model.K_uu = model.K_uu ...
@@ -40,6 +50,38 @@ model.TrC = sum(diag(model.C)); % Tr(C)
 % since it has a much smaller condition number than A=sigma^2 K_uu + Psi2
 model.At = (1/model.beta) * eye(size(model.C,1)) + model.C; % At = beta^{-1} I + C
 %model.Lat = chol(model.At, 'lower');
+
+
+
+%%%%% DEBUG__
+
+%tempModelDyn = model;
+%save 'tempModelDyn.mat' 'tempModelDyn';
+
+%  if isfield(model, 'dynamics') 
+%      if ~isempty(model.dynamics)
+%         [model.dynamics.kern.comp{1}.variance model.dynamics.kern.comp{1}.inverseWidth model.dynamics.kern.comp{2}.variance]
+%         fprintf(1,'\nMaxgVarmeansUpStats=%d\n',max(max(model.dynamics.vardist.means))); %%%%%%
+%      end
+%  end
+ 
+%  modelTempStatic = model;
+%  save 'modelTempStatic.mat' 'modelTempStatic';
+
+
+ if isfield(model, 'dynamics') & ~isempty(model.dynamics)
+  %   kernDyntmp = model.dynamics.kern;% kernDyntmp.transforms = [];
+  %   kernSttmp = model.kern; %kernSttmp.transforms=[];
+%      fprintf(1,'In UpdateStats DynKernParams are      %s\n', num2str(kernExtractParam(model.dynamics.kern)));
+%      fprintf(1,'In UpdateStats KernParams are      %s\n', num2str(kernExtractParam(model.kern)));
+%         fprintf(1,'Cond. At=%d\n',cond(model.At));
+%         fprintf(1,'Cond. Kt=%d\n',cond(model.dynamics.Kt));
+%        fprintf(1,'model.nParams=%d model.dynamics.nParams=%d model.dynamics.kern.nParams=%d\n',model.nParams, model.dynamics.nParams,model.dynamics.kern.nParams);
+ end
+
+% %%%%% __DEBUG
+
+
 model.Lat = jitChol(model.At)';
 model.invLat = model.Lat\eye(size(model.Lat,1));  
 model.invLatT = model.invLat';
@@ -64,4 +106,6 @@ Tb = (1/model.beta) * model.d * (model.P1' * model.P1);
 	Tb = Tb + (model.B * model.B');
 model.T1 = model.d * model.invK_uu - Tb;
 
+
 model.X = model.vardist.means;
+

@@ -32,11 +32,17 @@ end
 
 ll = ll-model.d*model.N/2*log(2*pi);
 
+% NEW_
 % KL divergence term 
-varmeans = sum(sum(model.vardist.means.*model.vardist.means)); 
-varcovs = sum(sum(model.vardist.covars - log(model.vardist.covars)));
-
-KLdiv = -0.5*(varmeans + varcovs) + 0.5*model.q*model.N; 
+ if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+   % A dynamics model is being used. 
+   KLdiv = modelVarPriorBound(model);
+ else
+    varmeans = sum(sum(model.vardist.means.*model.vardist.means)); 
+    varcovs = sum(sum(model.vardist.covars - log(model.vardist.covars)));
+    KLdiv = -0.5*(varmeans + varcovs) + 0.5*model.q*model.N; 
+ end
+% _NEW
 
 % Obtain the final value of the bound by adding the likelihood
 % and the KL term.

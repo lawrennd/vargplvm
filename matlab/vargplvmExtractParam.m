@@ -18,11 +18,58 @@ function [params, names] = vargplvmExtractParam(model)
 
 % VARGPLVM
 
+%%% Parameters must be returned as a vector in the following order (left to right) 
+% - parameter{size} -
+% vardistParams{model.vardist.nParams} % mu, S
+%       OR
+% [dynamicsVardistParams{dynamics.vardist.nParams} dynamics.kernParams{dynamics.kern.nParams}] % mu_bar, lambda
+% inducingInputs{model.q*model.k}
+% kernelParams{model.kern.nParams}
+% beta{prod(size(model.beta))}
+
+
 if nargout > 1
   returnNames = true;
 else
   returnNames = false;
 end 
+
+if isfield(model, 'dynamics') & ~isempty(model.dynamics)
+    % [VariationalParameters(reparam)   dynKernelParameters]
+    if returnNames
+        [dynParams, dynParamNames] = modelExtractParam(model.dynamics);
+        names = dynParamNames;
+    else
+        dynParams = modelExtractParam(model.dynamics);
+    end
+    params = dynParams;
+else
+    % Variational parameters 
+    if returnNames
+        %[varParams, varNames] = vardistExtractParam(model.vardist);
+        [varParams, varNames] = modelExtractParam(model.vardist);
+        names = varNames{:}; 
+    else
+        %varParams = vardistExtractParam(model.vardist);
+        varParams = modelExtractParam(model.vardist);
+    end
+    params = varParams;
+end
+
+
+% Inducing inputs 
+if ~model.fixInducing
+    params =  [params model.X_u(:)'];
+    if returnNames 
+      for i = 1:size(model.X_u, 1)
+      for j = 1:size(model.X_u, 2)
+          X_uNames{i, j} = ['X_u(' num2str(i) ', ' num2str(j) ')'];
+      end
+      end
+      names = {names{:}, X_uNames{:}};
+    end
+end
+
 
 % Kernel parameters  
 if returnNames
@@ -30,11 +77,11 @@ if returnNames
   for i = 1:length(kernParamNames)
     kernParamNames{i} = ['Kernel, ' kernParamNames{i}];
   end
-  names = {kernParamNames{:}};
+  names = {names{:}, kernParamNames{:}};
 else
   kernParams = kernExtractParam(model.kern);
 end
-params = kernParams;
+params = [params kernParams];
 
 
 % beta in the likelihood 
@@ -50,28 +97,4 @@ if model.optimiseBeta
    end
 end
 
-% Inducing inputs 
-if ~model.fixInducing
-    params =  [model.X_u(:)' params];
-    if returnNames 
-      for i = 1:size(model.X_u, 1)
-      for j = 1:size(model.X_u, 2)
-          X_uNames{i, j} = ['X_u(' num2str(i) ', ' num2str(j) ')'];
-      end
-      end
-      names = {X_uNames{:}, names{:}};
-    end
-end
-
-% Variational parameters 
-if returnNames
-  %[varParams, varNames] = vardistExtractParam(model.vardist);
-  [varParams, varNames] = modelExtractParam(model.vardist);
-  params = [varParams params];
-  names = {varNames{:}, names{:}}; 
-else
-  %varParams = vardistExtractParam(model.vardist);
-  varParams = modelExtractParam(model.vardist);
-  params = [varParams params];
-end
 
