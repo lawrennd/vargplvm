@@ -1,0 +1,3 @@
+%%% TEMP!! Needs fixing...
+function y = vargpTimeDynamicsOut(model, x);
+    y = gpPosteriorMeanVar(model, x);
