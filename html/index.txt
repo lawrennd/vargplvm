@@ -14,7 +14,11 @@ RELEASEINFORMATION
 
 <h3>Current Release</h3>
 
-This release is for the AISTATS 2010 submission.
+<p>This release includes improved numerical stability on the gradient and bound computations which finds better solutions under the optimizer. Derived and implemented by Andreas Damianou and Michalis Titsias.
+
+<h4>Version 0.1</h4>
+
+<p>This release is for the AISTATS 2010 submission.
 
 
 <h2>Examples</h2>
