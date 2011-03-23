@@ -1,7 +1,11 @@
 function model = vargplvmUpdateStats(model, X_u)
+% VARGPLVMUPDATESTATS Update stats for VARGPLVM model.
 %
-
-% VARGPLVMUPDATESTATS Update stats of VARGPLVM model.
+% COPYRIGHT : Michalis K. Titsias, 2009-2011
+% COPYRIGHT : Neil D. Lawrence, 2009-2011
+% COPYRIGHT : Andreas C. Damianou, 2010-2011
+% 
+% SEEALSO : vargplvmOptimise, vargplvmExpandParam
 
 % VARGPLVM
   
@@ -49,37 +53,6 @@ model.TrC = sum(diag(model.C)); % Tr(C)
 % Matrix At replaces the matrix A of the old implementation; At is more stable
 % since it has a much smaller condition number than A=sigma^2 K_uu + Psi2
 model.At = (1/model.beta) * eye(size(model.C,1)) + model.C; % At = beta^{-1} I + C
-%model.Lat = chol(model.At, 'lower');
-
-
-
-%%%%% DEBUG__
-
-%tempModelDyn = model;
-%save 'tempModelDyn.mat' 'tempModelDyn';
-
-%  if isfield(model, 'dynamics') 
-%      if ~isempty(model.dynamics)
-%         [model.dynamics.kern.comp{1}.variance model.dynamics.kern.comp{1}.inverseWidth model.dynamics.kern.comp{2}.variance]
-%         fprintf(1,'\nMaxgVarmeansUpStats=%d\n',max(max(model.dynamics.vardist.means))); %%%%%%
-%      end
-%  end
- 
-%  modelTempStatic = model;
-%  save 'modelTempStatic.mat' 'modelTempStatic';
-
-
- if isfield(model, 'dynamics') & ~isempty(model.dynamics)
-  %   kernDyntmp = model.dynamics.kern;% kernDyntmp.transforms = [];
-  %   kernSttmp = model.kern; %kernSttmp.transforms=[];
-%      fprintf(1,'In UpdateStats DynKernParams are      %s\n', num2str(kernExtractParam(model.dynamics.kern)));
-%      fprintf(1,'In UpdateStats KernParams are      %s\n', num2str(kernExtractParam(model.kern)));
-%         fprintf(1,'Cond. At=%d\n',cond(model.At));
-%         fprintf(1,'Cond. Kt=%d\n',cond(model.dynamics.Kt));
-%        fprintf(1,'model.nParams=%d model.dynamics.nParams=%d model.dynamics.kern.nParams=%d\n',model.nParams, model.dynamics.nParams,model.dynamics.kern.nParams);
- end
-
-% %%%%% __DEBUG
 
 
 model.Lat = jitChol(model.At)';

@@ -13,6 +13,9 @@ printDiagram = 1;
 % load data
 [Y, lbls] = lvmLoadData(dataSetName);
 
+%%% TEMP: for fewer data
+Y = Y(1:100,:); 
+
 % training and test sets
 Ntr = 0.7*floor(size(Y,1)); % 70% of the data for training  
 perm = randperm(size(Y,1)); 
@@ -23,7 +26,7 @@ Yts = Y(perm(Ntr+1:end),:);  lblsTs = lbls(perm(Ntr+1:end),:);
 % Set up model
 options = vargplvmOptions('dtcvar');
 options.kern = {'rbfard2', 'bias', 'white'};
-options.numActive = 50; 
+options.numActive = 20; % Default: 50
 
 options.optimiser = 'scg';
 latentDim = 10;
@@ -34,7 +37,7 @@ model = vargplvmCreate(latentDim, d, Ytr, options);
 model = vargplvmParamInit(model, model.m, model.X); 
 model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(model.vardist.covars));
 
-iters = 2000;
+iters = 10; % Default: 2000
 display = 1;
 
 model = vargplvmOptimise(model, display, iters);

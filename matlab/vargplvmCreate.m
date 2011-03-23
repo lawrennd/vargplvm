@@ -13,7 +13,8 @@ function model = vargplvmCreate(q, d, Y, options)
 % approximations to be used (if any).
 % RETURN model : the GP-LVM model.
 %
-% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009
+% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009-2011
+% Modifications : Andreas C. Damianou, 2010-2011
 %
 % SEEALSO : vargplvmOptions
 
@@ -23,9 +24,14 @@ if size(Y, 2) ~= d
   error(['Input matrix Y does not have dimension ' num2str(d)]);
 end
 
+% Datasets with dimensions larger than this number will run the 
+% code which is more efficient for large D. This will happen only if N is
+% smaller than D, though.
+limitDimensions = 5000; % Default: 5000
+
 model.type = 'vargplvm';
 model.approx = options.approx;
-  
+
 model.learnScales = options.learnScales;
 %model.scaleTransform = optimiDefaultConstraint('positive');
 
@@ -58,6 +64,8 @@ end
 
 model.y = Y;
 model.m = gpComputeM(model);
+
+
 %if options.computeS 
 %  model.S = model.m*model.m';
 %  if ~strcmp(model.approx, 'ftc')
@@ -66,9 +74,17 @@ model.m = gpComputeM(model);
 %end
 
 
+
 if isstr(options.initX)
-  initFunc = str2func([options.initX 'Embed']);
-  X = initFunc(model.m, q);
+   %%% The following should eventually be uncommented so as to initialize
+   %%% in the dual space. This is much more efficient for large D.
+   %if model.d > limitDimensions && model.N < limitDimensions
+   %      [X vals] = svd(model.m*model.m');
+   %      X = X(:,1:model.q); %%%%%
+   %else
+        initFunc = str2func([options.initX 'Embed']);
+        X = initFunc(model.m, q);
+   %end  
 else
   if size(options.initX, 1) == size(Y, 1) ...
         & size(options.initX, 2) == q
@@ -80,9 +96,104 @@ end
 
 model.X = X;
 
-% Trace(Y*Y) is a constant, so it can be calculated just once and stored
-% in memory to be used whenever needed.
-model.TrYY = sum(sum(model.m .* model.m));
+
+model.learnBeta = 1; % Newly added: deafault value for learnBeta.
+
+% If the provided matrices are really big, the required quantities can be
+% computed externally (e.g. block by block) and be provided here (we still
+% need to add a switch to get that).
+if model.d > limitDimensions && model.N < limitDimensions
+    model.DgtN = 1; % D greater than N mode on.
+    fprintf(1, '# The dataset has a large number of dimensions (%d)! Switching to "large D" mode!\n',model.d);
+    
+    % If we have test data, we can prepare some multiplications in
+    % advance, obtain NxN matrices and then never store Y.
+    
+   %{
+    % Also, check that the following trick must only be done, in case there
+    % is Yts, when length(indexPresent) > limitDimensions
+    if(isfield(options,'Ytest'))
+        % The same indices must be missing from all test points.
+        indexMissing = find(isnan(options.Ytest(1,:)));
+        indexPresent = setdiff(1:model.d, indexMissing);
+        % Scale test data exactly as the training ones.
+        modelTmp = model;
+        modelTmp.y = options.Ytest; %%% Temporary assignment
+        modelTmp.y = model.y(:,indexPresent);
+        modelTmp.m = model.m(:,indexPresent);
+        modelTmp.d = length(indexPresent);
+        my = gpComputeM(model);
+        modelTmp.y = []; % Never used
+        my = my(:,indexPresent);
+        
+                
+        mExt = [modelTmp.m; my];
+        mExtmExtT = mExt * mExt';
+        model.mExt = chol(mExtmExtT, 'lower'); % NxN
+        model.TrMMExt = sum(diag(mExtmExtT)); % scalar
+        model.mmyT = model.mExt * my'; % NxN
+    end
+    %}
+    
+   % yyT_denorm=model.y * model.y';
+    % Keep the original m. It is needed for predictions.
+    model.mOrig = model.m;
+    
+    % The following will eventually be uncommented.
+    %model.y = []; % Never used.
+    YYT = model.m * model.m'; % NxN
+    % Replace data with the cholesky of Y*Y'.Same effect, since Y only appears as Y*Y'.
+     %%% model.m = chol(YYT, 'lower');  %%% Put a switch here!!!!
+    [U S V]=svd(YYT);
+    model.m=U*sqrt(abs(S));
+
+    model.TrYY = sum(diag(YYT)); % scalar
+    
+%{    
+%     % Scale and bias
+%     d2=size(model.m,2);
+%     model.scale = ones(1, d2);
+%     
+%     [U S V]=svd(yyT_denorm);
+%     y2=U*sqrt(abs(S));
+%     model.bias = mean(y2);
+%     if(isfield(options,'scale2var1'))
+%         if(options.scale2var1)
+%             model.scale = std(y2);
+%             model.scale(find(model.scale==0)) = 1;
+%             if(model.learnScales)
+%                 warning('Both learn scales and scale2var1 set for GP');
+%             end
+%             if(isfield(options, 'scaleVal'))
+%                 warning('Both scale2var1 and scaleVal set for GP');
+%             end
+%         end
+%     end
+%     if(isfield(options, 'scaleVal'))
+%         model.scale = repmat(options.scaleVal, 1, d2);
+%     end
+    %}
+else
+    % Trace(Y*Y) is a constant, so it can be calculated just once and stored
+    % in memory to be used whenever needed.
+    model.DgtN = 0;
+    model.TrYY = sum(sum(model.m .* model.m));
+end
+
+
+
+%%% Also, if there is a test dataset, Yts, then when we need to take 
+% model.m*my' (my=Yts_m(i,:)) in the pointLogLikeGradient, we can prepare in advance
+% A = model.m*Yts_m' (NxN) and select A(:,i).
+% Similarly, when I have m_new = [my;m] and then m_new*m_new', I can find that
+% by taking m*m' (already computed as YY) and add one row on top: (m*my)'
+% and one column on the left: m*my.
+% 
+% %%%%%%%%%%
+
+%%%% _NEW
+
+
 
 %model.isMissingData = options.isMissingData;
 %if model.isMissingData
@@ -99,6 +210,7 @@ else
   model.kern = kernCreate(model.X, options.kern);
 end
 
+%{
 %if isfield(options, 'noise')
 %  if isstruct(options.noise)
 %    model.noise = options.noise;
@@ -122,7 +234,7 @@ end
 %                                     numData, ...
 %                                     size(model.y, 2));
 %end
-
+%}
 
 switch options.approx
  case {'dtcvar'}
@@ -143,6 +255,7 @@ switch options.approx
   end
   model.beta = options.beta;
 end
+%{
 %if model.k>model.N
 %  error('Number of active points cannot be greater than number of data.')
 %end
@@ -160,7 +273,7 @@ end
 %    end
 %  end  
 %end
-
+%}
 
 if isstruct(options.prior)
   model.prior = options.prior;
@@ -189,6 +302,8 @@ if isfield(options, 'tieParam') & ~isempty(options.tieParam)
   end
 %
 end
+
+%{
 %  if isstruct(options.back)
 
 %if isstruct(options.inducingPrior)
@@ -223,6 +338,8 @@ model.dynamics = [];
 
 initParams = vargplvmExtractParam(model);
 model.numParams = length(initParams);
+
 % This forces kernel computation.
 model = vargplvmExpandParam(model, initParams);
+%}
 

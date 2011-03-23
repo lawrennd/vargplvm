@@ -1,29 +1,135 @@
 function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads(dynModel, gVarmeansLik, gVarcovsLik)
+% MODELVARPRIORBOUND Returns the gradients of the various types of the
+% variational GPLVM bound when dynamics is used. The gradients returned are
+% those for the variational means and covariances and the temporal kernel.
+% FORMAT
+% DESC The function takes a dynamics model structure along with some partial
+% derivatives, amends as appropriate  and calculates the whole gradient for the
+% variational bound. The gradients returned are w.r.t mu_bar and lambda, i.e. the parameters used by the optimiser
+% (the ones introduced by the reparametrization), not the original ones (mu and S).
+% These gradients are obtained in two steps: firstly, another funtion is used to calculate the
+% gradients that correspond only to the likelihood part of the bound and
+% are w.r.t the original parameters mu and S. These quantities are the arguments
+% gVarmenasLik and gVarcovsLik and are calculated using the already
+% implemented code for the static vargplvm, which assumes that the original
+% parameters are not coupled.
+% The current funtions receives these quantities and a) amends
+% with partial derivatives because the variational parameters are coupled
+% via Kt for the dyn. gplvm b) Computes the whole gradients for both parts
+% of the bound, the one corresponding to the likelihood and the one
+% corresponding to the prior. This must be done in a single function
+% because the final formula contains both parts in a nonlinear form.
+% c) Also the kernel hyperparameters for the dynamics kernel are being retured.
+% See the dyn. vargplvm notes for more details.
+%
+% ARG dynModel : the dynamics model structure for which the gradients are
+% to be computed.
+% ARG gVarmeansLik, gVarcovsLik: the gradients for the VAR-GPLVM model computed
+% for the original parameters and only for the likelihood term.
+% RETURN gVarmeans, gVarcovs : the gradients for the "reparametrized" means
+% and covariances (the ones that are visible to the optimiser, not the
+% original ones) for the VAR-GPLVM model.
+% RETURN gDynKern: the gradient w.r.t the hyperparameters of the dynamics
+% kernel
+% 
+% SEEALSO : vargplvmLogLikeGradients modelVarPriorBound
+%
+% COPYRIGHT : Michalis K. Titsias and Andreas C. Damianou, 2010-2011
 
 
-[gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik);
+% VARGPLVM
 
-%{
-%[gVarmeans gVarcovs gDynKern] =
-%vargpTimeDynamicsPriorReparamGradsTEMP(dynModel, gVarmeansLik, gVarcovsLik);
-%%%%%%% COMPARISON
-% tStart=tic;
-% [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik);
-% tElapsed1=toc(tStart);
-% 
-% tStart=tic;
-% [gVarmeans2 gVarcovs2 gDynKern2] = vargpTimeDynamicsPriorReparamGrads2(dynModel, gVarmeansLik, gVarcovsLik);
-% tElapsed2=toc(tStart);
-% 
-% fprintf(1,'max(abs(gVarmeans-gVarmeans2))=%.10d\n',max(abs(gVarmeans-gVarmeans2)));
-% fprintf(1,'max(abs(gVarcovs-gVarcovs2))=%.10d\n',max(abs(gVarcovs-gVarcovs2)));
-% fprintf(1,'max(abs(gDynKern-gDynKern2))=%.10d\n',max(abs(gDynKern-gDynKern2)));
-% 
-% 
-% fprintf(1,'tElapsed1=%d\ntElapsed2=%d\n',tElapsed1,tElapsed2);
-%}
+
+if isfield(dynModel, 'seq') & ~isempty(dynModel.seq)
+    [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGradsSeq(dynModel, gVarmeansLik, gVarcovsLik);
+else
+    [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik);
+end
+
 
 %-------------
+% The following function calculates the derivative for the bound term
+% corresponding to the prior, when the model learns from multiple
+% independent sequences.
+function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGradsSeq(dynModel, gVarmeansLik, gVarcovsLik)
+% gVarmeansLik and gVarcovsLik are serialized into 1x(NxQ) vectors.
+% Convert them to NxQ matrices, i.e. fold them column-wise.
+gVarmeansLik = reshape(gVarmeansLik,dynModel.N,dynModel.q);
+gVarcovsLik = reshape(gVarcovsLik,dynModel.N,dynModel.q);
+
+gVarmeans = dynModel.Kt * (gVarmeansLik - dynModel.vardist.means);
+
+gVarcovs = zeros(dynModel.N, dynModel.q); % memory preallocation
+seqStart=1;
+seq = dynModel.seq;
+for i=1:length(dynModel.seq) 
+   seqEnd = seq(i);
+   sumTrGradKL{i} = zeros(seqEnd-seqStart+1, seqEnd-seqStart+1);
+   seqStart = seqEnd+1;
+end
+
+
+for q=1:dynModel.q
+    LambdaH_q = dynModel.vardist.covars(:,q).^0.5;
+    
+    % The calculations are performed for each sequence independently
+    % because correlations between sequences are not captured and, thus,
+    % most of the matrices involved are block diagonal, so that in each of
+    % the following loops only one block is considered.
+    seqStart=1;
+    for i=1:length(dynModel.seq) 
+        seqEnd = seq(i);
+        Bt_q = eye(seqEnd-seqStart+1) + LambdaH_q(seqStart:seqEnd,1)*LambdaH_q(seqStart:seqEnd,1)'.*dynModel.Kt(seqStart:seqEnd,seqStart:seqEnd);
+        
+        % Invert Bt_q
+        Lbt_q = jitChol(Bt_q)';
+        G1 = Lbt_q \ diag(LambdaH_q(seqStart:seqEnd,1));
+        G = G1*dynModel.Kt(seqStart:seqEnd, seqStart:seqEnd);
+        
+        % Find Sq
+        Sq = dynModel.Kt(seqStart:seqEnd, seqStart:seqEnd) - G'*G;
+        
+        gVarcovs(seqStart:seqEnd,q) = - (Sq .* Sq) * (gVarcovsLik(seqStart:seqEnd,q) + 0.5*dynModel.vardist.covars(seqStart:seqEnd,q));
+        
+        % Find the coefficient for the grad. wrt theta_t (params of Kt)
+        G1T=G1';
+        Bhat=G1T*G1;
+        BhatKt=G1T*G;
+        
+        trGradKL = -0.5*(BhatKt*Bhat + dynModel.vardist.means(seqStart:seqEnd,q) * dynModel.vardist.means(seqStart:seqEnd,q)');
+        
+        IBK = eye(seqEnd-seqStart+1) - BhatKt;
+        diagVarcovs = repmat(gVarcovsLik(seqStart:seqEnd,q)', seqEnd-seqStart+1,1);
+        trGradKL = trGradKL + IBK .*  diagVarcovs * IBK';
+        trGradKL = trGradKL + dynModel.vardist.means(seqStart:seqEnd,q) * gVarmeansLik(seqStart:seqEnd,q)';
+        
+        %tmp = eye(dynModel.N);
+        %tmp(seqStart:seqEnd, seqStart:seqEnd) = trGradKL;
+%        sumTrGradKL = sumTrGradKL + trGradKL;
+        sumTrGradKL{i} = sumTrGradKL{i} + trGradKL;
+       % size(sumTrGradKL{i} )
+        %sumTrGradKL = sumTrGradKL + tmp;
+        
+        seqStart = seqEnd+1;
+    end
+    %sumTrGradKL = sumTrGradKL + trGradKL;
+end
+
+seqStart=1;
+gDynKern = size(dynModel.kern.nParams,1);
+for i=1:length(dynModel.seq) 
+   seqEnd = seq(i);
+   gDynKern = gDynKern + kernGradient(dynModel.kern, dynModel.t(seqStart:seqEnd), sumTrGradKL{i});
+   seqStart = seqEnd+1;
+end
+
+% Serialize (unfold column-wise) gVarmeans and gVarcovs from NxQ matrices
+% to 1x(NxQ) vectors
+gVarcovs = gVarcovs(:)';
+gVarmeans = gVarmeans(:)';
+
+
+
 function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik)
 
 % gVarmeansLik and gVarcovsLik are serialized into 1x(NxQ) vectors.
@@ -71,13 +177,10 @@ end
 gVarcovs = gVarcovs(:)';
 gVarmeans = gVarmeans(:)';
 
-%%%%% DEBUG_
-% gDynKern %%%%%%DEBUG (they seem ok...)
-%  fprintf(1,'In ReparamGrads, params=%d %d %d\n',gDynKern(1),gDynKern(2),gDynKern(3));
-%  fprintf(1,'In ReparamGrads,MaxgVarmeans=%d\n',max(max(gVarmeans))); %%%%%%
-%  fprintf(1,'In ReparamGrads,MaxgVarcovs=%d\n',max(max(gVarcovs))); %%%%%%
-%%%%%%_DEBUG
 
+
+%{
+%%% Alternative implementations
 function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads2(dynModel, gVarmeansLik, gVarcovsLik)
 
 %fprintf(1,'vargpTimeDynamicsVarReparamGrads1..\n');%%% DEBUG
@@ -174,8 +277,6 @@ end
 gVarcovs = gVarcovs(:)';
 gVarmeans = gVarmeans(:)';
 
-
-
 % From the old one with a small addition
 function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGradsOLD(dynModel, gVarmeansLik, gVarcovsLik)
 
@@ -245,7 +346,6 @@ gDynKern = gDynKern + kernGradient(dynModel.kern, dynModel.t, gMeanPart);
 gVarcovs = gVarcovs(:)';
 gVarmeans = gVarmeans(:)';
 
-
 %-------------
 function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1OLD(dynModel, gVarmeansLik, gVarcovsLik)
 
@@ -312,3 +412,4 @@ end
 % to 1x(NxQ) vectors
 gVarcovs = gVarcovs(:)';
 gVarmeans = gVarmeans(:)';
+%}

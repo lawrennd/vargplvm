@@ -12,11 +12,11 @@ function f = vargplvmObjective(params, model)
 % 
 % SEEALSO : vargplvmCreate, vargplvmLogLikelihood, vargplvmExpandParam
 %
-% COPYRIGHT : Michalis K. Titsias, 2009
-%
-% COPYRIGHT : Neil D. Lawrence, 2005, 2006
+% COPYRIGHT : Michalis K. Titsias, 2009-2011
+% COPYRIGHT : Neil D. Lawrence, 2009-2011
 
 % VARGPLVM
+
 
 model = vargplvmExpandParam(model, params);
 f = - vargplvmLogLikelihood(model);

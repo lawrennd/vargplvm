@@ -63,12 +63,12 @@ t = t(1:end-1, 1);
         optionsDyn.means = model.vardist.means;
         optionsDyn.covars = model.vardist.covars;
         %%%
-   model = vargplvmAddDynamics(model, 'vargpTime', optionsDyn, t, 0, 0);
+   %model = vargplvmAddDynamics(model, 'vargpTime', optionsDyn, t, 0, 0);
 %%% 
 % _NEW
 
 % Optimise the model.
- iters = 5;
+ iters = 100;
  display = 1;
 % 
 fprintf('# Optimising the model...\n');

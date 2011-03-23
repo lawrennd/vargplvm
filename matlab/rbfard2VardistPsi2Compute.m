@@ -38,15 +38,18 @@ for n=1:N
     
     normfactor =  1./prod(AS_n);
     
-    Z_n = (repmat(vardist.means(n,:),[M 1]) - Z)*0.5; 
-    Z_n = Z_n.*repmat(sqrt(A)./AS_n,[M 1]);
+    %Z_n = (repmat(vardist.means(n,:),[M 1]) - Z)*0.5; 
+    Z_n = bsxfun(@minus, vardist.means(n,:), Z)*0.5;
+    %Z_n = Z_n.*repmat(sqrt(A)./AS_n,[M 1]);
+    Z_n = bsxfun(@times, Z_n, sqrt(A)./AS_n);
     distZ = dist2(Z_n,-Z_n); 
     
     sumKern = sumKern + normfactor*exp(-distZ);  
     %
 end
     
-ZZ = Z.*(repmat(sqrt(A),[M 1]));
+% ZZ = Z.*(repmat(sqrt(A),[M 1]));
+ZZ =  bsxfun(@times, Z, sqrt(A));
 distZZ = dist2(ZZ,ZZ);
 outKern = exp(-0.25*distZZ);
 

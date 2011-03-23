@@ -18,6 +18,18 @@ function f = vargplvmPointObjective(x, model, y)
 
 % VARGPLVM
 
-vardistx = model.vardistx;
-vardistx = vardistExpandParam(vardistx, x);
+if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+   % this is doing the expand 
+   x = reshape(x, model.N+size(y,1), model.dynamics.q*2);
+   xtrain = x(1:model.N,:);
+   xtest = x(model.N+1:end,:);
+   model.dynamics.vardist = vardistExpandParam(model.dynamics.vardist, xtrain);
+   vardistx = vardistExpandParam(model.vardistx, xtest);
+   % end of expand 
+else 
+   vardistx = model.vardistx;
+   vardistx = vardistExpandParam(vardistx, x);
+end
+
 f = - vargplvmPointLogLikelihood(model, vardistx, y);
+%f = -TEMPvargplvmPointLogLikelihoodSTATIC(model, vardistx, y);

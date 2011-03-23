@@ -1,7 +1,7 @@
 function model = vargplvmParamInit(model,Y,X)
 
 % VARGPLVMPARAMINIT Initialize the variational GPLVM from the data
-
+% COPYRIGHT: Michalis Titsias 2009-2011
 % VARGPLVM
   
   
@@ -21,7 +21,7 @@ if ~strcmp(model.kern.type,'cmpnd')
    if strcmp(model.kern.type,'rbfard2') 
       % 
        model.kern.inputScales = 5./(((max(X)-min(X))).^2);
-      model.kern.variance = max(var(Y));
+       model.kern.variance = max(var(Y));
       %
    elseif strcmp(model.kern.type,'linard2')
       %

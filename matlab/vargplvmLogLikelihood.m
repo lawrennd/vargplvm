@@ -8,11 +8,9 @@ function ll = vargplvmLogLikelihood(model)
 % being computed in the 'y' component of the structure.
 % RETURN ll : the log likelihood of the data given the model.
 %
-% COPYRIGHT : Michalis K. Titsias, 2009, 2010
-%
-% COPYRIGHT : Neil D. Lawrence, 2009, 2010
-%
-% COPYRIGHT : Andreas Damianou, 2010
+% COPYRIGHT : Michalis K. Titsias, 2009-2011
+% COPYRIGHT : Neil D. Lawrence, 2009-2011
+% COPYRIGHT : Andreas Damianou, 2010-2011
 
   
 % VARGPLVM
@@ -32,7 +30,7 @@ end
 
 ll = ll-model.d*model.N/2*log(2*pi);
 
-% NEW_
+
 % KL divergence term 
  if isfield(model, 'dynamics') && ~isempty(model.dynamics)
    % A dynamics model is being used. 
@@ -42,7 +40,6 @@ ll = ll-model.d*model.N/2*log(2*pi);
     varcovs = sum(sum(model.vardist.covars - log(model.vardist.covars)));
     KLdiv = -0.5*(varmeans + varcovs) + 0.5*model.q*model.N; 
  end
-% _NEW
 
 % Obtain the final value of the bound by adding the likelihood
 % and the KL term.

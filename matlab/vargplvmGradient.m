@@ -15,11 +15,12 @@ function g = vargplvmGradient(params, model)
 % 
 % SEEALSO : vargplvmLogLikeGradients, vargplvmExpandParam
 %
-% COPYRIGHT : Michalis K. Titsias, 2009
+% COPYRIGHT : Michalis K. Titsias, 2009 - 2011
 %
-% COPYRIGHT : Neil D. Lawrence, 2006, 2005
+% COPYRIGHT : Neil D. Lawrence, 2006, 2005, 2010-2011
 
 % VARGPLVM
 
 model = vargplvmExpandParam(model, params);
 g = - vargplvmLogLikeGradients(model);
+

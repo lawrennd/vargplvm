@@ -28,6 +28,7 @@ model = vargplvmCreate(latentDim, d, Y, options);
 %
 model = vargplvmParamInit(model, model.m, model.X); 
 model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(model.vardist.covars));
+model.learnBeta=1;
 
 % Optimise the model.
 iters = 2000;

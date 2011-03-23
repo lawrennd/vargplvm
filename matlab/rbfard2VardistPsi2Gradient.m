@@ -23,6 +23,8 @@ gKernvar = 2*sum(sum(Kgvar.*covGrad));
 % 1) line compute 0.5*(z_mq + z_m'q) for any q and store the result in a "M x Q x M" 
 %  matrix where M is the number of inducing points and Q the latent dimension
 % 2) line compute the z_mq - z_m'q, for any q
+ZmZm  = zeros(M,Q,M);
+ZmDZm = zeros(M,Q,M);
 for q=1:size(Z,2)
   ZmZm(:,q,:) = 0.5*(repmat(Z(:,q),[1 1 M]) + repmat(reshape(Z(:,q),[1 1 M]),[M 1 1]));
   ZmDZm(:,q,:) = repmat(Z(:,q),[1 1 M]) - repmat(reshape(Z(:,q),[1 1 M]),[M 1 1]);
@@ -54,8 +56,10 @@ for n=1:N
     s2_n = vardist.covars(n,:); 
     AS_n = asPlus1(n,:);  
      
-    MunZmZm = repmat(mu_n, [M 1 M]) - ZmZm;
-    MunZmZmA = MunZmZm./repmat(AS_n,[M 1 M]);
+    %MunZmZm = repmat(mu_n, [M 1 M]) - ZmZm;
+    MunZmZm = bsxfun(@minus,mu_n,ZmZm);
+    %MunZmZmA = MunZmZm./repmat(AS_n,[M 1 M]);
+    MunZmZmA =  bsxfun(@rdivide, MunZmZm, AS_n);
     
     k2Kern_n = sum((MunZmZm.^2).*repmat(aDasPlus1(n,:),[M 1 M]),2);
     k2Kern_n = exp(-k2Kern_n)/prod(sqrt(AS_n));
@@ -75,11 +79,15 @@ for n=1:N
     
     % Derivative wrt input scales  
     MunZmZmA = MunZmZmA.*MunZmZm; 
-    partA2 = partA2 + sum(sum(((MunZmZmA + repmat(s2_n,[M 1 M])).*k2ncovG)./repmat(AS_n,[M 1 M]),1),3);
+    %partA2 = partA2 + sum(sum(((MunZmZmA + repmat(s2_n,[M 1 M])).*k2ncovG)./repmat(AS_n,[M 1 M]),1),3);
+    tmppartA2 = bsxfun(@plus, MunZmZmA,s2_n).*k2ncovG;
+    partA2 = partA2 + sum(sum( bsxfun(@rdivide, tmppartA2, AS_n), 1),3);
     
     % derivatives wrt variational diagonal covariances 
-    MunZmZmA = MunZmZmA.*repmat(A,[M 1 M]);
-    gVarcovars(n,:) = sum(sum(repmat(aDasPlus1(n,:),[M 1 M]).*(2*MunZmZmA - 1).*k2ncovG,1),3);
+    %MunZmZmA = MunZmZmA.*repmat(A,[M 1 M]);
+    MunZmZmA = bsxfun(@times, MunZmZmA, A);
+    %gVarcovars(n,:) = sum(sum(repmat(aDasPlus1(n,:),[M 1 M]).*(2*MunZmZmA - 1).*k2ncovG,1),3);
+    gVarcovars(n,:) = sum(sum( bsxfun(@times, (2*MunZmZmA - 1).*k2ncovG, aDasPlus1(n,:)),1),3);
     
     %ZmZm1 = k2kernCompute(A, mu_n, cov_n, Z); 
     %

@@ -1,25 +1,25 @@
 function model = vargplvmAddDynamics(model, type, varargin)
 
-% VARGPLVMADDDYNAMICS Add a dynamics kernel to the model.
+% VARGPLVMADDDYNAMICS Add a dynamics structure to the model.
 %
 %	Description:
 %
-%	VARGPLVMADDDYNAMICS(MODEL, TYPE, ...) adds a dynamics model to the
+%	VARGPLVMADDDYNAMICS(MODEL, TYPE, ...) adds a dynamics structure to the
 %	VARGPLVM.
 %	 Arguments:
 %	  MODEL - the model to add dynamics to.
 %	  TYPE - the type of dynamics model to add in.
 %	  ... - additional arguments to be passed on creation of the
 %	   dynamics model.
-%	
-%	
+%
+% COPYRIGHT : Andreas C. Damianou, 2010-2011
+% COPYRIGHT : Michalis K. Titsias, 2010-2011
+% COPYRIGHT : Neil D. Lawrence, 2010-2011
 %	
 %
 %	See also
 %	MODELCREATE
 
-
-%	Based on FGPLVMADDDYNAMICS
 
 type = [type 'Dynamics'];
 model.dynamics = modelCreate(type, model.q, model.q, model.X, varargin{:}); % e.g. vargpTimeDynamicsCreate

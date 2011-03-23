@@ -1,5 +1,5 @@
-%%%% !!!!! This will go straight to vargpTimeDynamicsUpdateStats. This function will no longer be
-%%%% used.
+%%%% !!!!! This has gone straight to vargpTimeDynamicsUpdateStats. This function will no longer be
+%%%% used and will be depricated.
 
 function [muqOrig SqOrig] = vargpTimeDynamicsPriorKernGrad(dynModel)
 % VARGPTIMEDYNAMICSPRIORKERNGRAD Compute the original variational
@@ -39,7 +39,7 @@ end
 %%%%%%%%%%%%% 2n Version %%%%%%%%%%%%%%%%%
 
 function [muqOrig SqOrig] = vargpTimeDynamicsPriorKernGrad2(dynModel)
-fprintf(1,'vargpTimeDynamicsVarPriorKernGrad2..\n');%%% DEBUG
+%fprintf(1,'vargpTimeDynamicsVarPriorKernGrad2..\n');%%% DEBUG
 
 muqOrig = dynModel.Kt * dynModel.vardist.means;
 

@@ -31,7 +31,7 @@ model = vargplvmParamInit(model, model.m, model.X);
 %model.vardist.covars = 10*ones(model.N,model.q) + 0.001*randn(model.N,model.q);
 
 % Optimise the model.
-iters = 1500;
+iters = 15; % Default: 1500
 display = 1;
 
 model = vargplvmOptimise(model, display, iters);
@@ -51,11 +51,7 @@ end
 lvmResultsDynamic(model.type, dataSetName, experimentNo, 'plot3', model.y)
 
 
-  mm = vargplvmReduceModel(model,2);
-lvmScatterPlotColor(mm, model.y(:, 2));
+lvmScatterPlotColor(mm, model.y(:, 2)); %%% ?
 
-%% plot the two largest twe latent dimensions 
-if exist('printDiagram') & printDiagram
-  lvmPrintPlot(mm, lbls, capName, experimentNo);
-end
+
 

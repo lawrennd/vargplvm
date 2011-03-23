@@ -16,10 +16,14 @@ function model = vargpTimeDynamicsExpandParam(model, params)
 %	   updated.
 %	  PARAMS - a vector of parameters for placing in the model
 %	   structure.
-%	
+%
+%   COPYRIGHT : Andreas C. Damianou, 2010-2011
+%   COPYRIGHT : Michalis K. Titsias, 2010-2011
+%   COPYRIGHT : Neil D. Lawrence, 2010-2011
 %
 %	See also
-%	GPEXPANDPARAM, GPTIMEDYNAMICSCREATE, GPTIMEDYNAMICSEXTRACTPARAM, MODELEXTRACTPARAM, GPUPDATEKERNELS
+%   vargpTimeDynamicsExtractParam, vargpTimeDynamicsCreate,
+%   modelExpandParam
 
 
 % Parameters are received in the following order: (notation: % parameter{size})

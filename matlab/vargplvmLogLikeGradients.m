@@ -20,13 +20,13 @@ function g = vargplvmLogLikeGradients(model)
 % constraint's parameters).
 % RETURN gParam : gradients of the parameters of the GP-LVM model.
 %
-% COPYRIGHT : Michalis K. Titsias, 2009, 2010
+% COPYRIGHT : Michalis K. Titsias, 2009, 2010,2011
 %
-% COPYRIGHT :  Mauricio Alvarez, 2009, 2010
+% COPYRIGHT :  Mauricio Alvarez, 2009, 2010,2011
 %
-% COPYRIGHT :  Neil D. Lawrence, 2009, 2010
+% COPYRIGHT :  Neil D. Lawrence, 2009, 2010,2011
 %
-% COPYRIGHT : Andreas Damianou, 2010
+% COPYRIGHT : Andreas Damianou, 2010,2011
 
 % SEEALSO : vargplvmLogLikelihood, vargplvmCreate, modelLogLikeGradients
 
@@ -35,28 +35,8 @@ function g = vargplvmLogLikeGradients(model)
 
 % KL divergence terms  
 
-%%%%% WITH THIS VERSION Sq's are (must be) computed twice!!
-%%%%% See also vargpTimeDynamicsVarPriorGradients which is not used because
-%%%%% it is not compatible with the old implementation
-
 % The gradient of the kernel of the dynamics (e.g. temporal prior)
 gDynKern = [];
-
-% % Check if Dynamics kernel is being used.
-% if isfield(model, 'dynamics') && ~isempty(model.dynamics)
-%     % The model only holds the free variational parameters (reparametrization).
-%     % Get the original ones by performing the appropriate mapping.
-%     [muqOrig SqOrig] = modelPriorKernGrad(model.dynamics);
-%     % In case the model doesn't have dynamics, model.vardist holds the
-%     % variational distribution with its parameters. If it does contain
-%     % dynamics, it contains the variational distribution but the true means
-%     % and covariances are not stored; instead, the free ones are used
-%     % and they are stored in the model.dynamics.vardist field. With the
-%     % following command the true parameters are calculated and stored
-%     % temporarily into the model.
-%     model.vardist.means = muqOrig;
-%     model.vardist.covars = SqOrig;
-% else
 
 if ~isfield(model, 'dynamics') || isempty(model.dynamics)
     gVarmeansKL = - model.vardist.means(:)';
@@ -159,13 +139,27 @@ end
 gInd = gInd1 + gInd2 + gX_u(:)';
   
 
-%g = [gVar         gInd gKern gBeta];
-g = [gVar gDynKern gInd gKern gBeta];
+% It may better to start optimize beta a bit later so that 
+% so that the rest parameters can be initialized
+% (this could help to escape from the trivial local 
+% minima where the noise beta explains all the data) 
+% The learnBeta option deals with the above. 
 
+% This constrains the variance of the dynamics kernel to one
+% (This piece of code needs to be done in better way with unit variance dynamic 
+%  kernels. The code below also will only work for rbf dynamic kernel)
+if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+    gDynKern(2) = 0;
+end
+    
+if model.learnBeta == 1
+    % optimize all parameters including beta
+    g = [gVar gDynKern gInd gKern gBeta];
+else 
+    % keep beta fixed  
+    g = [gVar gDynKern gInd gKern 0*gBeta];
+end
 
-%%%%%% DEBUG_
-%fprintf(1,'In logLikeGradients kernParams are %s\n', num2str(gKern));
-%%%%%% _DEBUG
 
 % delete afterwards
 %g = [gVarmeans2 gVarcovs2 (gX_u(:)'+ gInd2) (gKern3+gKern2) 0*gBeta];

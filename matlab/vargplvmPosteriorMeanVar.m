@@ -39,15 +39,15 @@ vardistX.means = X;
 %model = vargplvmUpdateStats(model, model.X_u);
 
 
-Ainv = model.P1' * model.P1;
+Ainv = model.P1' * model.P1; % size: NxN
 
 if ~isfield(model,'alpha')
-   model.alpha = Ainv*model.Psi1'*model.m;
+    model.alpha = Ainv*model.Psi1'*model.m; % size: 1xD
 end
 Psi1_star = kernVardistPsi1Compute(model.kern, vardistX, model.X_u);
 
 % mean prediction 
-mu = Psi1_star*model.alpha;
+mu = Psi1_star*model.alpha; % size: 1xD
 
 if nargout > 1
    % 

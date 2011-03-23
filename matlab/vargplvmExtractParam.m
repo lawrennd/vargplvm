@@ -12,7 +12,9 @@ function [params, names] = vargplvmExtractParam(model)
 % RETURN params : a vector of parameters from the model.
 % RETURN names : cell array of parameter names.
 %
-% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009
+% COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009-2011
+%
+% Modifications: Andreas C. Damianou, 2010-2011 
 %
 % SEEALSO : vargplvmCreate, vargplvmExpandParam, modelExtractParam
 

@@ -9,7 +9,7 @@ function model = vargpTimeDynamicsCreate(q, d, latentVals, options, varargin)
 %	latent space of a GP-LVM. The input to the dynamics model is time,
 %	rather than the previous observation as is the case for GPDYNAMICS.
 %	 Returns:
-%	  MODEL - model structure containing the Gaussian process.
+%	  MODEL - model structure containing the Gaussian process for the Dynamics.
 %	 Arguments:
 %	  Q - the latent space dimension.
 %	  Q - the latent space dimension.
@@ -18,31 +18,29 @@ function model = vargpTimeDynamicsCreate(q, d, latentVals, options, varargin)
 %	  T - the input time values.
 %	  DIFF - Whether or not to use differences between points in the
 %	   latent space as the targets for the GP or absolute location of
-%	   points (default 1).
+%	   points (default 1). --not implemented yet
 %	  LEARN - Whether or not to learn the parameters of the dynamics
-%	   model (default 0).
+%	   model (default 0). -- not implemented yet
 %	  SEQ - array containing the indices of the last frame of each
 %	   sequence in the data. The array should be the same length as the
-%	   number of sequences in the data (default N, where N is total
-%	   number of frames in the model). the latent space as the inputs to
-%	   the GP or absolute location of points.
-%	
-%	
-%	
+%	   number of sequences in the data (default []).
+%
+%   COPYRIGHT : Andreas C. Damianou, 2010-2011
+%   COPYRIGHT : Michalis K. Titsias, 2010-2011
+%   COPYRIGHT : Neil D. Lawrence, 2010-2011
 %
 %	See also
-%	GPCREATE, GPDYNAMICSCREATE, GPTIMEDYNAMICSLATENTGRADIENTS, GPTIMEDYNAMICSSETLATENTVALUES, GPTIMEDYNAMICSLOGLIKELIHOOD
+%	vargplvmCreate, vargplvmDynamicsCreate, vargpTimeDynamicsLogLikelihood
 
 
 %	Based on GPTIMEDYNAMICSCREATE
-
 
 
 % Varargin may contain t, diff, learn, seq).
 if nargin>4
   t = varargin{1};
 else
-  t = [1:size(latentVals, 1)]'; % won't work (?)
+  t = [1:size(latentVals, 1)]'; % The upper levels ensure that t will always be set
 end
 if nargin>5 % Not implemented yet
   diff = varargin{2};
@@ -57,7 +55,8 @@ end
 if nargin > 7 % Not implemented yet
   seq = varargin{4};
 else
-  seq = size(latentVals, 1);
+  %seq = size(latentVals, 1);
+  seq=[];
 end
   
 if(iscell(options))
@@ -119,10 +118,11 @@ end
 
 model.vardist = vardistCreate(latentVals, q, 'gaussian');
 
+% Must find a formula which, given Kt, relates initial lambdas to initial Sqs
+% so that Sqs are around 0.5
+model.vardist.covars = 0.25 * ones(size(model.vardist.covars)); % 0.25 is a good value for the stick data
 
-model.vardist.covars = ones(size(model.vardist.covars));
-
-model.vardist.means = latentVals;
+model.vardist.means = latentVals; % vardistCreate does that
 
 model.type = 'vargpTimeDynamics';
 model.dynamicsType = 'regressive';
@@ -132,8 +132,15 @@ initParams = vargpTimeDynamicsExtractParam(model);
 model = vargpTimeDynamicsExpandParam(model, initParams);
 
 
-% % Not implemented yet
-% model.seq = seq;
+ model.seq = seq;
+ if max(seq) > model.N
+    error('The maximum seq. index cannot exceed N.')
+ end
+ if sum(seq>0) ~= length(seq)
+     error('Sequence indices must be positive.')
+ end
+ 
+ % % Not implemented yet
 % model.diff = diff;
 % model.learn = learn;
 
