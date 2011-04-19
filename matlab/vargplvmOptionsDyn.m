@@ -42,7 +42,8 @@ if strcmp(optionsDyn.type, 'vargpTime')
     % small value so the GP dynamic prior is weaker (less smoothed) at
     % initializations
     if  ~isfield(optionsDyn, 'kern') || isempty(optionsDyn.kern)
-        kern = kernCreate(t, {'rbf','white'});
+       % kern = kernCreate(t, {'rbf','white'});
+        kern = kernCreate(t, {'rbf','white', 'bias'});
         kern.comp{2}.variance = 1e-3; % 1e-1
         
         if  isfield(optionsDyn, 'inverseWidth')
@@ -59,9 +60,7 @@ if strcmp(optionsDyn.type, 'vargpTime')
     end
     
     
-    if exist('seq')
-        optionsDyn.seq=seq;
-    else
+    if ~isfield(optionsDyn,'seq')
         optionsDyn.seq=[];
     end
 end

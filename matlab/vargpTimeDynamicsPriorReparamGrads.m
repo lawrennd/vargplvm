@@ -1,4 +1,4 @@
-function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads(dynModel, gVarmeansLik, gVarcovsLik)
+function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads(dynModel, gVarmeansLik, gVarcovsLik, gInd)
 % MODELVARPRIORBOUND Returns the gradients of the various types of the
 % variational GPLVM bound when dynamics is used. The gradients returned are
 % those for the variational means and covariances and the temporal kernel.
@@ -26,12 +26,15 @@ function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads(dynM
 % to be computed.
 % ARG gVarmeansLik, gVarcovsLik: the gradients for the VAR-GPLVM model computed
 % for the original parameters and only for the likelihood term.
+% ARG gInd: in case the inducing points are tied to the variational means
+% this is the partial derivatives of the likelihood part of the variational
+% bound w.r.t the inducing points X_u, otherwise it is just [].
 % RETURN gVarmeans, gVarcovs : the gradients for the "reparametrized" means
 % and covariances (the ones that are visible to the optimiser, not the
 % original ones) for the VAR-GPLVM model.
 % RETURN gDynKern: the gradient w.r.t the hyperparameters of the dynamics
 % kernel
-% 
+%
 % SEEALSO : vargplvmLogLikeGradients modelVarPriorBound
 %
 % COPYRIGHT : Michalis K. Titsias and Andreas C. Damianou, 2010-2011
@@ -41,9 +44,9 @@ function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads(dynM
 
 
 if isfield(dynModel, 'seq') & ~isempty(dynModel.seq)
-    [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGradsSeq(dynModel, gVarmeansLik, gVarcovsLik);
+    [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGradsSeq(dynModel, gVarmeansLik, gVarcovsLik, gInd);
 else
-    [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik);
+    [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik, gInd);
 end
 
 
@@ -51,21 +54,27 @@ end
 % The following function calculates the derivative for the bound term
 % corresponding to the prior, when the model learns from multiple
 % independent sequences.
-function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGradsSeq(dynModel, gVarmeansLik, gVarcovsLik)
+function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGradsSeq(dynModel, gVarmeansLik, gVarcovsLik, gInd)
 % gVarmeansLik and gVarcovsLik are serialized into 1x(NxQ) vectors.
 % Convert them to NxQ matrices, i.e. fold them column-wise.
 gVarmeansLik = reshape(gVarmeansLik,dynModel.N,dynModel.q);
 gVarcovsLik = reshape(gVarcovsLik,dynModel.N,dynModel.q);
+
+% In case gInd is empty then the inducing points are not reparametrized
+% (are not fixed to the variational means).
+if ~isempty(gInd)
+    gInd = reshape(gInd, dynModel.N, dynModel.q); %%%%%
+end
 
 gVarmeans = dynModel.Kt * (gVarmeansLik - dynModel.vardist.means);
 
 gVarcovs = zeros(dynModel.N, dynModel.q); % memory preallocation
 seqStart=1;
 seq = dynModel.seq;
-for i=1:length(dynModel.seq) 
-   seqEnd = seq(i);
-   sumTrGradKL{i} = zeros(seqEnd-seqStart+1, seqEnd-seqStart+1);
-   seqStart = seqEnd+1;
+for i=1:length(dynModel.seq)
+    seqEnd = seq(i);
+    sumTrGradKL{i} = zeros(seqEnd-seqStart+1, seqEnd-seqStart+1);
+    seqStart = seqEnd+1;
 end
 
 
@@ -77,7 +86,7 @@ for q=1:dynModel.q
     % most of the matrices involved are block diagonal, so that in each of
     % the following loops only one block is considered.
     seqStart=1;
-    for i=1:length(dynModel.seq) 
+    for i=1:length(dynModel.seq)
         seqEnd = seq(i);
         Bt_q = eye(seqEnd-seqStart+1) + LambdaH_q(seqStart:seqEnd,1)*LambdaH_q(seqStart:seqEnd,1)'.*dynModel.Kt(seqStart:seqEnd,seqStart:seqEnd);
         
@@ -103,11 +112,19 @@ for q=1:dynModel.q
         trGradKL = trGradKL + IBK .*  diagVarcovs * IBK';
         trGradKL = trGradKL + dynModel.vardist.means(seqStart:seqEnd,q) * gVarmeansLik(seqStart:seqEnd,q)';
         
+        % In case gInd is empty then the inducing points are not reparametrized
+        % (are not fixed to the variational means) we need not amend further the
+        % derivative w.r.t theta_t.
+        if ~isempty(gInd)
+            trGradKL = trGradKL + dynModel.vardist.means(seqStart:seqEnd,q) * gInd(seqStart:seqEnd,q)';
+        end
+              
+                
         %tmp = eye(dynModel.N);
         %tmp(seqStart:seqEnd, seqStart:seqEnd) = trGradKL;
-%        sumTrGradKL = sumTrGradKL + trGradKL;
+        %        sumTrGradKL = sumTrGradKL + trGradKL;
         sumTrGradKL{i} = sumTrGradKL{i} + trGradKL;
-       % size(sumTrGradKL{i} )
+        % size(sumTrGradKL{i} )
         %sumTrGradKL = sumTrGradKL + tmp;
         
         seqStart = seqEnd+1;
@@ -117,10 +134,10 @@ end
 
 seqStart=1;
 gDynKern = size(dynModel.kern.nParams,1);
-for i=1:length(dynModel.seq) 
-   seqEnd = seq(i);
-   gDynKern = gDynKern + kernGradient(dynModel.kern, dynModel.t(seqStart:seqEnd), sumTrGradKL{i});
-   seqStart = seqEnd+1;
+for i=1:length(dynModel.seq)
+    seqEnd = seq(i);
+    gDynKern = gDynKern + kernGradient(dynModel.kern, dynModel.t(seqStart:seqEnd), sumTrGradKL{i});
+    seqStart = seqEnd+1;
 end
 
 % Serialize (unfold column-wise) gVarmeans and gVarcovs from NxQ matrices
@@ -130,12 +147,17 @@ gVarmeans = gVarmeans(:)';
 
 
 
-function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik)
+function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads1(dynModel, gVarmeansLik, gVarcovsLik, gInd)
 
 % gVarmeansLik and gVarcovsLik are serialized into 1x(NxQ) vectors.
 % Convert them to NxQ matrices, i.e. fold them column-wise.
 gVarmeansLik = reshape(gVarmeansLik,dynModel.N,dynModel.q);
 gVarcovsLik = reshape(gVarcovsLik,dynModel.N,dynModel.q);
+
+if ~isempty(gInd)
+    gInd = reshape(gInd, dynModel.N, dynModel.q); %%%%%
+end
+
 
 gVarmeans = dynModel.Kt * (gVarmeansLik - dynModel.vardist.means);
 
@@ -150,12 +172,12 @@ for q=1:dynModel.q
     Lbt_q = jitChol(Bt_q)';
     G1 = Lbt_q \ diag(LambdaH_q);
     G = G1*dynModel.Kt;
-   
+    
     % Find Sq
     Sq = dynModel.Kt - G'*G;
     
     gVarcovs(:,q) = - (Sq .* Sq) * (gVarcovsLik(:,q) + 0.5*dynModel.vardist.covars(:,q));
-
+    
     % Find the coefficient for the grad. wrt theta_t (params of Kt)
     G1T=G1';
     Bhat=G1T*G1;
@@ -164,13 +186,21 @@ for q=1:dynModel.q
     trGradKL = -0.5*(BhatKt*Bhat + dynModel.vardist.means(:,q) * dynModel.vardist.means(:,q)');
     
     IBK = eye(dynModel.N) - BhatKt;
-    diagVarcovs = repmat(gVarcovsLik(:,q)', dynModel.N,1);   
-    trGradKL = trGradKL + IBK .*  diagVarcovs * IBK';   
+    diagVarcovs = repmat(gVarcovsLik(:,q)', dynModel.N,1);
+    trGradKL = trGradKL + IBK .*  diagVarcovs * IBK';
     trGradKL = trGradKL + dynModel.vardist.means(:,q) * gVarmeansLik(:,q)';
+    
+    % In case gInd is empty then the inducing points are not reparametrized
+    % (are not fixed to the variational means) we need not amend further the
+    % derivative w.r.t theta_t, otherwise we have to do that.
+    if ~isempty(gInd)
+        trGradKL = trGradKL + dynModel.vardist.means(:,q) * gInd(:,q)';
+    end
+    
     
     sumTrGradKL = sumTrGradKL + trGradKL;
 end
- gDynKern = kernGradient(dynModel.kern, dynModel.t, sumTrGradKL);
+gDynKern = kernGradient(dynModel.kern, dynModel.t, sumTrGradKL);
 
 % Serialize (unfold column-wise) gVarmeans and gVarcovs from NxQ matrices
 % to 1x(NxQ) vectors
@@ -249,17 +279,17 @@ end
     
 %     G1T=G1';
 %     A1=G1T*G1;
-%     A2=G1T*G;  
-%     
+%     A2=G1T*G;
+%
 %     %-- Calculate the trace term-by-term
 %     trGradKL = -0.5*(A2*A1 + dynModel.vardist.means(:,q) * dynModel.vardist.means(:,q)');
 %     IBK = eye(dynModel.N) - A2;
 %     diagVarcovs = repmat(gVarcovsLik(:,q)', dynModel.N,1);
-%     trGradKL = trGradKL + IBK' .*  diagVarcovs * IBK; 
+%     trGradKL = trGradKL + IBK' .*  diagVarcovs * IBK;
 %    %     trGradKL = trGradKL + IBK' * diag(gVarcovsLik(:,q)) * IBK;
 %     gKern = kernGradient(dynModel.kern, dynModel.t, trGradKL);
 %     gDynKern = gDynKern + gKern;
-%     
+%
 %     %-- Calculate the means term
 %     % The following might be the other way around (because
 %     % kernGradient traces the result -it should be correct even in that case thought-)
@@ -321,11 +351,11 @@ for q=1:dynModel.q
     
     %-- Calculate the trace term-by-term
     trGradKL = -0.5*(BhatKt * Bhat_q + dynModel.vardist.means(:,q) * dynModel.vardist.means(:,q)');
-    IBK = eye(dynModel.N) - BhatKt;  
+    IBK = eye(dynModel.N) - BhatKt;
     
     %%% NEW
     diagVarcovs = repmat(gVarcovsLik(:,q)', dynModel.N,1);
-    trGradKL = trGradKL + IBK' .*  diagVarcovs * IBK; 
+    trGradKL = trGradKL + IBK' .*  diagVarcovs * IBK;
     %%%
     
     %trGradKL = trGradKL + IBK' * diag(gVarcovsLik(:,q)) * IBK;
@@ -375,16 +405,16 @@ for q=1:dynModel.q
 
     G1T=G1';
     Bhat=G1T*G1;
-    BhatKt=G1T*G;  
+    BhatKt=G1T*G;
     trGradKL = -0.5*(BhatKt*Bhat + dynModel.vardist.means(:,q) * dynModel.vardist.means(:,q)');
     IBK = eye(dynModel.N) - BhatKt;
    % trGradKL = trGradKL + IBK * diag(gVarcovsLik(:,q)) * IBK'; % Correct
     diagVarcovs = repmat(gVarcovsLik(:,q)', dynModel.N,1);
-    trGradKL = trGradKL + IBK .*  diagVarcovs * IBK'; 
+    trGradKL = trGradKL + IBK .*  diagVarcovs * IBK';
 %    Bhat = diag(LambdaH_q) * inv(Bt_q) * diag(LambdaH_q);
 %    BhatKt = Bhat * dynModel.Kt;
 %    trGradKL = -0.5*(BhatKt*Bhat + dynModel.vardist.means(:,q) * dynModel.vardist.means(:,q)');
-%    
+%
     %%%%%%% 1st way %%%
     %IBK = eye(dynModel.N) - BhatKt;
     %trGradKL = trGradKL + IBK' * diag(gVarcovsLik(:,q)) * IBK;
@@ -397,7 +427,7 @@ for q=1:dynModel.q
 %     invKtSq = invKt*Sq;
 %     trGradKL = trGradKL + invKtSq * diag(gVarcovsLik(:,q)) * invKtSq'; % Correct
 %     %trGradKL = trGradKL + (Sq * invKt) * diag(gVarcovsLik(:,q)) * (invKt*Sq);
-% 
+%
 %     %------------------
    
      trGradKL = trGradKL + dynModel.vardist.means(:,q) * gVarmeansLik(:,q)';

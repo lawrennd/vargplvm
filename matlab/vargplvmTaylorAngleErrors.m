@@ -82,7 +82,8 @@ vardistx = vardistCreate(model.dynamics.vardist.means(mini,:), model.q, 'gaussia
 vardistx.covars = 0.2*ones(size(vardistx.covars));
 model.vardistx = vardistx;
 
-iters=2000;% default: 1000
+%iters=2000;% default: 1000
+iters = model.reconstrIters;
 fprintf(1,'# Optimising for %d iterations...\n',iters)
 
 indexMissingData = startInd:size(YtestGplvm);

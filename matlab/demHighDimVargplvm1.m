@@ -7,38 +7,73 @@ rand('seed', 1e5);
 
 % Define constants (in a manner that allows other scripts to parametrize
 % this one).
-if ~exist('experimentNo')  experimentNo = 1;  end
-if ~exist('itNo')          itNo =2000;          end     % Default: 2000
-if ~exist('indPoints')     indPoints = 65;      end     % Default: 50
-if ~exist('latentDim')     latentDim = 30;      end
+if ~exist('experimentNo')   experimentNo = 404;  end
+if ~exist('itNo')           itNo =2000;          end     % Default: 2000
+if ~exist('indPoints')      indPoints = 75;      end     % Default: 50
+if ~exist('latentDim')      latentDim = 30;      end
 % Set to 1 to use dynamics or to 0 to use the standard var-GPLVM
-if ~exist('dynUsed')       dynUsed = 1;         end    
-% Set to 1 to keep only the dimensions modelling the head.
-if ~exist('cropVideo')     cropVideo = 0;         end    
+if ~exist('dynUsed')        dynUsed = 1;         end    
+% Set to 1 to keep only the dimensions modelling the head (missa dataset)
+if ~exist('cropVideo')      cropVideo = 0;       end    
+% Set to 1 to remove the frames with the translation (missa dataset)
+if ~exist('removeTransl')   removeTransl = 0;    end    
+if ~exist('fixedBetaIters') fixedBetaIters = 0; end     % DEFAULT: 23
+% Set to 1 to tie the inducing points with the latent vars. X
+if ~exist('fixInd') fixInd = 0; end    
+
 
 % load data
 dataSetName = 'missa'; % 360x288
 %load miss-americaHD
 Y = lvmLoadData(dataSetName);
+% For this dataset there is a translation in space between frames 66-103
+
+
+
+%%%%%%%%%%% TEMP
+%delete TEMPInducingMeansDist.mat
+%delete TEMPInducingMeansDistNorm.mat
+%delete TEMPInducingIndices.mat
+%delete TEMPLikelihoodTrace.mat
+%%%%%%%%%%%%%%%%%%%
+
+
 
 % dataSetName = 'susie';
 % load susie_352_240
 
-
+fprintf(1,'\n#----------------------------------------------------\n');
 fprintf(1,'# Dataset: %s\n',dataSetName);
 fprintf(1,'# ExperimentNo: %d\n', experimentNo);
 fprintf(1,'# Inducing points: %d\n',indPoints);
 fprintf(1,'# Latent dimensions: %d\n',latentDim);
-fprintf(1,'# Iterations: %d\n',itNo);
+fprintf(1,'# Iterations (with/without fixed Beta): %d / %s\n',fixedBetaIters, num2str(itNo));
+fprintf(1,'# Tie Inducing points: %d\n',fixInd);
 fprintf(1,'# Dynamics used: %d\n', dynUsed);
-fprintf(1,'# CropVideo: %d\n', cropVideo);
-fprintf(1,'#------------------------\n');
+%fprintf(1,'# CropVideo / removeTranslation: %d / %d \n', cropVideo, removeTransl);
+%fprintf(1,'#----------------------------------------------------\n');
 
-width=360;
-height=288;
+switch dataSetName
+    case 'missa'
+        width=360;
+        height=288;
+    case 'susie'
+        width=352;
+        height=240;
+    case 'ocean'
+        width=1080;
+        height=720;
+end
 
+% width=360;
+% height=288;
 
-% Crop video
+% Remove the translation part (only for the "missa" dataset)
+if removeTransl
+    Y = [Y(1:64,:) ; Y(103:end,:)];
+end
+
+% Crop video (only for the "missa" dataset)
 if cropVideo
     newWidth=144;
     newHeight=122;
@@ -52,7 +87,9 @@ if cropVideo
 end
 
 
-
+% %%%%TEMP (for gradchek)
+% Y = Y(1:30,:);
+% %%%%%
 
 dims = size(Y,2);
 
@@ -62,27 +99,26 @@ trainModel = 1;% Set it to 1 to retrain the model. Set it to 0 to load an alread
 % remaining frames
 N = size(Y,1);
 % assumes the number of data is even
-Nstar = N/2;
-Nts = N/2;
-Ntr = N/2;
-indTr = 1:2:N;
-indTs = 2:2:N;
-Ytr = Y(indTr,:);
-Yts = Y(indTs,:);
-YtsOriginal = Yts;
+Nstar = N/2; Nts = N/2; Ntr = N/2;
+indTr = 1:2:N; indTs = 2:2:N;
+Ytr = Y(indTr,:); Yts = Y(indTs,:); YtsOriginal = Yts;
+t = linspace(0, 2*pi, size(Y, 1)+1)'; t = t(1:end-1, 1);
+timeStampsTraining = t(indTr,1); timeStampsTest = t(indTs,1);
 
-t = linspace(0, 2*pi, size(Y, 1)+1)';
-t = t(1:end-1, 1);
-timeStampsTraining = t(indTr,1);
-timeStampsTest = t(indTs,1);
+fprintf(1,'# Dataset size used (train/test) : %d / %d \n', size(Ytr,1), size(Yts,1));
+%fprintf(1,'# CropVideo / removeTranslation: %d / %d \n', cropVideo, removeTransl);
+fprintf(1,'#----------------------------------------------------\n');
 
 
+%%
 % % Play movie
-% for i=1:size(Ytr,1)
-%     fr=reshape(Ytr(i,:),height,width);
+% for i=1:size(Y,1)
+%     fr=reshape(Y(i,:),height,width);
 %     imagesc(fr); colormap('gray');
-%     pause(0.01);
+%     pause(0.08);
 % end
+
+%%
 
 
 % Set up model
@@ -100,8 +136,14 @@ if trainModel
     % scale(find(scale==0)) = 1;
     %options.scaleVal = mean(std(Ytr));
     options.scaleVal = sqrt(var(Ytr(:)));
+    if fixInd
+        options.fixInducing=1;
+        options.fixIndices=1:size(Ytr,1);
+    end
     model = vargplvmCreate(latentDim, d, Ytr, options);
     
+
+        
     % Temporary: in this demo there should always exist the mOrig field
     if ~isfield(model, 'mOrig')
         model.mOrig = model.m;
@@ -125,13 +167,12 @@ if trainModel
         
         fprintf(1,'# Further calibration of the initial values...\n');
         model = vargplvmInitDynamics(model,optionsDyn);
-        
     end
+    
+    
     model.beta=1/(0.01*var(model.mOrig(:)));
     modelInit = model;
-    
-    
-    
+
     %%---
     capName = dataSetName;
     capName(1) = upper(capName(1));
@@ -139,48 +180,61 @@ if trainModel
     modelType(1) = upper(modelType(1));
     fileToSave = ['dem' capName modelType num2str(experimentNo) '.mat'];
     %%---
-    
-%     %%%% Optimisation
-%     % do not learn beta for few iterations for intitilization
-    model.learnBeta = 0;
+          
     display = 1;
-    fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
-    model = vargplvmOptimise(model, display, 23); % Default: 20
-    fprintf(1,'1 over beta = %.4d\n',1/model.beta);
+%     %%%% Optimisation
+%     % do not learn beta for few iterations for intitialization
+    if fixedBetaIters ~=0
+        model.learnBeta = 0;
+        fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
+        model = vargplvmOptimise(model, display, fixedBetaIters); % Default: 20
+        fprintf(1,'1/b = %.4d\n',1/model.beta);
+        
+        %fprintf(1,'# Saving %s\n',fileToSave);
+        %prunedModel = vargplvmPruneModel(model);
+        %prunedModelInit = vargplvmPruneModel(modelInit);
+        %save(fileToSave, 'prunedModel', 'prunedModelInit');
+        
+        modelBetaFixed = model;
+        model.fixedBetaIters=fixedBetaIters;
+    end
     
-    %fprintf(1,'# Saving %s\n',fileToSave);
-    %prunedModel = vargplvmPruneModel(model);
-    %prunedModelInit = vargplvmPruneModel(modelInit);
-    %save(fileToSave, 'prunedModel', 'prunedModelInit');
-    
-    
-    modelBetaFixed = model;
     model.learnBeta = 1;
-    model.iters =0;
+    model.iters = 0;
     
     % Optimise the model.
-    iters = itNo; % default: 2000
-    fprintf(1,'\n# Optimising the model for %d iterations...\n',iters);
-    model = vargplvmOptimise(model, display, iters);
-    model.iters = model.iters + itNo;
-    fprintf(1,'1 over beta = %.4d\n',1/model.beta);
-    modelTr = model;
-    fprintf(1,'# Saving %s\n',fileToSave);
+    for i=1:length(itNo)
+        iters = itNo(i); % default: 2000
+        fprintf(1,'\n# Optimising the model for %d iterations (session %d)...\n',iters,i);
+        model = vargplvmOptimise(model, display, iters);
+        model.iters = model.iters + iters;
+        fprintf(1,'1/b = %.4d\n',1/model.beta);
+        modelTr = model;
     
-    fprintf(1,'# 1/b=%.4f\n var(m)=%.4f\n 1/init_b=%.4f\n',1/model.beta, var(model.mOrig(:)), modelInit.beta);
+        fprintf(1,'# 1/b=%.4f\n var(m)=%.4f\n 1/init_b=%.4f\n',1/model.beta, var(model.mOrig(:)), modelInit.beta);
     
-    prunedModel = vargplvmPruneModel(model);
-    prunedModelInit = vargplvmPruneModel(modelInit);
-    prunedModelTr = vargplvmPruneModel(modelTr);
-    save(fileToSave, 'prunedModel', 'prunedModelInit', 'prunedModelTr');
-    
+        % Save model
+        fprintf(1,'# Saving %s\n',fileToSave);
+        prunedModel = vargplvmPruneModel(model);
+        prunedModelInit = vargplvmPruneModel(modelInit);
+        prunedModelTr = vargplvmPruneModel(modelTr);
+        save(fileToSave, 'prunedModel', 'prunedModelInit', 'prunedModelTr');
+    end
 else
+     % Load pre-trained model
     capName = dataSetName;
     capName(1) = upper(capName(1));
     modelType = 'vargplvm';
     modelType(1) = upper(modelType(1));
-    fileToSave = ['dem' capName modelType num2str(experimentNo) '.mat'];
-    load(fileToSave);
+    fileToLoad = ['dem' capName modelType num2str(experimentNo) '.mat'];
+    load(fileToLoad);
+    fileToSave = fileToLoad;
+end
+
+
+% Don't make predictions for the non-dynamic case
+if ~dynUsed
+    return
 end
 
 
@@ -209,12 +263,12 @@ for i=1:Nstar
 end
 % Mean absolute error per pixel
 errorNN = mean(abs(NNmu(:) - YtsOriginal(:)));
-
+%errorNN = sum(sum( abs(NNmu - YtsOriginal)) )/prod(size(YtsOriginal)); %equivalent
 
 fprintf(1,'# Error GPLVM: %d\n', errorOnlyTimes);
 fprintf(1,'# Error NN: %d\n', errorNN);
 
-return 
+ return
 
 % Visualization of the reconstruction
 for i=1:Nstar

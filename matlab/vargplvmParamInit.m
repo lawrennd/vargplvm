@@ -36,7 +36,8 @@ else
       if strcmp(model.kern.comp{i}.type,'rbfard2') 
       % 
          model.kern.comp{i}.inputScales = 5./(((max(X)-min(X))).^2);
-         model.kern.comp{i}.variance = max(var(Y));
+         %model.kern.comp{i}.variance = max(var(Y));
+         model.kern.comp{i}.variance = var(model.m(:));
       %
       elseif strcmp(model.kern.comp{i}.type,'linard2')
       %

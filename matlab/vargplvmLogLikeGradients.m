@@ -64,53 +64,7 @@ gKern = gKern0 + gKern1 + gKern2 + gKern3;
 gVarmeansLik = gVarmeans0 + gVarmeans1 + gVarmeans2;
 
 
-if isfield(model, 'dynamics') && ~isempty(model.dynamics)
-    % Calculate the derivatives for the reparametrized variational and Kt parameters.
-    % The formulae for these include in a mixed way the derivatives of the KL
-    % term w.r.t these., so gVarmeansKL and gVarcovsKL are not needed now. Also
-    % the derivatives w.r.t kernel parameters also require the derivatives of
-    % the likelihood term w.r.t the var. parameters, so this call must be put
-    % in this part.
-    
-    % For the dynamical GPLVM further the original covs. must be fed,
-    % before amending with the partial derivative due to exponing to enforce
-    % positiveness.
-    gVarcovsLik = gVarcovs0 + gVarcovs1 + gVarcovs2;
-    [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(model.dynamics, gVarmeansLik, gVarcovsLik);
-    % Variational variances are positive: Now that the final covariances
-    % are obtained we amend with the partial derivatives due to the
-    % exponential transformation to ensure positiveness.
-    gVarcovs = (gVarcovs(:).*model.dynamics.vardist.covars(:))';
-else
-    % For the non-dynamical GPLVM these cov. derivatives are the final, so
-    % it is time to amend with the partial derivative due to exponing them
-    % to force posigiveness.
-    gVarcovs0 = (gVarcovs0(:).*model.vardist.covars(:))';
-    gVarcovs1 = (gVarcovs1(:).*model.vardist.covars(:))';
-    gVarcovs2 = (gVarcovs2(:).*model.vardist.covars(:))';
-    
-    gVarcovsLik = gVarcovs0 + gVarcovs1 + gVarcovs2;
-    gVarmeans = gVarmeansLik + gVarmeansKL;
-    %gVarcovsLik = (gVarcovsLik(:).*model.vardist.covars(:))';
-    gVarcovs = gVarcovsLik + gVarcovsKL;
-end
 
-
-
-gVar = [gVarmeans gVarcovs];
-
-% gVarmeans = gVarmeans0 + gVarmeans1 + gVarmeans2 + gVarmeansKL;
-% gVarcovs = gVarcovs0 + gVarcovs1 + gVarcovs2 + gVarcovsKL; 
-
-
-
-if isfield(model.vardist,'paramGroups')
-    gVar = gVar*model.vardist.paramGroups;
-end
-
-
-    
-  
 %%% Compute Gradients with respect to X_u %%%
 gKX = kernGradX(model.kern, model.X_u, model.X_u);
 
@@ -137,7 +91,134 @@ end
 %pause
 
 gInd = gInd1 + gInd2 + gX_u(:)';
-  
+
+% If the inducing points are fixed (tied to the latent points) then
+% X_u=K_t*dynamics.vardist.means and the derivatives w.r.t theta_t must be
+% amended with the appropriate partial derivatives. gInd must be passed,
+% in that case, as an argument to the function which calculates the
+% derivatives for the reparametrized quantities.
+if isfield(model, 'fixInducing') & model.fixInducing
+    gIndRep = gInd;
+else
+    gIndRep=[];
+end
+
+if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+    % Calculate the derivatives for the reparametrized variational and Kt parameters.
+    % The formulae for these include in a mixed way the derivatives of the KL
+    % term w.r.t these., so gVarmeansKL and gVarcovsKL are not needed now. Also
+    % the derivatives w.r.t kernel parameters also require the derivatives of
+    % the likelihood term w.r.t the var. parameters, so this call must be put
+    % in this part.
+    
+    % For the dynamical GPLVM further the original covs. must be fed,
+    % before amending with the partial derivative due to exponing to enforce
+    % positiveness.
+    gVarcovsLik = gVarcovs0 + gVarcovs1 + gVarcovs2;
+    [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(model.dynamics, gVarmeansLik, gVarcovsLik, gIndRep);
+    % Variational variances are positive: Now that the final covariances
+    % are obtained we amend with the partial derivatives due to the
+    % exponential transformation to ensure positiveness.
+    gVarcovs = (gVarcovs(:).*model.dynamics.vardist.covars(:))';
+else
+    % For the non-dynamical GPLVM these cov. derivatives are the final, so
+    % it is time to amend with the partial derivative due to exponing them
+    % to force posigiveness.
+    gVarcovs0 = (gVarcovs0(:).*model.vardist.covars(:))';
+    gVarcovs1 = (gVarcovs1(:).*model.vardist.covars(:))';
+    gVarcovs2 = (gVarcovs2(:).*model.vardist.covars(:))';
+    
+    gVarcovsLik = gVarcovs0 + gVarcovs1 + gVarcovs2;
+    gVarmeans = gVarmeansLik + gVarmeansKL;
+    %gVarcovsLik = (gVarcovsLik(:).*model.vardist.covars(:))';
+    gVarcovs = gVarcovsLik + gVarcovsKL;
+end
+
+
+%%%Moved that a few lines below
+% gVar = [gVarmeans gVarcovs];
+% 
+% % gVarmeans = gVarmeans0 + gVarmeans1 + gVarmeans2 + gVarmeansKL;
+% % gVarcovs = gVarcovs0 + gVarcovs1 + gVarcovs2 + gVarcovsKL; 
+% 
+% 
+% 
+% if isfield(model.vardist,'paramGroups')
+%     gVar = gVar*model.vardist.paramGroups;
+% end
+
+
+    
+%{  
+% %%% Compute Gradients with respect to X_u %%%
+% gKX = kernGradX(model.kern, model.X_u, model.X_u);
+% 
+% % The 2 accounts for the fact that covGrad is symmetric
+% gKX = gKX*2;
+% dgKX = kernDiagGradX(model.kern, model.X_u);
+% for i = 1:model.k
+%   gKX(i, :, i) = dgKX(i, :);
+% end
+% 
+% % Allocate space for gX_u
+% gX_u = zeros(model.k, model.q);
+% % Compute portion associated with gK_u
+% for i = 1:model.k
+%   for j = 1:model.q
+%     gX_u(i, j) = gKX(:, j, i)'*gK_uu(:, i);
+%   end
+% end
+% 
+% % This should work much faster 
+% %gX_u2 = kernKuuXuGradient(model.kern, model.X_u, gK_uu);
+% 
+% %sum(abs(gX_u2(:)-gX_u(:)))
+% %pause
+% 
+% gInd = gInd1 + gInd2 + gX_u(:)';
+%}
+
+
+
+%%% TEMP:  the following needs some more testing...
+% If fixInducing is true then the inducing points are not optimised but are
+% rather reparametrized as X_u=X=mu (static case). Then, there is no derivative
+% for X_u any more but the one for mu must be amended by adding the partial
+% derivatives of the inducing points (which is just gInd because X_u is
+% mapped to mu with the identity function whose deriv. is 1). In the
+% dynamics case X_u=X=mu=Kt*mu_bar so we further need to amend with
+% d mu/ d mu_bar = K_t because we need 
+% d F/ d mu_bar instead of d F/ d mu.
+if isfield(model, 'fixInducing') & model.fixInducing
+    % If there are dynamics the derivative must further be amended with the
+    % partial deriv. due to the mean reparametrization.
+   if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+       gInd = reshape(gInd,model.k,model.q);
+       %gInd = gInd' * model.dynamics.Kt;
+       gInd =  model.dynamics.Kt * gInd;
+       gInd = gInd(:)';
+   end
+    %gVarmeans(model.inducingIndices, :) = gVarmeans(model.inducingIndices,
+    %:) + gInd; % This should work AFTER reshaping the matrices...but here
+    %we use all the indices anyway.
+    gVarmeans = gVarmeans + gInd;
+    gInd = []; % Inducing points are not free variables anymore, they dont have derivatives on their own.
+end
+
+
+
+gVar = [gVarmeans gVarcovs];
+
+% gVarmeans = gVarmeans0 + gVarmeans1 + gVarmeans2 + gVarmeansKL;
+% gVarcovs = gVarcovs0 + gVarcovs1 + gVarcovs2 + gVarcovsKL; 
+
+
+
+if isfield(model.vardist,'paramGroups')
+    gVar = gVar*model.vardist.paramGroups;
+end
+
+
 
 % It may better to start optimize beta a bit later so that 
 % so that the rest parameters can be initialized
@@ -145,11 +226,13 @@ gInd = gInd1 + gInd2 + gX_u(:)';
 % minima where the noise beta explains all the data) 
 % The learnBeta option deals with the above. 
 
+
+
 % This constrains the variance of the dynamics kernel to one
 % (This piece of code needs to be done in better way with unit variance dynamic 
 %  kernels. The code below also will only work for rbf dynamic kernel)
 if isfield(model, 'dynamics') && ~isempty(model.dynamics)
-    gDynKern(2) = 0;
+   gDynKern(2) = 0;
 end
     
 if model.learnBeta == 1
@@ -182,6 +265,35 @@ PLm = model.invLatT*model.P;
 gBeta = 0.5*(model.d*(model.TrC + (model.N-model.k)*sigm -model.Psi0) ...
 	- model.TrYY + model.TrPP ...
 	+ (1/(model.beta^2)) * model.d * sum(sum(model.invLat.*model.invLat)) + sigm*sum(sum(PLm.*PLm)));
+
+%%%%TEMP
+%{
+load TEMPbetaGradTrC; 
+TEMPbetaGradTrC = [TEMPbetaGradTrC model.d*0.5*model.TrC]; 
+save 'TEMPbetaGradTrC.mat' 'TEMPbetaGradTrC';
+
+load TEMPbetaGradNksigm; 
+TEMPbetaGradNksigm=[TEMPbetaGradNksigm model.d*0.5*(model.N-model.k)*sigm]; 
+save 'TEMPbetaGradNksigm.mat' 'TEMPbetaGradNksigm';
+
+load TEMPbetaGradPsi0; 
+TEMPbetaGradPsi0=[TEMPbetaGradPsi0 (-0.5*model.d*model.Psi0)];
+save 'TEMPbetaGradPsi0.mat' 'TEMPbetaGradPsi0';
+
+load TEMPbetaGradTrPP;
+TEMPbetaGradTrPP=[TEMPbetaGradTrPP 0.5*model.TrPP];
+save 'TEMPbetaGradTrPP.mat' 'TEMPbetaGradTrPP';
+
+load TEMPbetaGradLat;
+TEMPbetaGradLat=[TEMPbetaGradLat (1/(model.beta^2)) * model.d * sum(sum(model.invLat.*model.invLat))*0.5];
+save 'TEMPbetaGradLat.mat' 'TEMPbetaGradLat';
+
+load TEMPbetaGradPlm;
+TEMPbetaGradPlm=[TEMPbetaGradPlm sigm*sum(sum(PLm.*PLm))*0.5];
+save 'TEMPbetaGradPlm.mat' 'TEMPbetaGradPlm';
+%}
+%%%%%
+
 
 %gBeta = 0.5*(model.d*(model.TrC + (model.N-model.k)*sigm -model.Psi0) ...
 %	- model.TrYY + model.TrPP ...

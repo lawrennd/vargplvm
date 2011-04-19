@@ -42,13 +42,18 @@ else
     model.vardist = modelExpandParam(model.vardist, params(startVal:endVal)); 
 end
 
-
-
 % inducing inputs 
 startVal = endVal+1;
-if model.fixInducing 
+if model.fixInducing  
+    if isfield(model, 'dynamics') & ~isempty(model.dynamics)
+        Kt = kernCompute(model.dynamics.kern, model.dynamics.t);%%%%%%%%%%%%5
+        model.X_u = Kt*model.dynamics.vardist.means; %dynamics
+        model.X_u = model.X_u(model.inducingIndices,:);
+    else
+         model.X_u = model.vardist.means(model.inducingIndices, :); % static
+    end
     % X_u values are taken from X values.
-    model.X_u = model.X(model.inducingIndices, :);
+   % model.X_u = model.X(model.inducingIndices, :);
 else
     % Parameters include inducing variables.
     endVal = endVal + model.q*model.k;
@@ -70,6 +75,13 @@ end
 
 model.nParams = endVal;
 
-
 % Update statistics
 model = vargplvmUpdateStats(model, model.X_u);
+
+% %%%TEMP: This is not needed, probably. If yes, it should be merged with
+% %%%the above code for fixInducing.
+% if model.fixInducing
+%     model.X_u=model.X(model.inducingIndices, :);
+% end
+% %%%
+

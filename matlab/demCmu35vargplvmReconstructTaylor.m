@@ -19,7 +19,7 @@ rand('seed', 1e5);
 % seq = cumsum(sum(lbls)) - [1:31];
 
 dataSetName = 'cmu35gplvm';
-experimentNo = 1;
+experimentNo = 2;
 
 % load data
 [Y, lbls, Ytest, lblstest] = lvmLoadData(dataSetName);

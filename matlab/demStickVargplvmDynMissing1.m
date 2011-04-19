@@ -21,12 +21,23 @@ dims = size(Y,2);
 
 % Define constants (in a manner that allows other scripts to parametrize
 % this one).
-if ~exist('experimentNo')  experimentNo = 100;  end
-if ~exist('itNo')          itNo = 500;          end     % Default: 2000
-if ~exist('indPoints')     indPoints = 30;      end     % Default: 50
-if ~exist('latentDim')     latentDim = 10;      end
-% Set to 1 to use dynamics or to 0 to use the standard var-GPLVM
-if ~exist('dynUsed')       dynUsed = 1;         end     
+if ~exist('experimentNo')    experimentNo = 404;    end
+if ~exist('itNo')            itNo = 50;            end     % Default: 2000
+if ~exist('indPoints')       indPoints = 10;        end     % Default: 50
+if ~exist('latentDim')       latentDim = 8;        end     % Default: 10
+% Set to 1 to use dynamics or to 0 to use the sta  ndard var-GPLVM
+if ~exist('dynUsed')         dynUsed = 1;           end
+if ~exist('fixedBetaIters')  fixedBetaIters = 50;   end     % Default: 200
+if ~exist('reconstrIters')   reconstrIters = 50;    end      %Default: 200
+if ~exist('fixInd')          fixInd = 0;            end    
+
+
+%%%%%%%%%%% TEMP
+%delete TEMPInducingMeansDist.mat
+%delete TEMPInducingMeansDistNorm.mat
+%delete TEMPInducingIndices.mat
+%delete TEMPLikelihoodTrace.mat
+%%%%%%%%%%%%%%%%%%%
 
 printDiagram = 0;
 displayDynamic = 0;
@@ -46,6 +57,19 @@ t = t(1:end-1, 1);
 timeStampsTraining = t(1:end-Nstar,1);
 timeStampsTest = t(end-(Nstar-1+overL):end,1);
 
+
+fprintf(1,'\n#----------------------------------------------------\n');
+fprintf(1,'# Dataset: %s\n',dataSetName);
+fprintf(1,'# ExperimentNo: %d\n', experimentNo);
+fprintf(1,'# Inducing points: %d\n',indPoints);
+fprintf(1,'# Latent dimensions: %d\n',latentDim);
+fprintf(1,'# Iterations (with/without fixed Beta): %d / %d\n',fixedBetaIters,itNo);
+fprintf(1,'# Tie Inducing points: %d\n',fixInd);
+fprintf(1,'# Dynamics used: %d\n', dynUsed);
+fprintf(1,'# Dataset size used (train/test) : %d / %d \n', size(Ytr,1), size(Yts,1));
+fprintf(1,'#----------------------------------------------------\n');
+
+
 % Set up model
 options = vargplvmOptions('dtcvar');
 options.kern = {'rbfard2', 'bias', 'white'};
@@ -56,6 +80,10 @@ d = size(Y, 2);
 
 if trainModel
     fprintf(1,'# Creating the model...\n');
+    if fixInd
+        options.fixInducing=1;
+        options.fixIndices=1:size(Ytr,1);
+    end
     model = vargplvmCreate(latentDim, d, Ytr, options);
     model = vargplvmParamInit(model, model.m, model.X);
     model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(model.vardist.covars));
@@ -71,8 +99,9 @@ if trainModel
         model = vargplvmAddDynamics(model, 'vargpTime', optionsDyn, optionsDyn.t, 0, 0,optionsDyn.seq);
         
         fprintf(1,'# Further calibration of the initial parameters...\n');
-        model = vargplvmInitDynamics(model,optionsDyn);  
+        model = vargplvmInitDynamics(model,optionsDyn);
     end
+    model.beta=1/(0.01*var(model.m(:)));
     modelInit = model;
     
     % It seems that optimization gets stuck to the trivial local minima where
@@ -84,14 +113,14 @@ if trainModel
     % do not learn beta for few iterations for intitilization
     model.learnBeta = 0;
     display = 1;
-    fixedBetaIters=10; % Default: 200;
-    fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
-    model = vargplvmOptimise(model, display, fixedBetaIters);
+	if (fixedBetaIters ~= 0)
+        fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
+        model = vargplvmOptimise(model, display, fixedBetaIters);
+    end
     
     % Optimise the model.
-    display = 1;
     model.learnBeta = 1;
-    iters = 50;
+    iters = itNo;
     fprintf(1,'# Optimising the model...\n');
     model = vargplvmOptimise(model, display, iters);
     
@@ -103,19 +132,45 @@ if trainModel
     
 else % Load an already trained model
     if dynUsed
-        load stickMissing400iters1
+        %load stickMissing400iters1
         %load  stickMissing1iter
     else
-        load stickMissing400itersStatic1
+        load stickMissing400iters1
     end
 end
 
+if ~dynUsed %%% TEMP!!
+    if trainModel
+        % Save the results.
+        fprintf(1,'# Saving the model...\n');
+        %modelWriteResult(model, dataSetName, experimentNo);
+        capName = dataSetName;
+        capName(1) = upper(capName(1));
+        modelType = model.type;
+        modelType(1) = upper(modelType(1));
+        save(['dem' capName modelType num2str(experimentNo) '.mat'], 'model');
+    end
+    if exist('printDiagram') & printDiagram
+        lvmPrintPlot(model, lbls, dataSetName, experimentNo);
+    end
+    displayDynamic=1; printDiagram=1; %%%
+    if exist('displayDynamic') & displayDynamic
+        % load connectivity matrix
+        [void, connect] = mocapLoadTextData('run1');
+        % Load the results and display dynamically.
+        lvmResultsDynamic(model.type, dataSetName, experimentNo, 'stick', connect)
+    end
+    return
+end
+
+
+return %%%%
 
 
 %%%%%%%%%%%%%------ Reconstruction --------%%%%%%%%%%
 
 display = 1;
-iters=50;
+iters=reconstrIters;
 fprintf(1, '# Removing some outputs randomly from test data...\n');
 
 
@@ -137,9 +192,16 @@ for i=1:size(Yts,1)
     dst = dist2(Yts(i,indexPresent), Ytr(:,indexPresent));
     [mind, mini(i)] = min(dst);
 end
+
 % create the variational distribtion for the test latent point
-vardistx = vardistCreate(model.dynamics.vardist.means(mini,:), model.q, 'gaussian');
-vardistx.covars = model.dynamics.vardist.covars(mini,:);%0.2*ones(size(vardistx.covars));
+if dynUsed
+    vardistx = vardistCreate(model.dynamics.vardist.means(mini,:), model.q, 'gaussian');
+    vardistx.covars = model.dynamics.vardist.covars(mini,:);%0.2*ones(size(vardistx.covars));
+else
+    % Not tested yet!!!!
+    vardistx = vardistCreate(model.vardist.means(mini,:), model.q, 'gaussian');
+    vardistx.covars = model.vardist.covars(mini,:);%0.2*ones(size(vardistx.covars));
+end
 % optimize mean and vars of the latent point
 model.vardistx = vardistx;
 indexMissing = setdiff(1:model.d, indexPresent);

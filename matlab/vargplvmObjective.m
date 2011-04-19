@@ -19,4 +19,5 @@ function f = vargplvmObjective(params, model)
 
 
 model = vargplvmExpandParam(model, params);
+%max(max(model.X - model.X_u)) %%%%%%%%%
 f = - vargplvmLogLikelihood(model);

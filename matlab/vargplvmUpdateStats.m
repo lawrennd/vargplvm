@@ -82,3 +82,39 @@ model.T1 = model.d * model.invK_uu - Tb;
 
 model.X = model.vardist.means;
 
+%{
+%%%%-------------------------- TEMP (for analysing how ind. pts are optimised) !!!!!!!!!
+d=dist2(model.X_u, model.vardist.means);
+[C,I]=min(d,[],2);
+dNorm=dist2(model.X_u, model.vardist.means)/norm(model.X_u)^2;
+[Cnorm,Inorm]=min(dNorm,[],2);
+
+if Inorm-I ~= 0
+    fprintf(1, 'Something is wrong with the distances! (Update Stats)');
+end
+
+try 
+    load TEMPInducingMeansDist
+catch exception
+    TEMPInducingMeansDist=[];
+end
+try 
+    load TEMPInducingIndices
+catch exception
+    TEMPInducingIndices=[];
+end
+try 
+    load TEMPInducingMeansDistNorm
+catch exception
+    TEMPInducingMeansDistNorm=[];
+end
+TEMPInducingMeansDist = [TEMPInducingMeansDist sum(C)];
+save 'TEMPInducingMeansDist.mat' 'TEMPInducingMeansDist';
+%fprintf(1,'# Total X_u - vardistMeans = %d\n',sum(C));
+TEMPInducingIndices = [TEMPInducingIndices I];
+save 'TEMPInducingIndices.mat' 'TEMPInducingIndices';
+
+TEMPInducingMeansDistNorm = [TEMPInducingMeansDistNorm sum(Cnorm)];
+save 'TEMPInducingMeansDistNorm.mat' 'TEMPInducingMeansDistNorm';
+%}
+

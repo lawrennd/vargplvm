@@ -19,6 +19,9 @@ function options = vargplvmOptions(varargin);
 
 % VARGPLVM
 
+
+
+
 % Get default options from Gaussian process.
 options = gpOptions(varargin{:});
 

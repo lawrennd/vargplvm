@@ -31,6 +31,38 @@ end
 ll = ll-model.d*model.N/2*log(2*pi);
 
 
+%{
+% %%%%%%%%TEMP_ (for analysing the "difficult" trace term)
+%try
+%    load TEMPLikelihoodTrace
+%catch exception
+%    TEMPLikelihoodTrace=[];
+%end
+%TEMPLikelihoodTrace=[TEMPLikelihoodTrace ;-0.5*model.beta*model.d*model.Psi0 + 0.5*model.d*model.beta*model.TrC];
+%save 'TEMPLikelihoodTrace.mat' 'TEMPLikelihoodTrace';
+%%% _TEMP
+% load TEMPbetaLikTrC; 
+% TEMPbetaLikTrC = [TEMPbetaLikTrC 0.5*model.d*model.beta*model.TrC]; 
+% save 'TEMPbetaLikTrC.mat' 'TEMPbetaLikTrC';
+% 
+% load TEMPbetaLikNksigm; 
+% TEMPbetaLikNksigm=[TEMPbetaLikNksigm (model.d*(-(model.N-model.k)*log(model.beta)))]; 
+% save 'TEMPbetaLikNksigm.mat' 'TEMPbetaLikNksigm';
+% 
+% load TEMPbetaLikPsi0; 
+% TEMPbetaLikPsi0=[TEMPbetaLikPsi0 (- 0.5*model.beta*model.d*model.Psi0)];
+% save 'TEMPbetaLikPsi0.mat' 'TEMPbetaLikPsi0';
+% 
+% load TEMPbetaLikTrPP;
+% TEMPbetaLikTrPP=[TEMPbetaLikTrPP 0.5*model.TrPP];
+% save 'TEMPbetaLikTrPP.mat' 'TEMPbetaLikTrPP';
+% 
+% load TEMPbetaLikLat;
+% TEMPbetaLikLat=[TEMPbetaLikLat -0.5*model.d*model.logDetAt];
+% save 'TEMPbetaLikLat.mat' 'TEMPbetaLikLat';
+%%%%%%%%%%%%
+%}
+
 % KL divergence term 
  if isfield(model, 'dynamics') && ~isempty(model.dynamics)
    % A dynamics model is being used. 

@@ -288,7 +288,9 @@ gVarmeansLik = gVarmeans0 + gVarmeans1 + gVarmeans2;
 
 gVarcovsLik = gVarcovs0 + gVarcovs1 + gVarcovs2;      
 if includeKL
-    [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(model.dynamics, gVarmeansLik, gVarcovsLik);
+    %[gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(model.dynamics, gVarmeansLik, gVarcovsLik);
+    % TODO: This may have to be changed if we have model.fixInducing==1.
+    [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(model.dynamics, gVarmeansLik, gVarcovsLik,[]);
 else
     dynModel = model.dynamics;
     gVarmeansLik = reshape(gVarmeansLik,dynModel.N,dynModel.q);

@@ -1,4 +1,4 @@
-function [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(dynModel, gVarmeansLik, gVarcovsLik)
+function [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(dynModel, gVarmeansLik, gVarcovsLik,gInd)
 % MODELPRIORREPARAMGRADS Wrapper function for the gradients of the various types of the
 % variational GPLVM bound when dynamics is used.
 % FORMAT
@@ -27,6 +27,9 @@ function [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(dynModel, gVarme
 % to be computed.
 % ARG gVarmeansLik, gVarcovsLik: the gradients for the VAR-GPLVM model computed
 % for the original parameters and only for the likelihood term.
+% ARG gInd: in case the inducing points are tied to the variational means
+% this is the partial derivatives of the likelihood part of the variational
+% bound w.r.t the inducing points X_u, otherwise it is just [].
 % RETURN gVarmeans, gVarcovs : the gradients for the "reparametrized" means
 % and covariances (the ones that are visible to the optimiser, not the
 % original ones) for the VAR-GPLVM model.
@@ -43,6 +46,6 @@ function [gVarmeans gVarcovs gDynKern] = modelPriorReparamGrads(dynModel, gVarme
 
 
 fhandle = str2func([dynModel.type 'PriorReparamGrads']);
-[gVarmeans gVarcovs gDynKern] = fhandle(dynModel, gVarmeansLik, gVarcovsLik);
+[gVarmeans gVarcovs gDynKern] = fhandle(dynModel, gVarmeansLik, gVarcovsLik, gInd);
 
 
