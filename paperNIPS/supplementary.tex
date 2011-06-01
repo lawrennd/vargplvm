@@ -1,0 +1,199 @@
+\section{Derivation of the variational bound}
+
+We wish to approximate the marginal likelihood:
+\begin{equation}
+\label{marginalLikelihoodSuppl}
+p(Y | \bft) =  \int p( Y , F, X| \bft) \, \mathrm{d} X \,\mathrm{d}F,
+\end{equation}
+by computing a lower bound:
+\begin{align}
+\mathcal{F}_v(q, \boldsymbol \theta) = {}& \int q(\mathit{\Theta}) \log 
+		\frac{ p(Y , F , \mathit{X} | \mathbf{t})}
+			 {q(\mathit{\Theta})}  \, \mathrm{d} X \,\mathrm{d}F,
+% 	    \nonumber \\
+% 	      = {}& \sum_{d=1}^D \int q(\Theta) \log \left( p(\bfy_d | \bff_d) p(\bff_d | X) \right) dX d \bff_d -
+% 		    \int q(\Theta) \frac{p(X|\bft)}{q(\Theta)} dX
+		 \label{jensens1Suppl}
+\end{align}
+%
+This can be achieved by first augmenting the joint probability density of our model with inducing inputs $\tilde{X}$ along with their corresponding function values $U$:
+\begin{equation}
+ \label{augmentedJointSuppl}
+p(Y,F, U,X,\tilde{X} | \bft) = \prod_{d=1}^D p(\mathbf{y}_d | \mathbf{f}_d) p(\mathbf{f}_d | \mathbf{u}_d, \mathit{X})
+p(\bfu_d | \tilde{X})  p(X | \mathbf{t})
+\end{equation}
+where $p(\bfu_d | \tilde{X}) = \prod_{d=1}^D \mathcal{N} \left( \bfu_d | \mathbf{0}, K_{MM} \right)$ . For simplicity, $\tilde{X}$ is dropped from our
+expressions for the rest of this supplementary material. Note that after including the inducing points, $p(\bff_d | \bfu_d, X)$
+remains analytically tractable and it turns out to be \cite{rasmussen-williams}):
+\begin{equation}
+ \label{priorF2Suppl}
+p(\bff_d | \bfu_d, X) =  \mathcal{N}  \left( \bff_d | K_{NM} K_{MM}^{-1} \bfu_d , K_{NN} - K_{NM} K_{MM}^{-1} K_{MN} \right).
+\end{equation}
+We are now able to define a variational distribution $q(\Theta)$ which factorises as:
+For tractability we now define a variational density, $q(\Theta)$:
+\begin{equation}
+\label{varDistrSuppl}
+q(\mathit{\Theta}) = q(F, U,X) = q(F | U, X) q(U) q(X) = \prod_{d=1}^D p(\bff_d | \bfu_d, X )q(\bfu_d) q(X),
+\end{equation}
+%
+%
+where $q(X) = \prod_{q=1}^Q \mathcal{N} \left( \bfx_q | \bfmu_q, S_q \right)$. 
+%
+Now, we return to \ref{jensens1Suppl} and replace the joint distribution with its augmented version \eqref{augmentedJointSuppl} and the variational distribution with its factorised version \eqref{varDistrSuppl}:
+\begin{align}
+\mathcal{F}_v(q, \boldsymbol \theta) = {}& \int q(\mathit{\Theta}) \log 
+		\frac{ p(Y,F, U,X | \bft)}
+			 {q(F, U,X)}  \, \mathrm{d} X \,\mathrm{d}F,
+ 	    \nonumber \\
+= {}& \int \prod_{d=1}^D p(\bff_d | \bfu_d, X )q(\bfu_d) q(X) 
+	    \log  \frac{\prod_{d=1}^D p(\mathbf{y}_d | \mathbf{f}_d) \cancel{p(\mathbf{f}_d | \mathbf{u}_d, \mathit{X})}
+						p(\bfu_d | \tilde{X})  p(X | \mathbf{t})}
+ 	      		   {\prod_{d=1}^D \cancel{p(\bff_d | \bfu_d, X )}q(\bfu_d) q(X))}   \, \mathrm{d} X \,\mathrm{d}F \nonumber \\
+= {}& \int \prod_{d=1}^D p(\bff_d | \bfu_d, X )q(\bfu_d) q(X) 
+		\log  \frac{\prod_{d=1}^D p(\mathbf{y}_d | \mathbf{f}_d) p(\bfu_d | \tilde{X})}
+				   {\prod_{d=1}^D q(\bfu_d) q(X))}   \, \mathrm{d} X \,\mathrm{d}F, \nonumber \\
+- {}& \int \prod_{d=1}^D  q(X)   \log \frac{q(X)}{p(X | \mathbf{t})}   \, \mathrm{d} X \nonumber \\
+= {}& \hat{\mathcal{F}}_v - \text{KL}(q \parallel p), \label{jensens1Suppl}
+\end{align}
+%
+with $\hat{\mathcal{F}}_v =\int q(X) \log p( Y | F ) p( F | X) \,
+\mathrm{d} X \,\mathrm{d}F$. Both terms in \eqref{jensens1Suppl} are analytically tractable, with the first having the same analytical solution as the one derived in \cite{BayesianGPLVM}.
+
+\par
+The complete form of the jensen's lower bound turns out to be:
+\begin{align}
+\mathcal{F}_v(q, \boldsymbol \theta) = {}& \sum_{d=1}^{D} 
+	\mathit{\tilde{F}}_d(q, \boldsymbol \theta) -  KL(q \parallel p) \nonumber \\
+	= {}& 
+	\sum_{d=1}^{D} 
+		\log \left( 
+		\frac{(\beta)^{\frac{N}{2}} \vert \mathit{K_{MM}} \vert ^\frac{1}{2} }
+			 {(2\pi)^{\frac{N}{2}} \vert \beta \Psi_2 + \mathit{K_{MM}}  \vert ^\frac{1}{2} } 	
+		 e^{-\frac{1}{2} \mathbf{y}^{T}_{d} W \mathbf{y}_d} 
+		 \right) -
+		 \frac{\beta \psi_0}{2} + \frac{\beta}{2} 
+		 Tr \left( \mathit{K_{MM}^{-1}} \Psi_2 \right)  \nonumber \\
+{}&	- \frac{Q}{2} \log \vert \mathit{K_t} \vert - \frac{1}{2} \sum_{q=1}^{Q}
+	  \left[ Tr \left( \mathit{K_t}^{-1} \mathit{S_q} \right)	  
+	  	   + Tr \left( \mathit{K_t}^{-1} \boldsymbol \mu_q \boldsymbol \mu_q^T \right) \right] 
+	 + \frac{1}{2} \sum_{q=1}^Q \log \vert \mathit{S_q} \vert + const  \label{boundFinal}
+\end{align}
+where the last line corresponds to the KL term. Also:
+\begin{equation}
+\label{psis}
+\Psi_0 = Tr(\langle \mathit{K_{NN}} \rangle_{q(\mathit{X})}) \;, \;\;
+\Psi_1 = \langle \mathit{K_{NM}} \rangle_{q(\mathit{X})} \;, \;\;
+\Psi_2 = \langle \mathit{K_{MN}} \mathit{K_{NM}} \rangle_{q(\mathit{X})}
+\end{equation}
+The $\Psi$ quantities can be computed analytically as in \cite{BayesianGPLVM}.
+
+
+%-------------------------
+
+\section{Derivatives of the variational bound}
+Before giving the expressions for the derivatives of the variational bound \eqref{jensens1Suppl},
+it should be reminded that the variational parameters $\mu_q$ and $S_q$ (for all $q$s) have been
+reparametrised as $S_q = \left( \mathit{K}_t^{-1} + diag(\boldsymbol \lambda_q) \right)^{-1}  \text{ and }   \boldsymbol \mu_q = K_t \bar{\boldsymbol \mu}_q$, where the function $diag(\cdot)$ transforms a vector into a square diagonal matrix. Given the above, the set of the parameters to be optimised is 
+$( \boldsymbol \theta_f, \boldsymbol \theta_x, \{ \bar{\bfmu}_q, \boldsymbol \lambda_q \}_{q=1}^Q, \tilde{X}$. The gradient w.r.t the inducing points $\tilde{X}$, however, has exactly the same form as for $\boldsymbol \theta_f$ and, therefore, is not presented here. Also notice that from now on we will often use the term "variational parameters" to refer to the new quantities $\bar{\bfmu}_q$ and $\boldsymbol \lambda_q$. 
+
+\textbf{Some more notation:} 
+\begin{enumerate}
+\item $\lambda_q$ is a scalar, an element of the vector $\boldsymbol \lambda_q$ which, in turn, is the main diagonal of the diagonal matrix $\Lambda_q$. 
+\item$\lambda_m \triangleq \boldsymbol \lambda_{q;m}$, i.e. the $m$-th element of the vector $\boldsymbol \lambda_q$ (thus, an instantiation of $\lambda_q$)
+\item $S_{ij} \triangleq S_{q;ij}$ the element of $S_q$ found in the $i$-th row and $j$-th column.
+\item $\mathbf{s}_q \triangleq \lbrace S_{q;ii} \rbrace_{i=1}^N$, i.e. it is a vector with the diagonal of $S_q$.
+\item $s_i$ is the $i$-th element of $\mathbf{s}_q$.
+\item $diag(\mathbf{s}_q)$ is a matrix full of zeros apart from the main diagonal which contains the vector $\mathbf{s}_q$.
+\end{enumerate}
+
+\subsection{Derivatives w.r.t the variational parameters}
+\begin{equation}
+    \label{derivVarParamSuppl}
+\frac{\vartheta F}{\vartheta \bar{\boldsymbol \mu}_q} 
+=  K_t \left( \frac{\vartheta \tilde{F}}{\vartheta \boldsymbol \mu_q} - \bar{\boldsymbol \mu}_q \right)
+\text{ and }
+ \frac{\vartheta F}{\vartheta \boldsymbol \lambda_q}
+= - ( S_q \circ S_q) \left( \frac{\vv \tilde{F}}{\vv \mathbf{s}_q} + \frac{1}{2} \boldsymbol \lambda_q \right).
+\end{equation}
+
+where:
+
+\begin{align}
+ \frac{\tilde{F}(q, \boldsymbol \theta)}{\vartheta \mu_q}
+{}& = - \frac{\beta D}{2} \frac{\vartheta \Psi_0}{\vartheta \mu_q}
+    + \beta Tr \left(\frac{\vartheta \Psi_1^T}{\vartheta \mu_q} Y Y^T \Psi_1 A^{-1} \right) \nonumber \\
+{}& + \frac{\beta}{2} Tr \left[ \frac{\vartheta \Psi_2}{\vartheta \mu_q}
+       \left(
+	  D K_{MM}^{-1} - \beta^{-1} D A^{-1} - A^{-1} \Psi_1^T Y Y^T \Psi_1 A^{-1}
+       \right) \right] \label{derivFTildeEfficientComputationMu}
+\end{align}
+
+
+\begin{align}
+ \frac{\vv \tilde{F}(q, \boldsymbol \theta)}{\vartheta S_{q;i,j}}
+{}& = - \frac{\beta D}{2} \frac{\vartheta \Psi_0}{\vartheta S_{q;i,j}}
+    + \beta Tr \left(\frac{\vartheta \Psi_1^T}{\vartheta S_{q;i,j}} Y Y^T \Psi_1 A^{-1} \right) \nonumber \\
+{}& + \frac{\beta}{2} Tr \left[ \frac{\vartheta \Psi_2}{\vartheta S_{q;i,j}}
+       \left(
+	  D K_{MM}^{-1} - \beta^{-1} D A^{-1} - A^{-1} \Psi_1^T Y Y^T \Psi_1 A^{-1}
+       \right) \right] \label{derivFTildeEfficientComputationS}
+\end{align}
+
+
+with $A=\beta^{-1}K_{MM}+\Psi_2$.
+
+
+%-------
+
+
+
+\subsection{Derivatives w.r.t $\boldsymbol \theta = (\boldsymbol \theta_f, \boldsymbol \theta_t)$}
+\begin{equation}
+   \label{DerivativeOfFComplete}
+      \frac{\vartheta F}{\vartheta \theta_f} = \frac{\vartheta \tilde{F}}{\vartheta \theta_f}
+\mbox{ \ \ \ \textit{and} \ \ \ } 
+      \frac{\vartheta F}{\vartheta \theta_t} = \frac{\vartheta (-KL)}{\vartheta \theta_t}
+\end{equation}
+
+  with:
+
+\begin{align}
+\frac{\vartheta \tilde{F}}{\vartheta \theta_f} {}& = \text{const} - 
+\frac{\beta D}{2} \frac{\vartheta \Psi_0}{\vartheta \theta_f}
+ + \beta Tr \left(\frac{\vartheta \Psi_1^T}{\vartheta \theta_f} Y Y^T \Psi_1 A^{-1} \right) \nonumber \\
+{}& + \frac{1}{2} Tr \left[ \frac{\vartheta K_{MM}}{\vartheta \theta_f}
+        \left(
+	   D K_{MM}^{-1} - \beta^{-1} D A^{-1} - A^{-1} \Psi_1^T Y Y^T \Psi_1 A^{-1} - \beta D K_{MM}^{-1} \Psi_2 K_{MM}^{-1} 
+         \right) \right] \nonumber \\
+{}& + \frac{\beta}{2} Tr \left[ \frac{\vartheta \Psi_2}{\vartheta \theta_f} \;\;\;\;
+       \left(
+	  D K_{MM}^{-1} - \beta^{-1} D A^{-1} - A^{-1} \Psi_1^T Y Y^T \Psi_1 A^{-1}
+       \right) \right] \label{DerivativeOfFtildeComplete}
+\end{align}
+
+and
+
+
+   %%% KL %%%
+\highlight{TODO}
+
+\noindent where $A=\beta^{-1}K_{MM}+\Psi_2$ and $\boldsymbol \alpha = K_t^{-1} \bfmu_q$.
+% $\theta$ can be any parameter from the $\boldsymbol \theta$ vector; if it's an element of $\boldsymbol \theta_f$ then the $\frac{\vartheta (-KL)}{\vartheta \theta_t}$ term is zero and similarly if $\theta$ is an element of $\boldsymbol \theta_t$ then the first part with the derivatives w.r.t $\theta_f$ will be zero. 
+
+\subsection{w.r.t $\beta$}
+\begin{align}
+\frac{\vartheta \tilde{F}}{\vartheta \beta} ={}&
+  \frac{1}{2} \Big[ 
+      D \left( Tr(K_{MM}^{-1} \Psi_2) + (N-M)\beta^{-1} - \Psi_0 \right) - Tr(Y Y^\T)
+	  + Tr(A^{-1}\Psi_1^\T Y Y^\T \Psi_1) \nonumber \\
+   +{}& \beta^{-2} D Tr ( K_{MM} A^{-1} ) + \beta^{-1} Tr \left( K_{MM}^{-1} A^{-1} \Psi_1^\T Y Y^\T \Psi_1 A^{-1} \right) \Big]
+\label{derivb2}
+\end{align}
+
+
+
+
+\section{Predictions}
+
+
+\section{Additional results from the experiments}
