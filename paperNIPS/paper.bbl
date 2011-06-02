@@ -15,7 +15,8 @@ J.~M. Wang, D.~J. Fleet, and A.~Hertzmann, ``{G}aussian process dynamical
 
 \bibitem{Wang:gpdm08}
 J.~M. Wang, D.~J. Fleet, and A.~Hertzmann, ``Gaussian process dynamical models
-  for human motion,'' vol.~30, no.~2, pp.~283--298, 2008.
+  for human motion,'' {\em IEEE Transactions on Pattern Analysis and Machine
+  Intelligence}, vol.~30, pp.~283--298, Feb. 2008.
 
 \bibitem{hgplvm}
 N.~D. Lawrence, ``Hierarchical {G}aussian process latent variable models,'' in

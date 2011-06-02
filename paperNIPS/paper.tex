@@ -10,6 +10,7 @@
 \usepackage[psamsfonts]{amssymb}
 \usepackage{graphicx}
 \usepackage{subfigure}
+\usepackage{cancel}
 
 \title{Variational Gaussian Process Dynamical Systems}
 
@@ -125,9 +126,7 @@ problematic as latent trajectories are strongly correlated making
 efficient sampling a challenge. One promising approach
 %
 %
-\textcolor{red}{[[linking to the previous, is this implying a promising approach
- \textit{to marginalisation of the latent space}? Because a few lines later we say
- "the latent variables are not marginalised (referring to MAP approaches)",maybe the reader will get confused?]]}
+\textcolor{red}{[maybe the reader will think that this is a promising approach to the analytic marginalisation mentioned earlier? ]}
 %
 %
  has been to
@@ -224,8 +223,8 @@ f_d(\bfx)  & \sim & \mathcal{GP}(0, k_f(\bfx_i,\bfx_j)), \ \ d=1,\ldots,D.
 \label{eq:GPpriors}
 \end{eqnarray}
 Here, the individual components of the latent function $\bfx$ 
-have taken to be independent sample paths drawn from a Gaussian process with kernel or covariance function 
-\textcolor{red}{[is "kernel or covariance function" really needed in this form??]}
+have \textcolor{red}{are???} taken to be independent sample paths drawn from a Gaussian process with kernel or covariance function 
+\textcolor{red}{["kernel or covariance function"???]}
 $k_x(t_i,t_j)$. Similarly, the components of $\bff$ are independent 
 draws from a Gaussian process with covariance function $k_f(\bfx_i,\bfx_j)$. 
 These covariance functions, parametrized by parameters 
@@ -430,11 +429,13 @@ q(\mathit{\Theta}) = q(F, U,X) = q(F | U, X) q(U) q(X) = \prod_{d=1}^D p(\bff_d 
 where $q(X) = \prod_{q=1}^Q \mathcal{N} \left( \bfx_q | \bfmu_q, S_q
 \right)$ and $q(\bfu_m)$ is an arbitrary variational distribution. 
 In  \cite{BayesianGPLVM} the next step is to assume
-independence in $q(X)$ (i.e.\ diagonal $S_q$). Here, in contrast, 
+independence in $q(X)$ (i.e.\ diagonal $S_q$). 
+\textcolor{red}{[also there we have $S_n$ which is $Q \times Q$, here it is $N \times N$ (it's equivalent though)]}
+Here, in contrast, 
 the posterior over the latent variables will have strong correlations, 
 so $S_q$ is taken to be a $N \times N$ full covariance
 matrix. Optimization of the variational lower bound provides 
-an approximation to the true posterior $p(X|Y)$.
+an approximation to the true posterior $p(X|Y)$ \textcolor{red}{by $q(X)$}.
 %
 In the augmented probability model, the ``difficult`` term $p(F | X)$ appearing in \eqref{jensens1} is now replaced with \eqref{priorF2} and, eventually, it cancels out with the first factor of the variational distribution \eqref{varDistr} so that $F$ can now be marginalised out analytically.
 % 
@@ -473,14 +474,14 @@ This issue is addressed in the next section.
 
 The optimization involves the model parameters 
 $\boldsymbol \theta = (\beta, \boldsymbol \theta_f, \boldsymbol \theta_t)$, 
-the variational parameters $\{ \bfmu_q, S_q \}_{q=1}^Q$ from $q(X)$ and the inducing points,\footnote{We will use the term ``variational parameters'' to refer only to the parameters of $q(X)$ although the inducing points are also variational parameters.} $\tilde{X}$.
+the variational parameters $\{ \bfmu_q, S_q \}_{q=1}^Q$ from $q(X)$ and the inducing points\footnote{We will use the term ``variational parameters'' to refer only to the parameters of $q(X)$ although the inducing points are also variational parameters.} $\tilde{X}$.
 %Since $\boldsymbol \theta_f$ and $\boldsymbol \theta_t$ exist in different terms (see \eqref{jensens}), the only coupling between the prior on the latent space (which induces the datapoint correlations) and the likelihood term (which involves observations) is made via the variational parameters. 
 
 % \par In our formulation, unlike \cite{BayesianGPLVM}, the $Q$ variational covariances $S_q$ are full $N \times N$ matrices. 
 % Therefore, 
-Optimization of the variational parameters appears challenging due to
-their large number and due to the correlations between them. However by
-reparametrizing $O \left( N^2 \right)$ variational parameters
+Optimization of the variational parameters appears challenging, due to
+their large number and due to the correlations between them. However, by
+reparametrizing our $O \left( N^2 \right)$ variational parameters
 according to the framework described in
 \cite{OpperFixedPointCovariance} we can obtain a set of $O(N)$ 
 less correlated variational parameters. Specifically, we first take the derivatives of the variational bound \eqref{jensens} w.r.t $S_q$ and $\bfmu_q$ and set them to zero, in order to find the stationary points,
@@ -655,7 +656,7 @@ of dimensions only matters when performing calculations involving the
 data matrix $Y$. In the final form of the lower bound (and
 consequently in all of the derived quantities, such as gradients) this
 matrix only appears in the form $Y Y^\T$ which can be precomputed. This
-means that when $N \ll D$, we can calculate $Y Y^\T$ only once and
+means that, when $N \ll D$, we can calculate $Y Y^\T$ only once and
 then substitute $Y$ with the SVD (or Cholesky decomposition) of $Y
 Y^\T$. In this way, we can work with an $N \times N$ instead of an $N
 \times D$ matrix. Practically speaking, this allows us to work with data sets involving millions of features. In our experiments we model directly the pixels of HD quality video, exploiting this trick.
@@ -696,11 +697,11 @@ the root mean square error in the angle space suggested by
 \cite{gplvmLarger}. Our model was initialized with nine latent
 dimensions. We performed two runs, once using the Matern covariance function for the dynamical prior
 and once using the RBF. From table
-\ref{motionCaptureTable} we see the variational Gaussian process
+\ref{motionCaptureTable} we see that the variational Gaussian process
 dynamical system considerably outperforms the other approaches. 
 %
 The appropriate latent space dimensionality for the data was automatically
-inferred by our models, since the one using the RBF kernel retained four dimensions 
+inferred by our models, since the one that used the RBF kernel retained four dimensions 
 whereas the model using the Matern kept only three.
 %
 %The
@@ -770,10 +771,10 @@ as a $?-$dimensional video\footnote{available at: ...} showing a dog
 running for $60$ frames. The later is a dataset periodic in nature but
 only approximately, as it is a real-world video (otherwise the NN
 method would achieve perfect reconstruction). For the first two videos
-we used the Matern and RBF kernels respectively to model the dynamics and interpolated to
+we used the Matern and RBF kernel respectively to model the dynamics and interpolated to
 reconstruct blocks of frames chosen from the whole sequence. For the
-the 'dog' dataset we constructed a compound kernel $k_t = k_{t(rbf)} +
-k_{t(periodic)}$, where the RBF term is employed to capture the
+ 'dog' dataset we constructed a compound kernel $k_x = k_{x(rbf)} +
+k_{x(periodic)}$, where the RBF term is employed to capture the
 divergence from the approximately periodic pattern. We then used our
 model to reconstruct the last 7 frames, thus performing
 extrapolation. As can be seen in table \ref{videoResultsTable}, our
@@ -840,7 +841,7 @@ NN  & 3.26 & 9.53 & 4.15 \\
 \end{center}
 \caption{\small{
 \ref{fig:missa1} and \ref{fig:missa3} demonstrate the reconstruction achieved by VGPDS and NN respectively for the original frame \ref{fig:missa2} taken from the 'missa' video. Another example (cropped to fit) can be seen in \ref{fig:missa4} \textcolor{red}{I will add tags to each image to show the method}. \ref{fig:ocean1} (VGPDS) and \ref{fig:ocean2} (NN) depict the reconstruction achieved for a frame of the 'ocean' dataset. 
-Finally, we demonstrate the ability of the model to automatically select the latent dimensionality by showing the initial lengthscales (fig: \ref{fig:scalesDogInit}) of the ARD kernel and the values taken after training (fig: \ref{fig:scalesDogOpt}) on the 'dog' dataset.
+Finally, we demonstrate the ability of the model to automatically select the latent dimensionality by showing the initial lengthscales (fig: \ref{fig:scalesDogInit}) of the ARD kernel and the values obtained after training (fig: \ref{fig:scalesDogOpt}) on the 'dog' dataset.
 }
 }
 \label{fig:video1}
@@ -1063,4 +1064,6 @@ to be used for tasks in areas such as vision and finance.
 %{\bf 15}(7):5249-5262.
 %}
 
+
+\include{supplementary}
 \end{document}
