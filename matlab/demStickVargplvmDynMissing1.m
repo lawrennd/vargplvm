@@ -21,7 +21,7 @@ dims = size(Y,2);
 
 % Define constants (in a manner that allows other scripts to parametrize
 % this one).
-if ~exist('experimentNo')    experimentNo = 404;    end
+if ~exist('experimentNo')    experimentNo = 4044;    end
 if ~exist('itNo')            itNo = 50;            end     % Default: 2000
 if ~exist('indPoints')       indPoints = 10;        end     % Default: 50
 if ~exist('latentDim')       latentDim = 8;        end     % Default: 10
@@ -134,8 +134,9 @@ else % Load an already trained model
     if dynUsed
         %load stickMissing400iters1
         %load  stickMissing1iter
+        load demStickVargplvm404
     else
-        load stickMissing400iters1
+        load demStickVargplvm101
     end
 end
 

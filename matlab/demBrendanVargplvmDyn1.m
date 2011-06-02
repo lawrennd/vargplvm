@@ -122,7 +122,7 @@ end
 
 if exist('displayDynamic') & displayDynamic
     % load connectivity matrix
-    [void, connect] = mocapLoadTextData('run1');
+    %[void, connect] = mocapLoadTextData('run1');
     % Load the results and display dynamically.
     lvmResultsDynamic(model.type, dataSetName, experimentNo, 'image', [20 28],1, 0, 1)
 end

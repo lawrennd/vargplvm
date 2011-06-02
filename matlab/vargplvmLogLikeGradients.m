@@ -231,8 +231,27 @@ end
 % This constrains the variance of the dynamics kernel to one
 % (This piece of code needs to be done in better way with unit variance dynamic 
 %  kernels. The code below also will only work for rbf dynamic kernel)
+% Assume that the base rbf/matern/etc kernel is first in the compound
+% structure
 if isfield(model, 'dynamics') && ~isempty(model.dynamics)
-   gDynKern(2) = 0;
+   if strcmp(model.dynamics.kern.comp{1}.type,'rbf') || strcmp(model.dynamics.kern.comp{1}.type,'matern32') || strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic') || strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic2')
+       if ~isfield(model.dynamics, 'learnVariance') || ~model.dynamics.learnVariance   %%%%% NEW
+           gDynKern(2) = 0;
+       end
+   end
+   
+   
+    %___NEW: assume that the second rbf/matern etc kernel is last in the
+    %compound kernel
+    %if numel(model.dynamics.kern.comp) > 3 
+        if isfield(model.dynamics, 'learnSecondVariance') && ~model.dynamics.learnSecondVariance   %%%%% NEW
+           gDynKern(end) = 0;
+       end
+    %end
+%     if isfield(model.dynamics, 'learnSecondWidth') && ~model.dynamics.learnSecondWidth   %%%%% NEW
+%            gDynKern(end-1) = 0;
+%     end
+    %___
 end
     
 if model.learnBeta == 1

@@ -16,7 +16,12 @@ function varsigma = vargplvmPosteriorVar(model, X)
 
 % VARGPLVM
  
+
+%% ORIGINAL
 model.K_uf = kernCompute(model.kern, model.X_u, X);
 model.A = (1/model.beta)*model.K_uu + model.K_uf*model.K_uf';
 [model.Ainv, U] = pdinv(model.A);
 varsigma = gpPosteriorVar(model, X);
+
+%%% TEMP
+%[void, varsigma] = vargplvmPosteriorMeanVar(model, X);

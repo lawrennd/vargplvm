@@ -87,13 +87,13 @@ if trainModel
     
     % Optimise the model.
     model.learnBeta = 0;
-    iters = 100; % Default: 2000
+    iters = 20; % Default: 2000
     display = 1;
     fprintf(1,'# Optimising the model (fixed beta)...\n');
     model = vargplvmOptimise(model, display, iters);
     
     model.learnBeta = 1;
-    iters = 1200; % Default: 2000
+    iters = 30; % Default: 2000
     fprintf(1,'# Optimising the model...\n');
     model = vargplvmOptimise(model, display, iters);
     

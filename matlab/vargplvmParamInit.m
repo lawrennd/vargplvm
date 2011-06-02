@@ -21,7 +21,8 @@ if ~strcmp(model.kern.type,'cmpnd')
    if strcmp(model.kern.type,'rbfard2') 
       % 
        model.kern.inputScales = 5./(((max(X)-min(X))).^2);
-       model.kern.variance = max(var(Y));
+       %model.kern.variance = max(var(Y)); % !!! better use mean(var(Y)) here...
+       model.kern.variance = mean(var(Y)); % NEW!!!
       %
    elseif strcmp(model.kern.type,'linard2')
       %

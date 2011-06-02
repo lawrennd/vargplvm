@@ -1,3 +1,4 @@
+
 function model = vargplvmInitDynamics(model,optionsDyn)
 % VARGPLVMINITDYNAMICS Initialize the dynamics of a var-GPLVM model.
 % FORMAT
@@ -38,6 +39,66 @@ if isfield(model, 'DgtN') && model.DgtN
 else
     X = initFunc(model.m, model.q);
 end
+
+
+
+%---------------------- TEMP -------------------------------%
+% The following are several tries to make the init. of the means better.
+
+
+% X(1,:)=zeros(size(X(1,:)));
+% X(end,:)=zeros(size(X(1,:)));
+
+% X = 0.1*randn(size(X));
+% X(1,:)=zeros(size(X(1,:)));
+% X(end,:)=zeros(size(X(1,:)));
+
+
+
+% m = floor((size(X,1))/2);
+% p=max(max(abs(X))); p=p/10; %p = p^(1/m);
+% l = logspace(p,0,m);
+% l2 = logspace(p,0,m);
+% l2 = l2(end:-1:1);
+% l = [l l2]';
+% mask = repmat(l,1,size(X,2));
+% X = X.*(1./mask);
+% X(1,:) = zeros(size(X(1,:)));
+% X(end,:) = zeros(size(X(1,:)));
+% X(end-1,:) = zeros(size(X(1,:)));
+
+%save 'TEMPX.mat' 'X' %%TEMP
+
+if optionsDyn.regularizeMeans
+    model.dynamics.regularizeMeans = 1;
+    m = floor((size(X,1))/7);  % 7
+    p=ones(1,model.q);
+    mm=max(X).^(1/2); %1/2 % the smallest this ratio(the exponent) is, the largest the effect
+    for i=0:m-4
+        X(end-i,:) = X(end-i,:) -  X(end-i,:).*p;
+        p = p./mm;
+    end
+    p=ones(1,model.q);
+    for i=1:m
+        X(i,:) = X(i,:) -  X(i,:).*p;
+        p = p./mm;
+    end
+end
+
+
+%model.X = X;
+
+
+% m = floor((size(X,1))/2);
+% l = logspace(10,1,m);
+% l2 = logspace(10,1,m);
+% l2 = l2(end:-1:1);
+% mask = repmat([l l2]',1,size(X,2));
+% X2 = X-X.*mask;
+
+
+%-------------------------------------------------------------------
+
 
 vX = var(X);
 for q=1:model.q
@@ -98,11 +159,17 @@ else
                 % instead:
                 ind=randperm(size(model.vardist.means,1));
                 ind=ind(1);
-                model.X_u(i,:) = model.vardist.means(ind,:);
+                model.X_u(i,:) = model.vardist.means(ind,:)+0.001*randn(1,model.q);
             end
         end
     end   
 end
+
+if isfield(optionsDyn, 'testReoptimise')
+    model.dynamics.reoptimise = optionsDyn.testReoptimise; %%% RE-OPT-CODE-NEW
+end
+
+model.dynamics.learnVariance = optionsDyn.learnVariance; %%% RE-OPT-CODE-NEW  DEFAULT: 0
 
 params = vargplvmExtractParam(model);
 model = vargplvmExpandParam(model, params);

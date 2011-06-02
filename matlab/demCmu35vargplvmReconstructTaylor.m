@@ -13,13 +13,14 @@ rand('seed', 1e5);
 
 
 % dynUsed=1;
-% 
+%
 % % Get the sequence numbers.
 % [Y, lbls] = lvmLoadData('cmu35WalkJog');
 % seq = cumsum(sum(lbls)) - [1:31];
 
 dataSetName = 'cmu35gplvm';
-experimentNo = 2;
+
+if ~exist('experimentNo') experimentNo = 1; end
 
 % load data
 [Y, lbls, Ytest, lblstest] = lvmLoadData(dataSetName);
@@ -27,6 +28,11 @@ experimentNo = 2;
 
 
 dataSetName = 'cmu35gplvm';
+
+capName = dataSetName;
+capName(1) = upper(capName(1));
+
+fileName=['dem' capName 'Vargplvm' num2str(experimentNo)];
 
 % load data
 [Y, lbls, Ytest, lblstest] = lvmLoadData(dataSetName);
@@ -34,8 +40,8 @@ dataSetName = 'cmu35gplvm';
 % %%% Remove some sequences
 % seqFrom=2;
 % seqEnd=4;
-% 
-% 
+%
+%
 % if seqFrom ~= 1
 %     Yfrom = seq(seqFrom-1)+1;
 % else
@@ -67,28 +73,43 @@ timeStampsTest = ([0:size(Ytest,1)-1].*dt)';
 
 
 %for experimentNo = 1:3;
-experimentNo=1;
-  % Load saved model.
-  capName = dataSetName;
-  capName(1) = upper(capName(1));
-  %load(['dem' capName num2str(experimentNo) '.mat']);
-  load demCmu35gplvmVargplvm1; % From demCmu35gplvmVargplvm1.m
-  
-  model.dynamics.t_star = timeStampsTest;
- 
-  startInd = 63;
-  
-  legErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origScale, legInd, [dataSetName ...
-                      'Leg'], experimentNo);
-  bodyErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origScale, bodyInd, [dataSetName ...
-                      'Body'], experimentNo);
 
-  save(['dem' capName 'Reconstruct' num2str(experimentNo) '.mat'], ...
-     'legErrs', 'bodyErrs');
- 
- bar(model.kern.comp{1}.inputScales) 
- 
- 
+% Load saved model.
+%load(['dem' capName num2str(experimentNo) '.mat']);
+load(fileName); % From demCmu35gplvmVargplvm1.m
+fprintf(1,'# Loaded %s\n',fileName);
+fprintf(1,'# Dynamics kernel:');
+kernDisplay(model.dynamics.kern);
+fprintf(1,'# experimentNo=%d\n',experimentNo);
+fprintf(1,'# Reconstruction Iters=%d\n',model.reconstrIters);
+
+% model.reconstrIters = 2500; %%%TEMP
+
+model.dynamics.t_star = timeStampsTest;
+
+startInd = 63;
+
+legErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origScale, legInd, [dataSetName ...
+    'Leg'], experimentNo);
+
+save(['dem' capName 'ReconstructLegs' num2str(experimentNo) '.mat'], 'legErrs');
+prefix = [num2str(experimentNo) '/Leg/'];
+saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
+legErrs
+
+
+
+bodyErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origScale, bodyInd, [dataSetName ...
+    'Body'], experimentNo);
+
+save(['dem' capName 'ReconstructBody' num2str(experimentNo) '.mat'], 'bodyErrs');
+prefix = [num2str(experimentNo) '/Body/'];
+saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
+bodyErrs
+
+% bar(model.kern.comp{1}.inputScales)
+
+
 %end
 
 

@@ -79,10 +79,10 @@ if nargout > 1
    end
    %
 end
-
       
 % Rescale the mean
 mu = mu.*repmat(model.scale, size(vardistX.means,1), 1);
+
 % Add the bias back in
 mu = mu + repmat(model.bias, size(vardistX.means,1), 1);
 

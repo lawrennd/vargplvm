@@ -1,6 +1,7 @@
 function [errStruct] = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origScale,...
                                               missingInd, name, expNo);
 
+
 % VARGPLVMTAYLORANGLEERRORS Helper function for computing angle errors for CMU 35 data.
 %
 %	Description:
@@ -124,10 +125,11 @@ varx= modelTest.vardist.covars(end-(Nstar-1+overL):end,:);
 
 
 %%%%%%%%%%%%%
-fName=['TEMPTaylorVargplvm' num2str(iters) 'it' num2str(expNo) '.mat'];
-fprintf(1,'# Saving the workspace in file %s...\n',fName);
-save(fName);
-%%%%%%%%%%
+% fName=['TEMPTaylorVargplvm' num2str(iters) 'it' num2str(expNo) '.mat'];
+% fprintf(1,'# Saving the workspace in file %s...\n',fName);
+% save(fName);
+
+%%%%%%%%%
 
 
 %%% Normalise predictions as in Fgplvm
@@ -156,6 +158,11 @@ load cmu35TaylorScaleBias
 err = err.*repmat(scale(1, missingInd+9), size(YtrueTest, 1)-startInd+1, 1);
 errStruct.taylorErrorGplvm = sum(sum(err.*err))/length(missingInd);
 
+
+%%% Normalise predictions as in Fgplvm  %NEW!!!!!!!!!!
+ Ypred = Ypred - repmat(origBias, size(Ypred, 1), 1);
+ Ypred = Ypred.*repmat(origScale, size(Ypred, 1), 1);
+%%%%
 
 plotRange = missingInd;
 colordef white
@@ -192,3 +199,21 @@ for plotNo = plotRange
     %plot2svg(['../html/' fileName '.svg'])
     set(gcf, 'paperposition', origpos);
 end
+
+
+%%% Denormalise to save:  %NEW!!!!!!!!!!
+ Ypred = Ypred + repmat(origBias, size(Ypred, 1), 1);
+ Ypred = Ypred./repmat(origScale, size(Ypred, 1), 1);
+%%%%
+
+%%%
+ %prunedModelUpdated = vargplvmPruneModel(modelUpdated,1);
+ fileToSave = 'demCmu35Vargplvm';
+ if strcmp(name(end-3:end),'Body')
+     n = 'PredBody.mat';
+ else
+     n='PredLegs.mat';
+ end
+ save([fileToSave num2str(expNo) n], 'barmu', 'lambda', 'modelUpdated','Ypred','errStruct');
+ fprintf(1,'# Saved %s\n',[fileToSave num2str(expNo) n]);
+%%%

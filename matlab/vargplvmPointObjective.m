@@ -11,7 +11,7 @@ function f = vargplvmPointObjective(x, model, y)
 % ARG y : the location in data space for the point.
 % RETURN f : the negative of the log probability of the given data
 % point under the posterior distribution induced by the training data.
-% 
+%
 % SEEALSO : vargplvmCreate, vargplvmPointLogLikelihood, vargplvmOptimisePoint
 %
 % COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009
@@ -19,17 +19,19 @@ function f = vargplvmPointObjective(x, model, y)
 % VARGPLVM
 
 if isfield(model, 'dynamics') && ~isempty(model.dynamics)
-   % this is doing the expand 
-   x = reshape(x, model.N+size(y,1), model.dynamics.q*2);
-   xtrain = x(1:model.N,:);
-   xtest = x(model.N+1:end,:);
-   model.dynamics.vardist = vardistExpandParam(model.dynamics.vardist, xtrain);
-   vardistx = vardistExpandParam(model.vardistx, xtest);
-   % end of expand 
-else 
-   vardistx = model.vardistx;
-   vardistx = vardistExpandParam(vardistx, x);
+    if isfield(model.dynamics, 'reoptimise') && model.dynamics.reoptimise  %%% RE-OPT-CODE-NEW
+        [vardistx, model] = vargplvmPartExpand(model, x); %%% RE-OPT-CODE-NEW
+    else %%% RE-OPT-CODE-NEW
+        % this is doing the expand
+        x = reshape(x, model.N+size(y,1), model.dynamics.q*2);
+        xtrain = x(1:model.N,:);
+        xtest = x(model.N+1:end,:);
+        model.dynamics.vardist = vardistExpandParam(model.dynamics.vardist, xtrain);
+        vardistx = vardistExpandParam(model.vardistx, xtest);
+        % end of expand
+    end %%% RE-OPT-CODE-NEW
+else
+    vardistx = model.vardistx;
+    vardistx = vardistExpandParam(vardistx, x);
 end
-
 f = - vargplvmPointLogLikelihood(model, vardistx, y);
-%f = -TEMPvargplvmPointLogLikelihoodSTATIC(model, vardistx, y);

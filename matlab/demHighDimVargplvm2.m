@@ -7,26 +7,29 @@ rand('seed', 1e5);
 
 % Define constants (in a manner that allows other scripts to parametrize
 % this one).
-if ~exist('experimentNo')   experimentNo = 404;  end
-if ~exist('itNo')           itNo =2000;          end     % Default: 2000
-if ~exist('indPoints')      indPoints = 75;      end     % Default: 50
-if ~exist('latentDim')      latentDim = 30;      end
+if ~exist('experimentNo')   experimentNo = 404;      end
+if ~exist('itNo')           itNo =2000;              end     % Default: 2000
+if ~exist('indPoints')      indPoints = 49;          end     % Default: 49
+if ~exist('latentDim')      latentDim = 40;          end
 % Set to 1 to use dynamics or to 0 to use the standard var-GPLVM
-if ~exist('dynUsed')        dynUsed = 1;         end
+if ~exist('dynUsed')        dynUsed = 1;             end
 % Set to 1 to keep only the dimensions modelling the head (missa dataset)
-if ~exist('cropVideo')      cropVideo = 0;       end
+if ~exist('cropVideo')      cropVideo = 0;           end
 % Set to 1 to remove the frames with the translation (missa dataset)
-if ~exist('removeTransl')   removeTransl = 0;    end
-if ~exist('fixedBetaIters') fixedBetaIters = 0; end     % DEFAULT: 23
+if ~exist('removeTransl')   removeTransl = 0;        end
+if ~exist('fixedBetaIters') fixedBetaIters = 0;      end     % DEFAULT: 23
 % Set to 1 to tie the inducing points with the latent vars. X
-if ~exist('fixInd') fixInd = 0; end
+if ~exist('fixInd') fixInd = 0;                      end
 if ~exist('dynamicKern') dynamicKern = {'rbf', 'white', 'bias'}; end
-if ~exist('reconstrIters') reconstrIters = 1000; end
+if ~exist('reconstrIters') reconstrIters = 1000;                 end
+if ~exist('vardistCovarsMult') vardistCovarsMult=1.3;            end % 0.1 gives around 0.5 init.covars. 1.3 biases towards 0.
 
+        
 % load data
 dataSetName = 'ocean'; % 720x1280
 
-load '../../datasets/mat/DATA_Ocean';
+load '../../VideoManipulation/datasets/mat/DATA_Ocean';
+% For this dataset there is a translation in space between frames 66-103
 
 
 % dataSetName = 'susie';
@@ -46,6 +49,7 @@ if dynUsed
 end
 
 fprintf(1,'# CropVideo / removeTranslation: %d / %d \n', cropVideo, removeTransl);
+fprintf(1,'# VardistCovarsMult: %d \n', vardistCovarsMult);
 %fprintf(1,'#----------------------------------------------------\n');
 
 switch dataSetName
@@ -172,11 +176,14 @@ if trainModel
         
         kern = kernCreate(t, dynamicKern); % Default: {'rbf','white','bias'}
         kern.comp{2}.variance = 1e-1; % Usual values: 1e-1, 1e-3
-        % The following is related to the expected number of zero-crossings.
-        kern.comp{1}.inverseWidth = optionsDyn.inverseWidth./(((max(t)-min(t))).^2);
-        kern.comp{1}.variance = 1;
+        % The following is related to the expected number of
+        % zero-crossings.(larger inv.width numerator, rougher func)
+        if ~strcmp(kern.comp{1}.type,'ou')
+            kern.comp{1}.inverseWidth = optionsDyn.inverseWidth./(((max(t)-min(t))).^2);
+            kern.comp{1}.variance = 1;
+        end
         optionsDyn.kern = kern;
-        optionsDyn.vardistCovars = 0.3; % 0.23 gives true vardist.covars around 0.5 (DEFAULT: 0.23) for the ocean dataset
+        optionsDyn.vardistCovars = vardistCovarsMult; % 0.23 gives true vardist.covars around 0.5 (DEFAULT: 0.23) for the ocean dataset
              
         % Fill in with default values whatever is not already set
         optionsDyn = vargplvmOptionsDyn(optionsDyn);
@@ -185,7 +192,6 @@ if trainModel
         fprintf(1,'# Further calibration of the initial values...\n');
         model = vargplvmInitDynamics(model,optionsDyn);
     end
-    
     
     model.beta=1/(0.01*var(model.mOrig(:)));
     modelInit = model;
@@ -307,15 +313,15 @@ end
 %%%------------------ Extra --------------------%%%%%%%
 
 % The full movie!!
-for i=1:size(Ytr,1)
+for i=1:size(Varmu2,1)
     fr=reshape(Ytr(i,:),height,width);
     imagesc(fr);
     colormap('gray');
-    pause(0.05)
+    pause(0.09)
     fr=reshape(Varmu2(i,:),height,width);
     imagesc(fr);
     colormap('gray');
-    pause(0.09)
+    pause(0.001)
 end
 %%%%%
 
@@ -397,11 +403,11 @@ if predWithMs
     % Visualization of the reconstruction
     for i=1:Nstar
         subplot(1,2,1);
-        fr=reshape(YtsOriginal(i,:),288,360);
+        fr=reshape(YtsOriginal(i,:),height,width);
         imagesc(fr);
         colormap('gray');
         subplot(1,2,2);
-        fr=reshape(Varmu(i,:),288,360);
+        fr=reshape(Varmu(i,:),height,width);
         imagesc(fr);
         colormap('gray');
         pause(0.5);

@@ -21,7 +21,9 @@ end
 
 
 if strcmp(optionsDyn.type, 'vargpTime')
-    optionsDyn.initX = 'ppca';
+    if ~isfield(optionsDyn, 'initX')
+        optionsDyn.initX = 'ppca';
+    end
     
     % Create time vector for each dimension; if t is not given, assume an
     % equally spaced time vector.
@@ -63,5 +65,18 @@ if strcmp(optionsDyn.type, 'vargpTime')
     if ~isfield(optionsDyn,'seq')
         optionsDyn.seq=[];
     end
+    
+     if ~isfield(optionsDyn, 'testReoptimise')
+     	optionsDyn.testReoptimise = 1;  % !!! SET THE DEFAULT TO 1
+     end
+    
+    if ~isfield(optionsDyn, 'learnVariance')
+        optionsDyn.learnVariance = 0; % !!! SET THE DEFAULT TO 0
+    end
+
+    if ~isfield(optionsDyn, 'regularizeMeans')
+        optionsDyn.regularizeMeans = 0; 
+     end
+    
 end
 

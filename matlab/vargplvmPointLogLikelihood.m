@@ -3,7 +3,11 @@ function [ll, model] = vargplvmPointLogLikelihood(model, vardistx, y)
 % FORMAT
 % DESC returns the log likelihood of some latent points and the corresponding
 % (possibly partly) observed data point for the posterior prediction of the GP-LVM model.
-% It is perfectly functional when the input is just for one point.
+% It is perfectly functional when the input is just for one point. Note
+% that this function assumes that vargplvmUpdateStats is not called before
+% (unlike the vargplvmLogLikelihood function), so all the necessary
+% precomputations (due to the change in the parameters during optimisation)
+% are being done here. 
 % ARG model : the model for which the points prediction will be
 % made.
 % ARG vardistx : the variational distribution over latent points for which the posterior distribution
@@ -24,6 +28,8 @@ function [ll, model] = vargplvmPointLogLikelihood(model, vardistx, y)
 % compute firstly the lower bound that corresponds to the missing indices
 % in y 
 %  --- this bit of the lower bound does not depend on the vardistx    
+
+jitter = 1e-6;
 
 
 % Indices of missing dimension
@@ -51,6 +57,20 @@ Kt = zeros(N+Nstar, N+Nstar);
 % the variational distribution changes, the Psi statistics and everything
 % that depends on them needs to be re-computed.
 if dynUsed == 1
+    %%% RE-OPT-CODE-NEW_
+    if isfield(model.dynamics, 'reoptimise') && model.dynamics.reoptimise   
+        % In this case the inducing points and theta_t are optimised and 
+        % since updateStats is not called, any computations which need X_u
+        % or theta_t must be done here.
+        model = vargplvmDynamicsUpdateStats(model); % Update Kt, mu and S
+        model.K_uu = kernCompute(model.kern, model.X_u); 
+        model.K_uu = model.K_uu ...
+            + sparseDiag(repmat(jitter, size(model.K_uu, 1), 1));
+        model.Lm = jitChol(model.K_uu)';
+        model.invLm = model.Lm\eye(model.k);
+        model.invLmT = model.invLm';
+    end %%% _RE-OPT-CODE-NEW 
+    
    %model.y = model.y(:,indexMissing);
    model.m = model.m(:,indexMissing);
    model.d = prod(size(indexMissing));
