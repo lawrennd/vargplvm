@@ -213,13 +213,20 @@ similar expression:
 \end{align}
 
 
-In contrast to the above, the term $\hat{\mathcal{F}}_v$ does involve parameters $\boldsymbol \theta_x$, because it involves the variational parameters that are now reparametrized with $K_t$, which in turn depends on $\boldsymbol \theta_x$. 
-To demonstrate that, we will forget for a moment the reparametrization of $S_q$ and we will express the bound as $F(\boldsymbol \theta_x, \mu_q (\boldsymbol \theta_x))$ (where $\mu_q (\boldsymbol \theta_x) = K_t \bar{\boldsymbol \mu_q}$) so as to show explicitly the dependency on the variational mean which is now a function of $\boldsymbol \theta_x$. Our calculations must now take into account the term
-$
-\left( \frac{\vartheta \hat{\mathcal{F}}(\boldsymbol \mu_q)}{\vartheta \boldsymbol \mu_q} \right)^\top
-       \frac{\vartheta \mu_q (\boldsymbol \theta_x)}{\vartheta \boldsymbol \theta_x}
-$
-that is what we "miss" when we consider $\mu_q(\boldsymbol \theta_x) = \boldsymbol \mu_q$:
+In contrast to the above, the term $\hat{\mathcal{F}}_v$ does involve
+parameters $\boldsymbol \theta_x$, because it involves the variational
+parameters that are now reparametrized with $K_t$, which in turn
+depends on $\boldsymbol \theta_x$.  To demonstrate that, we will
+forget for a moment the reparametrization of $S_q$ and we will express
+the bound as $F(\boldsymbol \theta_x, \mu_q (\boldsymbol \theta_x))$
+(where $\mu_q (\boldsymbol \theta_x) = K_t \bar{\boldsymbol \mu_q}$)
+so as to show explicitly the dependency on the variational mean which
+is now a function of $\boldsymbol \theta_x$. Our calculations must now
+take into account the term $ \left( \frac{\vartheta
+    \hat{\mathcal{F}}(\boldsymbol \mu_q)}{\vartheta \boldsymbol \mu_q}
+\right)^\top \frac{\vartheta \mu_q (\boldsymbol \theta_x)}{\vartheta
+  \boldsymbol \theta_x} $ that is what we ``miss'' when we consider
+$\mu_q(\boldsymbol \theta_x) = \boldsymbol \mu_q$:
 \begin{align}
 \frac{\vartheta \mathcal{F}_v(\boldsymbol \theta_x, \mu_q(\boldsymbol \theta_x))}{\vartheta \theta_x} = {}&
 	\frac{\vartheta \mathcal{F}_v(\boldsymbol \theta_x, \boldsymbol \mu_q)}{\vartheta \theta_x} 
@@ -235,7 +242,10 @@ that is what we "miss" when we consider $\mu_q(\boldsymbol \theta_x) = \boldsymb
 \label{meanReparamDerivFTheta}
 \end{align}
 
-We do the same for $S_q$ and then we can take the resulting equations and replace $\bfmu_q$ and $S_q$ with their equals so as to take the final expression which only contains $\bar{\bfmu}_q$ and $\boldsymbol \lambda_q$:
+We do the same for $S_q$ and then we can take the resulting equations
+and replace $\bfmu_q$ and $S_q$ with their equals so as to take the
+final expression which only contains $\bar{\bfmu}_q$ and $\boldsymbol
+\lambda_q$:
 
 \begin{align}
 \frac{\vartheta \mathcal{F}_v(\boldsymbol \theta_x, \mu_q(\boldsymbol \theta_x), S_q(\boldsymbol \theta_x))}{\vartheta \theta_x}
