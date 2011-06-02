@@ -1,6 +1,6 @@
 function g = vargplvmSeqDynGradient(x, model, y)
 
-% VARGPLVMPOINTGRADIENT Wrapper function for gradient of a single point.
+% VARGPLPVMSEQDYNGRADIENT Wrapper function for gradient of a single point.
 % FORMAT
 % DESC is a wrapper function for the gradient of the log likelihood
 % with respect to a point in the latent space. The GP-LVM

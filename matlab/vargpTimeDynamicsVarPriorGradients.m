@@ -6,16 +6,16 @@ function [gVarmeans gVarcovs gDynKern] = ...
 % and for the theta_t parameters. The order of the calculations is such
 % that everything is already computed when it's needed without
 % recalculating things (e.g. Sq's are only calculated once). 
-
+%
 % THIS FUNCTION IS NOT USED AND WILL BE REMOVED FROM FUTURE RELEASES!!!!!
-
 % Notes: model.dynamics.vardist is used to hold lambda_q's and mu_bar's.
 % The original mu's and Sq's are not stored anywhere, just computed
 % locally, (Sq and mu_q). In that sense, model.vardist is probably not
 % necessary. 
-
+%
 % Most of the things are doable, only where I've put "TODO!!!" there is a
 % little problem that must be taken care of.
+%
 % VARGPLVM
 
 Kt = kernCompute(model.kern, model.t);

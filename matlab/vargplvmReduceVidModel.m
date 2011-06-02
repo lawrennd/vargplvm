@@ -1,4 +1,4 @@
-% vargplvmReduceVidModel
+% VARGPLVMREDUCEVIDMODEL
 % VARGPLVM
 
 % varargin may include "factor1" and "factor2" optionally

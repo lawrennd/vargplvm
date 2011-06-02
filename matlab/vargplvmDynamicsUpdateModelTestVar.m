@@ -1,5 +1,5 @@
 function [muX, varX, model]  = vargplvmDynamicsUpdateModelTestVar(model, x, varx, y)        
-% VARGPLVMDYNAMICSUYPDATEMODELTESTVAR return the original variational means and
+% VARGPLVMDYNAMICSUPDATEMODELTESTVAR return the original variational means and
 % variances for the test data and update the model to be prepared for
 % prediction
 % DESC in the dynamical vargplvm the original variational parameters are
