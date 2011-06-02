@@ -1,12 +1,13 @@
-% THIS FUNCTION IS NOT USED
 function [gVarmeans gVarcovs gDynKern] = ...
     vargpTimeDynamicsVarPriorGradients(model, gPsi1, gPsi2, gPsi0)
 
-% DESCRIPTION: This function does all the work for calculating the
+% VARGPTIMEDYNAMICSVARPRIORGRADIENTS: This function does all the work for calculating the
 % derivatives for the variational parameters (the new ones, lambda, mu_bar)
 % and for the theta_t parameters. The order of the calculations is such
 % that everything is already computed when it's needed without
 % recalculating things (e.g. Sq's are only calculated once). 
+
+% THIS FUNCTION IS NOT USED AND WILL BE REMOVED FROM FUTURE RELEASES!!!!!
 
 % Notes: model.dynamics.vardist is used to hold lambda_q's and mu_bar's.
 % The original mu's and Sq's are not stored anywhere, just computed
@@ -15,6 +16,7 @@ function [gVarmeans gVarcovs gDynKern] = ...
 
 % Most of the things are doable, only where I've put "TODO!!!" there is a
 % little problem that must be taken care of.
+% VARGPLVM
 
 Kt = kernCompute(model.kern, model.t);
 Lt = jitChol(Kt)';

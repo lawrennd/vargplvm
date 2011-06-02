@@ -3,5 +3,17 @@ demOil100Point.m
 demoVargplvm1.m       
 demFinance.m
 demFinance2.m
-playMov.m
+loadWalkSitJog.m
+testDemFinance2.m
+testPointLogLikelihoodScript.m
+demHighDimVargplvm1.m
+demInterpolation.m
+demHighDimVargplvmReconstr1.m
+vargplvmDynEvaluateReconstruction.m
+demCmu35gplvmVargplvmOne.m
+loadWalkSitJog.m
+testDemFinance2.m
+demHighDimVargplvm1.m
+demInterpolation.m
+vargplvmDynEvaluateReconstruction.m
 

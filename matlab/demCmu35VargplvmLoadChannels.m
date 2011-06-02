@@ -1,4 +1,6 @@
 function channels = demCmu35VargplvmLoadChannels(Ytest, skel)
+% DEMCMU35VARGPLVMLOADCHANNELS
+% VARGPLVM
 
 % playSkel(Ytest, startInd)
     skel = acclaimReadSkel('35.asf');

@@ -24,7 +24,7 @@ function model = vargpTimeDynamicsExpandParam(model, params)
 %	See also
 %   vargpTimeDynamicsExtractParam, vargpTimeDynamicsCreate,
 %   modelExpandParam
-
+% VARGPLVM
 
 % Parameters are received in the following order: (notation: % parameter{size})
 % [dynamicsVardistParams{dynamics.vardist.nParams}        % mu_bar, lambda

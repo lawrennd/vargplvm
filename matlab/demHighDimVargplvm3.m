@@ -1,4 +1,5 @@
-% Like demHighDimVargplvm2 but with more options for the dataset split.
+% DEMHIGHDIMVARGPLVM3 This is the main script to run the video experiments.
+% VARGPLVM
 
 clear timeStamps; % in case it's left from a previous experiment
 

@@ -1,6 +1,5 @@
-% Like the demo2 but with mode options to play with
 
-% DEMCMU35GPLVMVARGPLVM2 Run variational GPLVM with dynamics on CMU35 data.
+% DEMCMU35GPLVMVARGPLVM3 Run variational GPLVM with dynamics on CMU35 data.
 % Exactly as the demo no1 but we use also a bias part for the cmpd dynamics
 % kernel.
 

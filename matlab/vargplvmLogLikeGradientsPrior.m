@@ -1,5 +1,7 @@
-% This function is depricated and not used.
+% VARGPLVMLOGLIKEGRADIENTSPRIOR
+% This function is depricated and not used (will be removed in a future release)
 %
+% VARGPLVM
 function [gVarmeansKL gVarcovsKL] = vargplvmLogLikeGradientsPrior(model)
 % Like vargplvmLogLikeGradients bug only for the variational parameters of KL.
 

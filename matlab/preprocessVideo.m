@@ -1,5 +1,8 @@
 
 function [Y, height, width] = preprocessVideo(videoFile, width, height, form, options)
+% PREPROCESSVIDEO
+% VARGPLVM
+
 
 %baseDir = 'datasets/';
 %baseDir=[];

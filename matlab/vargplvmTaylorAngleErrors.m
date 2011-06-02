@@ -8,6 +8,7 @@ function [errStruct] = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, orig
 %	[errStruct] = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origScale,...
 %                                              missingInd, name, expNo);
 % 	Based on fgplvmTaylorAngleErrors.m
+% VARGPLVM
 
 %%%NEW
 Ygplvm=Y;

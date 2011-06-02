@@ -1,5 +1,5 @@
 function mm = vargplvmPruneModel(model, onlyData)
-% VARGPLVMCREATE Prune a var-GPLVM model.
+% VARGPLVMPRUNEMODEL Prune a var-GPLVM model.
 % FORMAT
 % DESC prunes a VAR-GPLVM model by removing some fields which can later be
 % reconstructed based on what is being kept. Used when storing a model.

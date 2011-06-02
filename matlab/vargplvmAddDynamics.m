@@ -19,7 +19,7 @@ function model = vargplvmAddDynamics(model, type, varargin)
 %
 %	See also
 %	MODELCREATE
-
+% VARGPLVM
 
 type = [type 'Dynamics'];
 model.dynamics = modelCreate(type, model.q, model.q, model.X, varargin{:}); % e.g. vargpTimeDynamicsCreate

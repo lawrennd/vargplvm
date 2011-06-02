@@ -24,6 +24,7 @@ function [muX, varX, model]  = vargplvmDynamicsUpdateModelTestVar(model, x, varx
 % COPYRIGHT : Michalis K. Titsias, 2009-2011
 % COPYRIGHT : Neil D. Lawrence, 2009-2011
 %
+% VARGPLVM
   
 Nstar = size(x,1);    
 N = model.N;

@@ -1,5 +1,5 @@
 function model = vargpTimeDynamicsUpdateStats(model)
-% VARGPLVMOPTIONSDYN Supplementary update stats for when the model contains
+% VARGPTIMEDYNAMICSUPDATESTATS Supplementary update stats for when the model contains
 % dynamics
 % FORMAT
 % DESC When the model contains dynamics, this function first updates the

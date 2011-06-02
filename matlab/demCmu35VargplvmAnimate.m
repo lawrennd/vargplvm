@@ -1,7 +1,8 @@
+% DEMCMU35VARGPLVMANIMATE
 % demCmu35 with animation. The predictions Ypred are recomputed based on
 % the saved barmu, lambda, modelUpdated because they weren't saved
 % properly. (TODO: save these recomputations!)
-
+% VARGPLVM
 randn('seed', 1e5);
 rand('seed', 1e5);
 

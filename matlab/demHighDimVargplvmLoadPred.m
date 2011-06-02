@@ -1,3 +1,7 @@
+% DEMHIGHDIMVARGLPVMLOADPRED Helper function
+% VARGPLVM
+
+
 %<dataset info and experimentNo>
 % load xxxxPred
 predWithMs=0; doSampling=0;

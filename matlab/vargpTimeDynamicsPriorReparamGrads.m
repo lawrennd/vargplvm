@@ -1,5 +1,5 @@
 function [gVarmeans gVarcovs gDynKern] = vargpTimeDynamicsPriorReparamGrads(dynModel, gVarmeansLik, gVarcovsLik, gInd)
-% MODELVARPRIORBOUND Returns the gradients of the various types of the
+% VARGPTIMEDYNAMICSPRIORREPARAMGRADS Returns the gradients of the various types of the
 % variational GPLVM bound when dynamics is used. The gradients returned are
 % those for the variational means and covariances and the temporal kernel.
 % FORMAT

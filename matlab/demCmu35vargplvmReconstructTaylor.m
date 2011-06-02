@@ -6,7 +6,7 @@
 % Based on demCmu35fgplvmReconstructTaylor.m
 
 % See also: vargplvmTaylorAngleErrors
-
+% VARGPLVM
 
 randn('seed', 1e5);
 rand('seed', 1e5);

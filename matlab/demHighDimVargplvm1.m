@@ -1,3 +1,5 @@
+% DEMHIGHDIMVARGPLVM1
+% VARGPLVM
 
 clear timeStamps; % in case it's left from a previous experiment
 

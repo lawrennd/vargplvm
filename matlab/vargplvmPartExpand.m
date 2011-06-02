@@ -1,3 +1,4 @@
+% VARGPLVMPARTEXPAND
 % This function is used when the model is using jointly the test and
 % training data (possibly with missing values from the first) to optimise
 % and in that case only part of the parameters are being optimised. This
@@ -10,7 +11,7 @@
 
 % x = [mu_bar lambda theta_t X_u] where mu_bar and lambda are augmented to
 % include the vardist. of the test points.
-
+% VARGPLVM
 
 % [(N*Q*2)              |theta_t| Q*k |theta_f| 1] -> vargplvmExtractParam(model)
 % [(N*Q*2)+(Nstar*Q*2)  |theta_t| Q*k]             -> x

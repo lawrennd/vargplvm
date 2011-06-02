@@ -1,4 +1,5 @@
 % vargplvmReduceVidModel
+% VARGPLVM
 
 % varargin may include "factor1" and "factor2" optionally
 function [model, newHeight, newWidth] = vargplvmReduceVidModel(model, height, width, varargin)

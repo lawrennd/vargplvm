@@ -2,7 +2,8 @@
 % vargplvmPointLogLikeGradient
 
 function gVar = vargplvmLogLikeGradientsVar(model, includeKL)
-
+% VARGPLVMLOGLIKEGRADIENTSVAR
+% VARGPLVM
 
 if ~isfield(model, 'dynamics') || isempty(model.dynamics)
     gVarmeansKL = - model.vardist.means(:)';

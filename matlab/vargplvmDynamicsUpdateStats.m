@@ -9,7 +9,7 @@ function model = vargplvmDynamicsUpdateStats(model)
 %
 % COPYRIGHT Andreas C. Damianou, Michalis Titsias, Neil Lawrence, 2010-2011
 %
-
+% VARGPLVM
 
 fhandle = str2func([model.dynamics.type 'UpdateStats']);
 model = fhandle(model);

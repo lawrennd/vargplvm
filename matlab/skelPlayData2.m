@@ -1,6 +1,6 @@
 function skelPlayData2(skelStruct, frameLength, channels1, channels2, channels3, lbls)
 
-% SKELPLAYDATA Play skel motion capture data.
+% SKELPLAYDATA2 Play skel motion capture data.
 %
 %	Description:
 %
@@ -20,6 +20,7 @@ function skelPlayData2(skelStruct, frameLength, channels1, channels2, channels3,
 % 	skelPlayData.m CVS version 1.2
 % 	skelPlayData.m SVN version 42
 % 	last update 2008-08-12T20:23:47.000000Z
+% VARGPLVM
 
 if nargin < 3
     frameLength = 1/120;

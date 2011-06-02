@@ -1,3 +1,6 @@
+% DEMHIGHDIMVARGPLVMTRAINED
+% VARGPLVM
+
 % This demo is the extension of demHighDimVargplvmX.m. In essence, the code
 % is almost similar to the one in the end of the aforementioned demo, but
 % here the training phase is omitted .

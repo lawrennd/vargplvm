@@ -1,5 +1,5 @@
 %%%% !!!!! This has gone straight to vargpTimeDynamicsUpdateStats. This function will no longer be
-%%%% used and will be depricated.
+%%%% used and as it is depricated will be removed from future releases
 
 function [muqOrig SqOrig] = vargpTimeDynamicsPriorKernGrad(dynModel)
 % VARGPTIMEDYNAMICSPRIORKERNGRAD Compute the original variational
@@ -11,6 +11,7 @@ function [muqOrig SqOrig] = vargpTimeDynamicsPriorKernGrad(dynModel)
 % RETURN muqOrig : the original Q, N-dimensional variational means in a matrix (NxQ).
 % RETURN SqOrig : the original Q, N-dimensional diagonals of the variational 
 % NxN covariances in a matrix (NxQ).
+% VARGPLVM
 
 [muqOrig SqOrig]=vargpTimeDynamicsPriorKernGrad2(dynModel);
 

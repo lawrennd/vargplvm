@@ -1,3 +1,6 @@
+% DEMOSNIPS
+% VARGPLVM
+
 %------------ MOCAP ------------------------------%
 %% Matern
 experimentNo=33; 
