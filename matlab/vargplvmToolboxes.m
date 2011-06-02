@@ -9,3 +9,5 @@ importLatest('kern');
 importLatest('ndlutil');
 importLatest('mocap');
 importLatest('gp');
+importLatest('noise');
+

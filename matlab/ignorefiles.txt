@@ -1,3 +1,7 @@
 adpaths.m
 demOil100Point.m  
 demoVargplvm1.m       
+demFinance.m
+demFinance2.m
+playMov.m
+

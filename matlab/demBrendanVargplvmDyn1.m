@@ -1,4 +1,4 @@
-% DEMBRENDANVARGPLVM1 Run variational GPLVM on Brendan face data.
+% DEMBRENDANVARGPLVMDYN1 Run variational GPLVM on Brendan face data.
 
 % VARGPLVM
 %clear;

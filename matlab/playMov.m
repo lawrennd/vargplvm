@@ -1,5 +1,8 @@
 function playMov(h, w, options, Y1, Y2,sz)
 
+% PLAYMOV 
+  
+% VARGPLVM
 if ~nargin
     fprintf(1,'# Usage: \nplayMov(h,w,[p <p_diff>],Y1,<Y2>,<figSizeFactor>)\n');
     return

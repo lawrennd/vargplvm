@@ -1,6 +1,9 @@
 % Demo for a univariate time series (one time series)
 % In this case this model is not much different than doing standard GP
 % regression (?)
+% DEMFINANCE Demonstrate variational GPLVM on financial data.
+
+% VARGPLVM
 
 load garchdata
 dataSetName='garchdata';

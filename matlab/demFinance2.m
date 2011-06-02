@@ -1,5 +1,7 @@
 % Demo for multivariate time series (i.e multiple univariate time series)
+% DEFMFINANCE2 Demonstrate Variational GPLVM on financial data.
 
+% VARGPLVM
 
 
 

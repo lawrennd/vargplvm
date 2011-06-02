@@ -1,17 +1,23 @@
-% Receives a video and reduces its resolution by factor1 (lines) and
-% factor2).
-
-% Yall: a matrix for which each line corresponds to a frame. This frame
-% must be of dimensions h (height) x w (width) and it must be formed by
-% column-wise serialisation of the original frame, i.e. fr(:)'.
-%
-% factor1: every factor1 lines will be skipped
-% factor2: every factor2 columns will be skipped
-% Z: the new video in the same format as described for Yall
-% newHeight: the new height for each frame
-% newWidth: the new width for each frame
 function [Z, newHeight, newWidth] = vargplvmReduceVideo(Yall, h, w, factor1,factor2)
 
+% VARGPLVMREDUCEVIDEO Receives a video and reduces its resolution by factor1 (lines) and factor2).
+% FORMAT
+% ARG Yall : a matrix for which each line corresponds to a frame. This frame
+% must be of dimensions h (height) x w (width) and it must be formed by 
+% column-wise serialisation of the original frame, i.e. fr(:)'.
+% ARG h : height
+% ARG w : height
+%
+% ARG factor1 : every factor1 lines will be skipped
+% ARG factor2: every factor2 columns will be skipped
+% RETURN Z : the new video in the same format as described for Yall
+% RETURN newHeight: the new height for each frame
+% RETURN newWidth: the new width for each frame
+%
+% COPYRIGHT : Andreas Damianou, 2011
+
+% VARGPLVM
+  
 if nargin == 3
     factor1 = 2;
     factor2 = 2;
