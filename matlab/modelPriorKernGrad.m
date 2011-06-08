@@ -1,5 +1,6 @@
 function [muqOrig SqOrig] = modelPriorKernGrad(dynModel)
 % MODELPRIORKERNGRAD
+% see vargpTimeDynamicsPriorKernGrad. This function here is just a wrapper.
 % VARGPLVM
 
 fhandle = str2func([dynModel.type 'PriorKernGrad']);

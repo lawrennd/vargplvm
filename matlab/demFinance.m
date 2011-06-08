@@ -1,15 +1,13 @@
-% Demo for a univariate time series (one time series)
-% In this case this model is not much different than doing standard GP
-% regression (?)
-% DEMFINANCE Demonstrate variational GPLVM on financial data.
-
+% DEMFINANCE Demonstrate variational GPLVM with dynamics on financial data for a univariate time series (one time series)
+% DESC This demo is not really of interest the dimensionality of the data is D=1
+% COPYRIGHT : Andreas C. Damianou, 2011
 % VARGPLVM
 
 load garchdata
 dataSetName='garchdata';
 
-Y=price2ret(NASDAQ);
-Y=NASDAQ; %%%%%%%%%%%%%TEMP!!!
+% Y=price2ret(NASDAQ); % This is the return
+Y=NASDAQ; % This is the price series
 
 clear DEM2GBP
 clear NYSE

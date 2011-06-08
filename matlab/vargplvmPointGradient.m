@@ -1,5 +1,4 @@
 function g = vargplvmPointGradient(x, model, y)
-
 % VARGPLVMPOINTGRADIENT Wrapper function for gradient of a single point.
 % FORMAT
 % DESC is a wrapper function for the gradient of the log likelihood
@@ -14,7 +13,8 @@ function g = vargplvmPointGradient(x, model, y)
 %
 % SEEALSO : vargplvmPointLogLikeGradient, vargplvmOptimisePoint
 %
-% COPYRIGHT Michalis K. Titsias and Neil D. Lawrence, 2009
+% COPYRIGHT Michalis K. Titsias and Neil D. Lawrence, 2009, 2011
+% COPYRIGHT Andreas C. Damianou, 2011
 
 % VARGPLVM
 

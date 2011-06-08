@@ -1,8 +1,14 @@
-% DEMCMU35VARGPLVMANIMATE
-% demCmu35 with animation. The predictions Ypred are recomputed based on
-% the saved barmu, lambda, modelUpdated because they weren't saved
-% properly. (TODO: save these recomputations!)
+% DEMCMU35VARGPLVMANIMATE Load results for the dyn. GPLVM on CMU35 data and produce animation and plots
+% DESC Load results for the dyn. GPLVM on CMU35 data and produce animation and plots.
+% By default the demo presents the results for the leg reconstruction. By commenting the appropriate line
+% the demo can present the results for the body reconstruction.
+% COPYRIGHT :  Andreas C. Damianou, Michalis K. Titsias, 2011
+%
+% SEEALSO : demCmu35VargplvmLoadChannels, demCmu35gplvmVargplvm3.m
 % VARGPLVM
+
+
+
 randn('seed', 1e5);
 rand('seed', 1e5);
 
@@ -33,6 +39,9 @@ timeStampsTest = ([0:size(Ytest,1)-1].*dt)';
 load(fileName)
 model.dynamics.t_star = timeStampsTest;
 
+
+% Comment one of the following lines as appropriate to obtain the results for the leg or body reconstruction
+% respectively.
 %load(['demCmu35Vargplvm' num2str(experimentNo) 'PredLegs.mat']); missingInd = legInd;
 load(['demCmu35Vargplvm' num2str(experimentNo) 'PredBody.mat']) ;missingInd = bodyInd;
 
@@ -40,14 +49,13 @@ YtestOrig = Ytest;
 YtestGplvm = Ytest;
 YtestGplvm(startInd:end, missingInd) = NaN;
 indexMissingData = startInd:size(YtestGplvm);
+% In case only barmu and lambda are loaded from the results then the next step is necessary to find
+% the predictive dencity Ypred.
 [x, varx, modelUpdated] = vargplvmDynamicsUpdateModelTestVar(model, barmu, lambda, YtestGplvm);
 Testmeans = x(indexMissingData, :);
 Testcovars = varx(indexMissingData, :);
 [mu, sigma] = vargplvmPosteriorMeanVar(modelUpdated, Testmeans, Testcovars);
 Ypred = mu;
-
-
-
 
 %%
 origYtest = Ytest;
@@ -115,48 +123,6 @@ channels2 = demCmu35VargplvmLoadChannels(Ypred,skel);
 channels3 = demCmu35VargplvmLoadChannels(Y(bestIndNn, :),skel);
 %skelPlayData(skel, channels, 1/25);
 
-%{
- for i=1:3
-    %left indices
-    xyzInd = [2];
-    xyzDiffInd = [1 3];
-    rotInd = [4 6];
-    rotDiffInd = [5];
-    generalInd = [7:38 41:47 49:50 53:59 61:62];
-    startInd = 1;
-    endInd = length(generalInd);
-    channels(:, generalInd) = 180*Ytest(:, startInd:endInd)/pi;
-    startInd = endInd + 1;
-    endInd = endInd + length(xyzDiffInd);
-    channels(:, xyzDiffInd) = cumsum(Ytest(:, startInd:endInd), 1);
-    startInd = endInd + 1;
-    endInd = endInd + length(xyzInd);
-    channels(:, xyzInd) = Ytest(:, startInd:endInd);
-    startInd = endInd + 1;
-    endInd = endInd + length(xyzDiffInd);
-    channels(:, xyzDiffInd) = cumsum(Ytest(:, startInd:endInd), 1);
-    startInd = endInd + 1;
-    endInd = endInd + length(rotInd);
-    channels(:, rotInd) = asin(Ytest(:, startInd:endInd))*180/pi;
-    channels(:, rotInd(end)) = channels(:, rotInd(end))+270;
-    startInd = endInd + 1;
-    endInd = endInd + length(rotDiffInd);
-    channels(:, rotDiffInd) = 0;%cumsum(asin(Ytest(:, startInd:endInd)), 1))*180/pi;
-    % skelPlayData(skel, channels, 1/25);
-
-    if i==1
-        Ytest = Ypred;
-        channels1 = channels;
-        clear channels
-    elseif i==2
-        Ytest = Y(bestIndNn, :);
-        channels2 = channels;
-        clear channels
-    end
-end
-%channels3 = channels;
-%}
-
 startInd = 63;
 skelPlayData2(skel, 1/15, channels1(startInd:end,:), channels2, channels3,{'Ytest','YpredGPLVM','YpredNN'});
 
@@ -165,9 +131,6 @@ skelPlayData2(skel, 1/15, channels1(startInd:end,:), channels2, channels3,{'Ytes
 if ~exist('doSampling')
     doSampling = 0;
 end
-
-
-
 
 
 if doSampling

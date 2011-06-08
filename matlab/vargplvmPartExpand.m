@@ -1,3 +1,4 @@
+function [vardistx, model] = vargplvmPartExpand(model, x, update)
 % VARGPLVMPARTEXPAND
 % This function is used when the model is using jointly the test and
 % training data (possibly with missing values from the first) to optimise
@@ -11,15 +12,13 @@
 
 % x = [mu_bar lambda theta_t X_u] where mu_bar and lambda are augmented to
 % include the vardist. of the test points.
-% VARGPLVM
 
+% Note on the order of the parameters:
 % [(N*Q*2)              |theta_t| Q*k |theta_f| 1] -> vargplvmExtractParam(model)
 % [(N*Q*2)+(Nstar*Q*2)  |theta_t| Q*k]             -> x
-
-function [vardistx, model] = vargplvmPartExpand(model, x, update)
-%%%TMP
-%save 'TEMP.mat' 'model' 'x'
-%%%
+%
+% COPYRIGHT: Andreas C. Damianou, Michalis K. Titsias 2011
+% VARGPLVM
 
 % The model params before optimisation
 paramsOrig = vargplvmExtractParam(model);

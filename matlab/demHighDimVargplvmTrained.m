@@ -1,9 +1,15 @@
-% DEMHIGHDIMVARGPLVMTRAINED
+% DEMHIGHDIMVARGPLVMTRAINED Perform tasks (predictions, sampling) for an already trained model on high dimensinoal video datasets.
+% DESC: Load an already trained model on a video dataset and do sampling or predictions with that.
+% !!! The parameters that concern the dataset and the experimentNo must be exactly the same as those for the trained model.
+%
+% COPYRIGHT: Andreas C. Damianou, Michalis K. Titsias, 2010 - 2011
+% SEEALSO: demHighDimVargplvm3.m
 % VARGPLVM
 
-% This demo is the extension of demHighDimVargplvmX.m. In essence, the code
-% is almost similar to the one in the end of the aforementioned demo, but
-% here the training phase is omitted .
+%---- This file is in essence the same as demHighDimVargplvm3.m with the training phase omitted. ---
+%-------------
+% VARGPLVM
+
 
 
 % Fix seeds

@@ -1,8 +1,25 @@
 function playMov(h, w, options, Y1, Y2,sz)
+% PLAYMOV Play a video file which is stored by rows in a 2-D matrix.
+% DESC Utility to play video files (a sequence of frames) where each row corresponds
+% to one frame, serialized by columns. Each frame must then be reshaped before plotted
+% and for this the function must receice its actual dimensions as an argument.
+% This function has been developed in many steps and is quite messy!!!
+% ARG h: the true height of the frame
+% ARG w: the true width of the frame
+% ARG options: further options for the function
+% ARG: Y1 the matrix which keeps the video by rows
+% ARG: As Y2, in case the user wants to see two videos side by side
+% (as long as both have the same dimensions)
+% ARG: sz: The presented frame's dimensions (cf. the true dimensions) is
+% divided by this number if the argument is present.
+%
+% COPYRIGHT: Andreas C. Damianou, 2011
+%
+% SEEALSO : preprocessVideo.m
 
-% PLAYMOV 
-  
 % VARGPLVM
+
+
 if ~nargin
     fprintf(1,'# Usage: \nplayMov(h,w,[p <p_diff>],Y1,<Y2>,<figSizeFactor>)\n');
     return

@@ -1,6 +1,7 @@
-% Demo for multivariate time series (i.e multiple univariate time series)
-% DEFMFINANCE2 Demonstrate Variational GPLVM on financial data.
-
+% DEFMFINANCE2 Demonstrate Variational GPLVM with dynamics on financial data for multivariate time series (i.e multiple univariate time series)
+% DESC The dimensionality of the data is the number of the correlated timeseries. The data number is the points in a timeseries
+% (the number of which is the same for all timeseries)
+% COPYRIGHT : Andreas C. Damianou, 2011
 % VARGPLVM
 
 
@@ -22,12 +23,13 @@ if ~exist('Nstar')           Nstar = 60;            end % Number of test points
 if ~exist('makeStationary')  makeStationary = 1;    end
 if ~exist('logOfData')       logOfData = 0;         end
 
-switch dataSetName
-    case 'USecon'
-        load DATA_USecon
-    case 'NYSE2Small'
-        load ../../datasets/finance/nyse_new2Small
-end
+% switch dataSetName
+%     case 'USecon'
+%         load DATA_USecon
+%     case 'NYSE2Small'
+%         load ../../datasets/finance/nyse_new2Small
+% end
+Y = lvmLoadData(dataSetName);
 
 %--- FOR DEBUG
 if exist('dataToKeep')

@@ -1,4 +1,3 @@
-
 function model = vargplvmInitDynamics(model,optionsDyn)
 % VARGPLVMINITDYNAMICS Initialize the dynamics of a var-GPLVM model.
 % FORMAT

@@ -1,6 +1,6 @@
-% DEMHIGHDIMVARGPLVM1
+% DEMHIGHDIMVARGPLVM2
+% This is an old script. See demHighDimVargplvm3.m
 % VARGPLVM
-
 clear timeStamps; % in case it's left from a previous experiment
 
 % Fix seeds
@@ -9,36 +9,29 @@ rand('seed', 1e5);
 
 % Define constants (in a manner that allows other scripts to parametrize
 % this one).
-if ~exist('experimentNo')   experimentNo = 404;  end
-if ~exist('itNo')           itNo =2000;          end     % Default: 2000
-if ~exist('indPoints')      indPoints = 75;      end     % Default: 50
-if ~exist('latentDim')      latentDim = 30;      end
+if ~exist('experimentNo')   experimentNo = 404;      end
+if ~exist('itNo')           itNo =2000;              end     % Default: 2000
+if ~exist('indPoints')      indPoints = 49;          end     % Default: 49
+if ~exist('latentDim')      latentDim = 40;          end
 % Set to 1 to use dynamics or to 0 to use the standard var-GPLVM
-if ~exist('dynUsed')        dynUsed = 1;         end    
+if ~exist('dynUsed')        dynUsed = 1;             end
 % Set to 1 to keep only the dimensions modelling the head (missa dataset)
-if ~exist('cropVideo')      cropVideo = 0;       end    
+if ~exist('cropVideo')      cropVideo = 0;           end
 % Set to 1 to remove the frames with the translation (missa dataset)
-if ~exist('removeTransl')   removeTransl = 0;    end    
-if ~exist('fixedBetaIters') fixedBetaIters = 0; end     % DEFAULT: 23
+if ~exist('removeTransl')   removeTransl = 0;        end
+if ~exist('fixedBetaIters') fixedBetaIters = 0;      end     % DEFAULT: 23
 % Set to 1 to tie the inducing points with the latent vars. X
-if ~exist('fixInd') fixInd = 0; end    
+if ~exist('fixInd') fixInd = 0;                      end
+if ~exist('dynamicKern') dynamicKern = {'rbf', 'white', 'bias'}; end
+if ~exist('reconstrIters') reconstrIters = 1000;                 end
+if ~exist('vardistCovarsMult') vardistCovarsMult=1.3;            end % 0.1 gives around 0.5 init.covars. 1.3 biases towards 0.
 
-
+        
 % load data
-dataSetName = 'missa'; % 360x288
-%load miss-americaHD
-Y = lvmLoadData(dataSetName);
+dataSetName = 'ocean'; % 720x1280
+
+load '../../VideoManipulation/datasets/mat/DATA_Ocean';
 % For this dataset there is a translation in space between frames 66-103
-
-
-
-%%%%%%%%%%% TEMP
-%delete TEMPInducingMeansDist.mat
-%delete TEMPInducingMeansDistNorm.mat
-%delete TEMPInducingIndices.mat
-%delete TEMPLikelihoodTrace.mat
-%%%%%%%%%%%%%%%%%%%
-
 
 
 % dataSetName = 'susie';
@@ -52,7 +45,13 @@ fprintf(1,'# Latent dimensions: %d\n',latentDim);
 fprintf(1,'# Iterations (with/without fixed Beta): %d / %s\n',fixedBetaIters, num2str(itNo));
 fprintf(1,'# Tie Inducing points: %d\n',fixInd);
 fprintf(1,'# Dynamics used: %d\n', dynUsed);
-%fprintf(1,'# CropVideo / removeTranslation: %d / %d \n', cropVideo, removeTransl);
+if dynUsed
+    fprintf(1,'# Dynamics kern: ');
+    disp(dynamicKern);
+end
+
+fprintf(1,'# CropVideo / removeTranslation: %d / %d \n', cropVideo, removeTransl);
+fprintf(1,'# VardistCovarsMult: %d \n', vardistCovarsMult);
 %fprintf(1,'#----------------------------------------------------\n');
 
 switch dataSetName
@@ -63,29 +62,42 @@ switch dataSetName
         width=352;
         height=240;
     case 'ocean'
-        width=1080;
+        width=1280;
         height=720;
 end
-
-% width=360;
-% height=288;
 
 % Remove the translation part (only for the "missa" dataset)
 if removeTransl
     Y = [Y(1:64,:) ; Y(103:end,:)];
 end
 
-% Crop video (only for the "missa" dataset)
+% Crop video
 if cropVideo
-    newWidth=144;
-    newHeight=122;
-    Ynew = zeros(size(Y,1), newWidth*newHeight);
-    for i=1:size(Y,1)
-        fr=reshape(Y(i,:),height,width);
-        fr=imcrop(fr,[129.5 91.5 newWidth-1 newHeight-1]);
-        Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
+    switch dataSetName
+        case 'missa'
+            % Keep only the head
+            newWidth=144;
+            newHeight=122;
+            Ynew = zeros(size(Y,1), newWidth*newHeight);
+            for i=1:size(Y,1)
+                fr=reshape(Y(i,:),height,width);
+                fr=imcrop(fr,[129.5 91.5 newWidth-1 newHeight-1]);
+                Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
+            end
+            Y = Ynew; width=newWidth; height=newHeight;
+        case 'ocean'
+            % Keep only the water
+            %[1.5 288.5 1279 432]
+            newWidth=width;
+            newHeight=round(height/1.6666);
+            Ynew = zeros(size(Y,1), newWidth*newHeight);
+            for i=1:size(Y,1)
+                fr=reshape(Y(i,:),height,width);
+                fr=imcrop(fr,[1 288.5 newWidth-1 newHeight-1]);
+                Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
+            end
+            Y = Ynew; width=newWidth; height=newHeight;
     end
-    Y = Ynew; width=newWidth; height=newHeight;
 end
 
 
@@ -144,8 +156,8 @@ if trainModel
     end
     model = vargplvmCreate(latentDim, d, Ytr, options);
     
-
-        
+    
+    
     % Temporary: in this demo there should always exist the mOrig field
     if ~isfield(model, 'mOrig')
         model.mOrig = model.m;
@@ -162,7 +174,19 @@ if trainModel
         optionsDyn.type = 'vargpTime';
         optionsDyn.t=timeStampsTraining;
         optionsDyn.inverseWidth=100; % Default: 100
+                
         
+        kern = kernCreate(t, dynamicKern); % Default: {'rbf','white','bias'}
+        kern.comp{2}.variance = 1e-1; % Usual values: 1e-1, 1e-3
+        % The following is related to the expected number of
+        % zero-crossings.(larger inv.width numerator, rougher func)
+        if ~strcmp(kern.comp{1}.type,'ou')
+            kern.comp{1}.inverseWidth = optionsDyn.inverseWidth./(((max(t)-min(t))).^2);
+            kern.comp{1}.variance = 1;
+        end
+        optionsDyn.kern = kern;
+        optionsDyn.vardistCovars = vardistCovarsMult; % 0.23 gives true vardist.covars around 0.5 (DEFAULT: 0.23) for the ocean dataset
+             
         % Fill in with default values whatever is not already set
         optionsDyn = vargplvmOptionsDyn(optionsDyn);
         model = vargplvmAddDynamics(model, 'vargpTime', optionsDyn, optionsDyn.t, 0, 0,optionsDyn.seq);
@@ -171,10 +195,9 @@ if trainModel
         model = vargplvmInitDynamics(model,optionsDyn);
     end
     
-    
     model.beta=1/(0.01*var(model.mOrig(:)));
     modelInit = model;
-
+    
     %%---
     capName = dataSetName;
     capName(1) = upper(capName(1));
@@ -182,10 +205,10 @@ if trainModel
     modelType(1) = upper(modelType(1));
     fileToSave = ['dem' capName modelType num2str(experimentNo) '.mat'];
     %%---
-          
+    
     display = 1;
-%     %%%% Optimisation
-%     % do not learn beta for few iterations for intitialization
+    %     %%%% Optimisation
+    %     % do not learn beta for few iterations for intitialization
     if fixedBetaIters ~=0
         model.learnBeta = 0;
         fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
@@ -212,9 +235,9 @@ if trainModel
         model.iters = model.iters + iters;
         fprintf(1,'1/b = %.4d\n',1/model.beta);
         modelTr = model;
-    
+        
         fprintf(1,'# 1/b=%.4f\n var(m)=%.4f\n 1/init_b=%.4f\n',1/model.beta, var(model.mOrig(:)), modelInit.beta);
-    
+        
         % Save model
         fprintf(1,'# Saving %s\n',fileToSave);
         prunedModel = vargplvmPruneModel(model);
@@ -223,7 +246,7 @@ if trainModel
         save(fileToSave, 'prunedModel', 'prunedModelInit', 'prunedModelTr');
     end
 else
-     % Load pre-trained model
+    % Load pre-trained model
     capName = dataSetName;
     capName(1) = upper(capName(1));
     modelType = 'vargplvm';
@@ -270,7 +293,7 @@ errorNN = mean(abs(NNmu(:) - YtsOriginal(:)));
 fprintf(1,'# Error GPLVM: %d\n', errorOnlyTimes);
 fprintf(1,'# Error NN: %d\n', errorNN);
 
- return
+return
 
 % Visualization of the reconstruction
 for i=1:Nstar
@@ -292,15 +315,15 @@ end
 %%%------------------ Extra --------------------%%%%%%%
 
 % The full movie!!
-for i=1:size(Ytr,1)
+for i=1:size(Varmu2,1)
     fr=reshape(Ytr(i,:),height,width);
     imagesc(fr);
     colormap('gray');
-    pause(0.05)
+    pause(0.09)
     fr=reshape(Varmu2(i,:),height,width);
     imagesc(fr);
     colormap('gray');
-    pause(0.09)
+    pause(0.001)
 end
 %%%%%
 
@@ -312,7 +335,7 @@ end
 % observed test images (also good for de-bugging because this should be better
 % than the onlyTimes prediction)
 
-predWithMs = 1;
+predWithMs = 0;
 
 if predWithMs
     %
@@ -365,7 +388,7 @@ if predWithMs
     
     Yts(:,indexMissing) = NaN;
     model.dynamics.t_star = timeStampsTest;
-    iters=100;
+    iters=reconstrIters;
     [x, varx, modelUpdated] = vargplvmOptimisePoint(model, vardistx, Yts, display, iters);
     barmu = x;
     lambda = varx;
@@ -377,18 +400,33 @@ if predWithMs
     Varmu = vargplvmPosteriorMeanVar(modelUpdated, x, varx);
     % Mean error per pixel
     errorFull = sum(sum( abs(Varmu(:,indexMissing) - YtsOriginal(:,indexMissing)) ))/prod(size(YtsOriginal(:,indexMissing)));
+    fprintf(1,'# GPLVM Error (in the missing dims) with missing inputs:%d\n', errorFull);
     
     % Visualization of the reconstruction
     for i=1:Nstar
         subplot(1,2,1);
-        fr=reshape(YtsOriginal(i,:),288,360);
+        fr=reshape(YtsOriginal(i,:),height,width);
         imagesc(fr);
         colormap('gray');
         subplot(1,2,2);
-        fr=reshape(Varmu(i,:),288,360);
+        fr=reshape(Varmu(i,:),height,width);
         imagesc(fr);
         colormap('gray');
         pause(0.5);
     end
+    
+    NNmuPart = zeros(Nstar, model.d);
+    for i=1:Nstar
+        if i < Nstar
+            NNmuPart(i, indexMissing) = 0.5*(Ytr(i,indexMissing) + Ytr(i+1,indexMissing));
+        else
+            NNmuPart(i, indexMissing) = Ytr(end,indexMissing);
+        end
+        NNmuPart(i, indexPresent) = Yts(i, indexPresent);
+    end
+    % Mean absolute error per pixel
+    %errorNNPart = mean(abs(NNmuPart(:) - YtsOriginal(:)));
+    errorNNPart = sum(sum( abs(NNmuPart(:,indexMissing) - YtsOriginal(:,indexMissing)) ))/prod(size(YtsOriginal(:,indexMissing)));
+    fprintf(1,'# NN Error (in the missing dims) with missing inputs:%d\n', errorNNPart);
     
 end

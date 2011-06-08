@@ -2,12 +2,14 @@ function [errStruct] = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, orig
                                               missingInd, name, expNo);
 
 
-% VARGPLVMTAYLORANGLEERRORS Helper function for computing angle errors for CMU 35 data.
+% VARGPLVMTAYLORANGLEERRORS Helper function for computing angle errors for CMU 35 data using 
+%	GPLVM with dynamics.
 %
 %	Description:
 %	[errStruct] = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origScale,...
 %                                              missingInd, name, expNo);
-% 	Based on fgplvmTaylorAngleErrors.m
+% 	Based on fgplvmTaylorAngleErrors.m for FGPLVM.
+% COPYRIGHT: Neil Lawrence, Andreas Damianou, Michalis Titsias 2010-2011
 % VARGPLVM
 
 %%%NEW

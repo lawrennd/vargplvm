@@ -1,6 +1,14 @@
 % DEMCMU35GPLVMVARGPLVM1 Run variational GPLVM with dynamics on CMU35 data.
-
+%
+% COPYRIGHT :  Andreas C. Damianou, Michalis K. Titsias, 2011
+%
+% SEEALSO : demCmu35gplvmVargplvm3.m
 % VARGPLVM
+
+
+
+
+
 
 clear
 % Fix seeds

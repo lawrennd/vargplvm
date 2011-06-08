@@ -1,11 +1,11 @@
 function skelPlayData2(skelStruct, frameLength, channels1, channels2, channels3, lbls)
-
-% SKELPLAYDATA2 Play skel motion capture data.
+% SKELPLAYDATA2 Play skel motion capture data for more than one dataset (for comparison).
 %
 %	Description:
 %
-%	SKELPLAYDATA(SKEL, CHANNELS, FRAMELENGTH) plays channels from a
-%	motion capture skeleton and channels.
+%	SKELPLAYDATA2(SKEL, FRAMELENGTH, CHANNELS, CHANNELS2, CHANNELS3, lbls) plays channels from a
+%	motion capture skeleton and channels. This function just extends the original one by allowing
+% 	more datasets to be presented side by side for comparison
 %	 Arguments:
 %	  SKEL - the skeleton for the motion.
 %	  CHANNELS - the channels for the motion.
@@ -14,12 +14,8 @@ function skelPlayData2(skelStruct, frameLength, channels1, channels2, channels3,
 %
 %	See also
 %	BVHPLAYDATA, ACCLAIMPLAYDATA
-
-
 %	Copyright (c) 2006 Neil D. Lawrence
-% 	skelPlayData.m CVS version 1.2
-% 	skelPlayData.m SVN version 42
-% 	last update 2008-08-12T20:23:47.000000Z
+% 	Modifications: Andreas C. Damianou 2011
 % VARGPLVM
 
 if nargin < 3

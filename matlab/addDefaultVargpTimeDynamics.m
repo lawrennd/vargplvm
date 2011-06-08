@@ -1,7 +1,8 @@
 function model = addDefaultVargpTimeDynamics(model, timeStamps, seq)
 % ADDDEFAULTVARGPTIMEDYNAMICS
-% Depricated!! Instead, use vargplvmOptionsDyn. e.g., see
+% Depricated. Instead, use vargplvmOptionsDyn. e.g., see
 % demStickVargplvmDynMissing1.m
+% This file is here for back-compatibility with some older demos.
 % VARGPLVM
    
 fprintf(1,'# Adding dynamics to the model...\n');

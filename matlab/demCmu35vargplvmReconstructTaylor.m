@@ -1,6 +1,6 @@
 % DEMCMU35VARGPLVMRECONSTRUCTTAYLOR Reconstruct right leg and body of CMU 35.
 %
-%	Description:
+% DESC
 %  Load a model learned with vargplvm and reconstruct the missing indices
 %  using the Taylor framework developed for fgplvm (angle errors)
 % Based on demCmu35fgplvmReconstructTaylor.m

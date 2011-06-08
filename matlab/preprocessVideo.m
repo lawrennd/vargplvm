@@ -1,7 +1,22 @@
-
 function [Y, height, width] = preprocessVideo(videoFile, width, height, form, options)
-% PREPROCESSVIDEO
+% PREPROCESSVIDEO Transform video files of various types into 2-D matrices.
+% DESC This function transformes video files of various types (namely: avi, yuv, ras) to 2-D matrices.
+% The function uses MATLAB's aviread and inherits all of its limitations (e.g. in UNIX
+% systems it can only handle uncompressed avi files).
+% ARG: videoFile The name of the video file to be transformed
+% ARG: width The actual known width of each of the video's frames. In case videoFile
+% is an avi, this (and then next) argument(s) can be set to arbitrary values and the true
+% values are returned
+% ARG: form The type of the video file, one of 'avi', 'yuv', 'ras'.
+% ARG: options More options for the function, e.g. crop each frame
+% according to a bounding box, the specific yuv type etc
+%
+% COPYRIGHT: Andreas C. Damianou, 2011
+%
+% SEEALSO : playMov.m
+
 % VARGPLVM
+
 
 
 %baseDir = 'datasets/';

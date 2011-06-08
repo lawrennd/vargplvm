@@ -1,10 +1,9 @@
-
-% DEMCMU35GPLVMVARGPLVM3 Run variational GPLVM with dynamics on CMU35 data.
-% Exactly as the demo no1 but we use also a bias part for the cmpd dynamics
-% kernel.
-
+% DEMCMU35GPLVMVARGPLVM1 Run variational GPLVM with dynamics on CMU35 data.
+%
+% COPYRIGHT :  Andreas C. Damianou, Michalis K. Titsias, 2011
+%
+% SEEALSO : demCmu35vargplvmReconstructTaylor.m
 % VARGPLVM
-
 
 % Fix seeds
 randn('seed', 1e5);
@@ -206,7 +205,7 @@ prefix = 'scales';
 saveAllOpenFigures(['Results/CMU/NEW/' num2str(experimentNo) '/'], prefix,1)
 
 
-
+% Reconstruction can also be done separately calling demCmu35vargplvmReconstructTaylor
 if doReconstr
     %---- RECONSTRUCTION ---%
     save 'TEMPExperimentNo.mat' 'experimentNo'
@@ -215,8 +214,6 @@ if doReconstr
     delete TEMPExperimentNo.mat
     fprintf('# Taylor Reconstruction for expNo:%d\n', experimentNo);
     demCmu35vargplvmReconstructTaylor
-    
-    
-    prefix = [num2str(experimentNo) '/'];
-    saveAllOpenFigures('Results/CMU/NEW/', prefix,1)
+    %prefix = [num2str(experimentNo) '/'];
+    %saveAllOpenFigures('Results/CMU/NEW/', prefix,1)
 end

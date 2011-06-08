@@ -1,6 +1,8 @@
 function [Z, newHeight, newWidth] = vargplvmReduceVideo(Yall, h, w, factor1,factor2)
 
 % VARGPLVMREDUCEVIDEO Receives a video and reduces its resolution by factor1 (lines) and factor2).
+% DESC Receives a video and reduces its resolution by factor1 (lines) and factor2). The video
+% is in a 2-D matrix form.
 % FORMAT
 % ARG Yall : a matrix for which each line corresponds to a frame. This frame
 % must be of dimensions h (height) x w (width) and it must be formed by 
@@ -15,7 +17,7 @@ function [Z, newHeight, newWidth] = vargplvmReduceVideo(Yall, h, w, factor1,fact
 % RETURN newWidth: the new width for each frame
 %
 % COPYRIGHT : Andreas Damianou, 2011
-
+% SEEALSO: vargplvmReduceVidModel.m
 % VARGPLVM
   
 if nargin == 3

@@ -1,5 +1,10 @@
 The vargplvm toolbox is an implementation of the variational approximation for the Bayesian GPLVM.
 
+Version 0.2
+-----------
+
+The software now is extended with dynamics.
+
 
 Version 0.1
 -----------

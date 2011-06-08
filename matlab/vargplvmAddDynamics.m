@@ -1,5 +1,4 @@
 function model = vargplvmAddDynamics(model, type, varargin)
-
 % VARGPLVMADDDYNAMICS Add a dynamics structure to the model.
 %
 %	Description:

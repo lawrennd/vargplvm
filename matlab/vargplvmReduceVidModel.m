@@ -1,4 +1,8 @@
-% VARGPLVMREDUCEVIDMODEL
+% VARGPLVMREDUCEVIDMODEL Take a model computed on a video dataset and return a model which is computed on
+% the same video but with lower resolution
+% DESC Take a model computed on a video dataset and return a model which is computed on
+% the same video but with lower resolution.
+% SEEALSO: vargplvmReduceVideo.m
 % VARGPLVM
 
 % varargin may include "factor1" and "factor2" optionally

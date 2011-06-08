@@ -1,6 +1,4 @@
-% This demo is the extension of demHighDimVargplvm1.m. In essence, the code
-% is almost similar to the one in the end of the aforementioned demo, but
-% here we have the freedom to do more experiments and to tune various
+% This script is no longer used. See demHighDimVargplvmTrained.m instead
 % parameters.
 
 % TODO: make the mask not to be the half of the image but randomly selected

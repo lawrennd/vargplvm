@@ -1,6 +1,10 @@
 function channels = demCmu35VargplvmLoadChannels(Ytest, skel)
-% DEMCMU35VARGPLVMLOADCHANNELS
+% DEMCMU35VARGPLVMLOADCHANNELS Given a dataset load the skeleton channels
+%
+% SEEALSO : demCmu35VargplvmAnimate, demCmu35gplvmVargplvm3.m
 % VARGPLVM
+
+
 
 % playSkel(Ytest, startInd)
     skel = acclaimReadSkel('35.asf');

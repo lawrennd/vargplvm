@@ -1,4 +1,12 @@
-% DEMHIGHDIMVARGPLVM3 This is the main script to run the video experiments.
+% DEMHIGHDIMVARGPLVM3 This is the main script to run variational GPLVM on
+% high dimenisional video datasets.
+% DESC The script can be parametrized in many ways. Most of the important
+% parameters to set appear in the first lines, but some also appear throughout
+% the code. All parameters are set by first checking existance, which means that
+% any parameter that is not set just takes a default value.
+% 
+% COPYRIGHT: Andreas C. Damianou, Michalis K. Titsias, 2010 - 2011
+% SEEALSO: demHighDimVargplvmTrained.m
 % VARGPLVM
 
 clear timeStamps; % in case it's left from a previous experiment
