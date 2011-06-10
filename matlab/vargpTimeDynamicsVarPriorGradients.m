@@ -1,7 +1,7 @@
 function [gVarmeans gVarcovs gDynKern] = ...
     vargpTimeDynamicsVarPriorGradients(model, gPsi1, gPsi2, gPsi0)
 
-% VARGPTIMEDYNAMICSVARPRIORGRADIENTS: This function does all the work for calculating the
+% VARGPTIMEDYNAMICSVARPRIORGRADIENTS This function does all the work for calculating the
 % derivatives for the variational parameters (the new ones, lambda, mu_bar)
 % and for the theta_t parameters. The order of the calculations is such
 % that everything is already computed when it's needed without
