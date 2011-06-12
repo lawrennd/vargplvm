@@ -1,10 +1,13 @@
-% DEMCMU35VARGPLVMANIMATE Load results for the dyn. GPLVM on CMU35 data and produce animation and plots
-% DESC Load results for the dyn. GPLVM on CMU35 data and produce animation and plots.
-% By default the demo presents the results for the leg reconstruction. By commenting the appropriate line
-% the demo can present the results for the body reconstruction.
+% DEMCMU35VARGPLVMANIMATE Load results for the dyn. GPLVM on CMU35 data and
+% produce animation and plots. The plots (and errors) are in the data
+% space. For plots / errors  in the scaled space (for comparison with FGPLVM) 
+% see demCmu35VargplvmPlotsScaled.m
+% DESC Load results for the dyn. GPLVM on CMU35 data and produce animation
+% and plots.
 % COPYRIGHT :  Andreas C. Damianou, Michalis K. Titsias, 2011
 %
-% SEEALSO : demCmu35VargplvmLoadChannels, demCmu35gplvmVargplvm3.m
+% SEEALSO : demCmu35VargplvmLoadChannels, demCmu35gplvmVargplvm3.m,
+% demCmu35VargplvmPlotsScaled.m
 % VARGPLVM
 
 
@@ -15,6 +18,14 @@ rand('seed', 1e5);
 
 dataSetName = 'cmu35gplvm';
 if ~exist('experimentNo') experimentNo = 33; end
+% Options for the following: 'Legs', 'Body'
+if ~exist('predictPart') predictPart = 'Legs'; end
+% Sampling:
+if ~exist('doSampling') doSampling = 0; end
+if ~exist('showSkel') showSkel = 1; end
+if ~exist('displayPlots')  displayPlots = 1; end
+% -1 is a flag meaning that plotRange == missingInd
+if ~exist('plotRange') plotRange = -1; end
 
 % load data
 [Y, lbls, Ytest, lblstest] = lvmLoadData(dataSetName);
@@ -40,10 +51,13 @@ load(fileName)
 model.dynamics.t_star = timeStampsTest;
 
 
-% Comment one of the following lines as appropriate to obtain the results for the leg or body reconstruction
+% Choose one of the following lines as appropriate to obtain the results for the leg or body reconstruction
 % respectively.
-%load(['demCmu35Vargplvm' num2str(experimentNo) 'PredLegs.mat']); missingInd = legInd;
-load(['demCmu35Vargplvm' num2str(experimentNo) 'PredBody.mat']) ;missingInd = bodyInd;
+if strcmp(predictPart,'Legs')
+    load(['demCmu35Vargplvm' num2str(experimentNo) 'PredLegs.mat']); missingInd = legInd;
+elseif strcmp(predictPart, 'Body')
+    load(['demCmu35Vargplvm' num2str(experimentNo) 'PredBody.mat']) ;missingInd = bodyInd;
+end
 
 YtestOrig = Ytest;
 YtestGplvm = Ytest;
@@ -79,13 +93,13 @@ dists = dist2(YtrainNn, YtestNn);
 
 %%
 
-if ~exist('displayPlots')
-    displayPlots = 1;
-end
+
 
 if displayPlots
     colordef white
-    plotRange = missingInd;
+    if plotRange == -1 % flag
+        plotRange = missingInd;
+    end
     for plotNo = plotRange
         figNo = plotNo - min(plotRange) + 1;
         figure(figNo)
@@ -116,21 +130,20 @@ end
 
 %%
 
-skel = acclaimReadSkel('35.asf');
-[tmpchan, skel] = acclaimLoadChannels('35_01.amc', skel);
-channels1 = demCmu35VargplvmLoadChannels(Ytest,skel);
-channels2 = demCmu35VargplvmLoadChannels(Ypred,skel);
-channels3 = demCmu35VargplvmLoadChannels(Y(bestIndNn, :),skel);
-%skelPlayData(skel, channels, 1/25);
+if showSkel
+    skel = acclaimReadSkel('35.asf');
+    [tmpchan, skel] = acclaimLoadChannels('35_01.amc', skel);
+    channels1 = demCmu35VargplvmLoadChannels(Ytest,skel);
+    channels2 = demCmu35VargplvmLoadChannels(Ypred,skel);
+    channels3 = demCmu35VargplvmLoadChannels(Y(bestIndNn, :),skel);
+    %skelPlayData(skel, channels, 1/25);
 
-startInd = 63;
-skelPlayData2(skel, 1/15, channels1(startInd:end,:), channels2, channels3,{'Ytest','YpredGPLVM','YpredNN'});
+    startInd = 63;
+    skelPlayData2(skel, 1/15, channels1(startInd:end,:), channels2, channels3,{'Ytest','YpredGPLVM','YpredNN'});
+end
 
 %%
-% Sampling:
-if ~exist('doSampling')
-    doSampling = 0;
-end
+
 
 
 if doSampling

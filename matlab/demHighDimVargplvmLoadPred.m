@@ -73,8 +73,10 @@ switch cut
             indexMissing = 1:round(size(Yts,2)/1.70);
         elseif strcmp(dataSetName,'ADN')
             indexMissing = 1:round(size(Yts,2)/1.7);
-            % elseif strcmp(dataSetName,'ocean')
-            %     indexMissing = 1:round(size(Yts,2)/1.6);
+        elseif strcmp(dataSetName,'ocean')
+            indexMissing = 1:round(size(Yts,2)/1.6);
+        elseif strcmp(dataSetName,'head')
+            indexMissing=1:round(size(Yts,2)/2.08);
         else
             indexMissing=1:round(size(Yts,2)/2);
         end
@@ -154,7 +156,7 @@ if ~timeNN
                 NNmuPartK(i,indexMissing) = NNmuPartK(i,indexMissing)+Ytr(sortedInd(i,n),indexMissing);
             end
             NNmuPartK(i,indexMissing) = NNmuPartK(i,indexMissing)*(1/k); % normalise with the number of NN's
-
+            
             NNmuPartK(i, indexPresent) = Yts(i, indexPresent);
         end
         errorNNPartK = sum(sum( abs(NNmuPartK(:,indexMissing) - YtsOriginal(:,indexMissing)) ))/prod(size(YtsOriginal(:,indexMissing)));

@@ -94,7 +94,7 @@ legErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origSca
 
 save(['dem' capName 'ReconstructLegs' num2str(experimentNo) '.mat'], 'legErrs');
 prefix = [num2str(experimentNo) '/Leg/'];
-saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
+%saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
 legErrs
 
 
@@ -104,7 +104,7 @@ bodyErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origSc
 
 save(['dem' capName 'ReconstructBody' num2str(experimentNo) '.mat'], 'bodyErrs');
 prefix = [num2str(experimentNo) '/Body/'];
-saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
+%saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
 bodyErrs
 
 % bar(model.kern.comp{1}.inputScales)
