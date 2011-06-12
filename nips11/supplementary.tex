@@ -1,3 +1,97 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{nips11submit_e,times}
+%\documentstyle[nips10submit_09,times,art10]{article} % For LaTeX 2.09
+
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{verbatim}
+\usepackage{nccmath}
+\usepackage[psamsfonts]{amssymb}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{cancel}
+\usepackage{verbatim}
+
+\newenvironment{matlab}{\comment}{\endcomment}    
+\newenvironment{octave}{\comment}{\endcomment}    
+\newenvironment{matlabv}{\verbatim}{\endverbatim} 
+\newenvironment{octavev}{\verbatim}{\endverbatim} 
+
+
+\title{Variational Gaussian Process Dynamical Systems}
+
+
+\author{
+David S.~Hippocampus\thanks{ Use footnote for providing further information
+about author (webpage, alternative address)---\emph{not} for acknowledging
+funding agencies.} \\
+Department of Computer Science\\
+Cranberry-Lemon University\\
+Pittsburgh, PA 15213 \\
+\texttt{hippo@cs.cranberry-lemon.edu} \\
+\And
+Coauthor \\
+Affiliation \\
+Address \\
+\texttt{email} \\
+\AND
+Coauthor \\
+Affiliation \\
+Address \\
+\texttt{email} \\
+\And
+Coauthor \\
+Affiliation \\
+Address \\
+\texttt{email} \\
+\And
+Coauthor \\
+Affiliation \\
+Address \\
+\texttt{email} \\
+(if needed)\\
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+
+\newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
+
+\newcommand{\bff}{\mathbf{f}}
+\newcommand{\bfu}{\mathbf{u}}
+\newcommand{\bfy}{\mathbf{y}}
+\newcommand{\bfx}{\mathbf{x}}
+\newcommand{\bft}{\mathbf{t}}
+\newcommand{\bfk}{\mathbf{k}}
+\newcommand{\bfmu}{\boldsymbol \mu}
+\newcommand{\bfz}{\mathbf{0}}
+
+\newcommand{\T}{{\top}}
+
+\newcommand{\bfa}{\mathbf{a}}
+\newcommand{\bb}{\beta^{-1}}
+\newcommand{\la}{\left\langle}
+\newcommand{\ra}{\right\rangle}
+\newcommand{\vv}{\vartheta}
+
+\newcommand{\intd}{\text{d}} %???
+
+
 \section{Derivation of the variational bound}
 
 We wish to approximate the marginal likelihood:
@@ -363,7 +457,8 @@ The values of the scales of the ARD kernel after training on the motion capture 
 \begin{figure}[ht]
 \begin{center}
 \subfigure[]{
-	\includegraphics[width=0.48\textwidth]{images/supplMocapBody23GpdsRbf}
+	%\includegraphics[width=0.48\textwidth]{images/supplMocapBody23GpdsRbf}
+	\includegraphics[width=0.48\textwidth]{images/supplMocapBody28GpdsMatern}
 	\label{fig:suppMocap3}
 }
 \subfigure[]{
@@ -406,3 +501,5 @@ Some more examples for the reconstruction achieved for the 'dog' dataset. $40\%$
 }
 \label{fig:supplDog}
 \end{figure}
+
+\end{document}
