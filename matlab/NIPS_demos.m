@@ -5,7 +5,7 @@
 % .mat files with the precomputed results:
 
 % cmu35TaylorScaleBias.mat
-% demCmu35gplvmReconstructBody33.mat
+% % demCmu35gplvmReconstructBody33.mat
 % demCmu35gplvmReconstructBody34.mat
 % demCmu35gplvmReconstructLegs33.mat
 % demCmu35gplvmReconstructLegs34.mat
@@ -49,7 +49,7 @@ rePredict = 0;
 
 % Save the above options because the script clears the workspace
 save 'opts.mat' 'retrainModels' 'rePredict'
-system('mkdir images');
+system('mkdir diagrams');
 %% 
 
 % ########################## OCEAN ######################################
@@ -81,9 +81,9 @@ else
 end
 % Produce plots
 fr=reshape(Varmu(27,:),height,width); imagesc(fr); colormap('gray'); % VGPDS
-print -depsc images/images/oceanGpdsframe27.eps; system('epstopdf images/images/oceanGpdsframe27.eps');
+print -depsc diagrams/oceanGpdsframe27.eps; system('epstopdf diagrams/oceanGpdsframe27.eps');
 fr=reshape(NNmuPartBest(27,:),height,width); imagesc(fr); colormap('gray'); % NN
-print -depsc images/images/oceanNNframe27.eps; system('epstopdf images/images/oceanNNframe27.eps');
+print -depsc diagrams/oceanNNframe27.eps; system('epstopdf diagrams/oceanNNframe27.eps');
 %}
 %%
 
@@ -111,17 +111,17 @@ end
 
 % Produce plots
 fr=reshape(Varmu(46,:),height,width); imagesc(fr); colormap('gray'); % VGPDS
-print -depsc images/missaGpdsframe46.eps; system('epstopdf images/missaGpdsframe46.eps');
+print -depsc diagrams/missaGpdsframe46.eps; system('epstopdf diagrams/missaGpdsframe46.eps');
 fr=reshape(YtsOriginal(46,:),height,width); imagesc(fr); colormap('gray'); % Original
-print -depsc images/missaYtsOrigframe46.eps; system('epstopdf images/missaYtsOrigframe46.eps');
+print -depsc diagrams/missaYtsOrigframe46.eps; system('epstopdf diagrams/missaYtsOrigframe46.eps');
 fr=reshape(NNmuPartBest(46,:),height,width); imagesc(fr); colormap('gray'); % NN for best k
-print -depsc images/missaNNframe46.eps; system('epstopdf images/missaNNframe46.eps');
+print -depsc diagrams/missaNNframe46.eps; system('epstopdf diagrams/missaNNframe46.eps');
 % The following two pictures are edited in the paper so that they fit in
 % the place of one single picture
 fr=reshape(Yts(17,:),height,width); imagesc(fr); colormap('gray'); 
-print -depsc images/missaGpdsPredFrame17_part1.eps; system('epstopdf images/missaGpdsPredFrame17_part1.eps');
+print -depsc diagrams/missaGpdsPredFrame17_part1.eps; system('epstopdf diagrams/missaGpdsPredFrame17_part1.eps');
 fr=reshape(Varmu(17,:),height,width); imagesc(fr); colormap('gray');
-print -depsc images/missaGpdsPredFrame17_part2.eps; system('epstopdf images/missaGpdsPredFrame17_part2.eps');
+print -depsc diagrams/missaGpdsPredFrame17_part2.eps; system('epstopdf diagrams/missaGpdsPredFrame17_part2.eps');
 %%
 
 
@@ -160,16 +160,16 @@ futurePred = 40; doSampling = 0; demHighDimVargplvmTrained
 
 % Produce plots
 bar(prunedModelInit.kern.comp{1}.inputScales)
-print -depsc images/dog_scalesInit.eps; system('epstopdf images/dog_scalesInit.eps');
+print -depsc diagrams/dog_scalesInit.eps; system('epstopdf diagrams/dog_scalesInit.eps');
 bar(model.kern.comp{1}.inputScales)
-print -depsc images/dog_scalesOpt.eps; system('epstopdf images/dog_scalesOpt.eps');
+print -depsc diagrams/dog_scalesOpt.eps; system('epstopdf diagrams/dog_scalesOpt.eps');
 
 fr=reshape(Ytr(end,:),height,width); imagesc(fr); colormap('gray'); % Last training image
-print -depsc images/dogGeneration_lastOfTraining.eps; system('epstopdf images/dogGeneration_lastOfTraining.eps');
+print -depsc diagrams/dogGeneration_lastOfTraining.eps; system('epstopdf diagrams/dogGeneration_lastOfTraining.eps');
 fr=reshape(Varmu2(1,:),height,width); imagesc(fr); colormap('gray');  % First predicted
-print -depsc images/dogGeneration_firstOfTest.eps; system('epstopdf images/dogGeneration_firstOfTest.eps');
+print -depsc diagrams/dogGeneration_firstOfTest.eps; system('epstopdf diagrams/dogGeneration_firstOfTest.eps');
 fr=reshape(Varmu2(13,:),height,width); imagesc(fr); colormap('gray'); % A subsequent frame
-print -depsc images/dogGeneration_frame14.eps; system('epstopdf images/dogGeneration_frame14.eps');
+print -depsc diagrams/dogGeneration_frame14.eps; system('epstopdf diagrams/dogGeneration_frame14.eps');
 
 
 % The following is for interpolation
@@ -220,13 +220,13 @@ else
 end
 % Produce plots (these go to the supplementary)
 fr=reshape(Varmu(5,:),height,width); imagesc(fr); colormap('gray'); 
-print -depsc images/supplDogPredGpds5.eps; system('epstopdf images/supplDogPredGpds5.eps');
+print -depsc diagrams/supplDogPredGpds5.eps; system('epstopdf diagrams/supplDogPredGpds5.eps');
 fr=reshape(Yts(5,:),height,width); imagesc(fr); colormap('gray'); 
-print -depsc images/supplDogPredYts5.eps; system('epstopdf images/supplDogPredYts5.eps');
+print -depsc diagrams/supplDogPredYts5.eps; system('epstopdf diagrams/supplDogPredYts5.eps');
 fr=reshape(Varmu(6,:),height,width); imagesc(fr); colormap('gray'); 
-print -depsc images/supplDogPredGpds6.eps; system('epstopdf images/supplDogPredGpds6.eps');
+print -depsc diagrams/supplDogPredGpds6.eps; system('epstopdf diagrams/supplDogPredGpds6.eps');
 fr=reshape(Yts(6,:),height,width); imagesc(fr); colormap('gray'); 
-print -depsc images/supplDogPredYts6.eps; system('epstopdf images/supplDogPredYts6.eps');
+print -depsc diagrams/supplDogPredYts6.eps; system('epstopdf diagrams/supplDogPredYts6.eps');
 
 %%
 
@@ -262,7 +262,7 @@ fprintf(1,'# VGPDS RBF error on Body reconstr:');
 errStruct
 
 bar(model.kern.comp{1}.inputScales);
-print -depsc images/supplMocapScalesRbf.eps; system('epstopdf images/supplMocapScalesRbf.eps');
+print -depsc diagrams/supplMocapScalesRbf.eps; system('epstopdf diagrams/supplMocapScalesRbf.eps');
 
 
 % matern32 for legs
@@ -285,20 +285,20 @@ elseif rePredict
 end
 predictPart = 'Legs'; plotRange = 10;
 demCmu35VargplvmPlotsScaled
-print -depsc images/supplMocapLeg5GpdsMatern.eps; system('epstopdf images/supplMocapLeg5GpdsMatern.eps');
+print -depsc diagrams/supplMocapLeg5GpdsMatern.eps; system('epstopdf diagrams/supplMocapLeg5GpdsMatern.eps');
 % demCmu35VargplvmAnimate
 fprintf(1,'# VGPDS Matern error on Legs reconstr:');
 errStruct
 
 predictPart = 'Body'; plotRange = 28;
 demCmu35VargplvmPlotsScaled
-print -depsc images/supplMocapBody28GpdsMatern.eps; system('epstopdf images/supplMocapBody28GpdsMatern.eps');
+print -depsc diagrams/supplMocapBody28GpdsMatern.eps; system('epstopdf diagrams/supplMocapBody28GpdsMatern.eps');
 % demCmu35VargplvmAnimate
 fprintf(1,'# VGPDS Matern error on Body reconstr:');
 errStruct
 close all
 bar(model.kern.comp{1}.inputScales);
-print -depsc images/supplMocapScalesMatern.eps; system('epstopdf images/supplMocapScalesMatern.eps');
+print -depsc diagrams/supplMocapScalesMatern.eps; system('epstopdf diagrams/supplMocapScalesMatern.eps');
 
 
 %% ---------
