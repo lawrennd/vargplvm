@@ -49,7 +49,7 @@ function gK = paramTransformPsi0(kern, gK)
 %
 % 
 
-if strcmp(kern.type,'rbfard2') | strcmp(kern.type,'bias') | strcmp(kern.type,'white')
+if strcmp(kern.type,'rbfardjit') | strcmp(kern.type,'rbfard2') | strcmp(kern.type,'bias') | strcmp(kern.type,'white')
     gK(1) = gK(1)*kern.variance;
 elseif strcmp(kern.type,'linard2')
     gK(1:end) = gK(1:end).*kern.inputScales;

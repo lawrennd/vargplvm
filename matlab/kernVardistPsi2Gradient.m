@@ -89,7 +89,7 @@ function gKern = paramTransformPsi2(kern, gKern)
 %
 %
 
-if strcmp(kern.type,'rbfard2')
+if strcmp(kern.type,'rbfard2') | strcmp(kern.type,'rbfardjit')
    gKern(1) = gKern(1)*kern.variance;
    gKern(2:end) = gKern(2:end).*kern.inputScales;
 elseif strcmp(kern.type,'linard2')

@@ -18,7 +18,7 @@ function model = vargplvmParamInit(model,Y,X)
 
 if ~strcmp(model.kern.type,'cmpnd')
    % 
-   if strcmp(model.kern.type,'rbfard2') 
+   if strcmp(model.kern.type,'rbfard2')  | strcmp(model.kern.type,'rbfardjit') 
       % 
        model.kern.inputScales = 5./(((max(X)-min(X))).^2);
        %model.kern.variance = max(var(Y)); % !!! better use mean(var(Y)) here...
@@ -34,7 +34,7 @@ else
    %
    for i = 1:length(model.kern.comp)
       %
-      if strcmp(model.kern.comp{i}.type,'rbfard2') 
+      if strcmp(model.kern.comp{i}.type,'rbfard2') | strcmp(model.kern.type,'rbfardjit') 
       % 
          model.kern.comp{i}.inputScales = 5./(((max(X)-min(X))).^2);
          %model.kern.comp{i}.variance = max(var(Y));

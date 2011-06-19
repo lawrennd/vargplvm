@@ -32,8 +32,10 @@ model.K_uu = kernCompute(model.kern, X_u);
 % whiteVariance in the kernel which is constant.
 %if (~isfield(model.kern, 'whiteVariance')) | model.kern.whiteVariance < jitter
    % There is no white noise term so add some jitter.
-   model.K_uu = model.K_uu ...
-        + sparseDiag(repmat(jitter, size(model.K_uu, 1), 1));
+if ~strcmp(model.kern.type, 'rbfardjit')
+       model.K_uu = model.K_uu ...
+                         + sparseDiag(repmat(jitter, size(model.K_uu, 1), 1));
+end
 %end
 
 model.Psi0 = kernVardistPsi0Compute(model.kern, model.vardist);
@@ -56,6 +58,7 @@ model.At = (1/model.beta) * eye(size(model.C,1)) + model.C; % At = beta^{-1} I +
 
 
 model.Lat = jitChol(model.At)';
+
 model.invLat = model.Lat\eye(size(model.Lat,1));  
 model.invLatT = model.invLat';
 model.logDetAt = 2*(sum(log(diag(model.Lat)))); % log |At|

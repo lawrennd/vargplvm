@@ -46,7 +46,7 @@ end
 
 
 % Likelihood terms (coefficients)
-[gK_uu, gPsi0, gPsi1, gPsi2, g_Lambda, gBeta] = vargpCovGrads(model);
+[gK_uu, gPsi0, gPsi1, gPsi2, g_Lambda, gBeta, tmpV] = vargpCovGrads(model);
 
 
 % Get (in three steps because the formula has three terms) the gradients of
@@ -64,6 +64,13 @@ gKern = gKern0 + gKern1 + gKern2 + gKern3;
 gVarmeansLik = gVarmeans0 + gVarmeans1 + gVarmeans2;
 
 
+if strcmp(model.kern.type, 'rbfardjit')
+    % different derivatives for the variance, which is super-numerically stable for 
+    % this particular kernel  
+    gKern(1) = 0.5*model.d*( - model.k+ sum(sum(model.invLat.*model.invLat))/model.beta - model.beta*(model.Psi0-model.TrC)  )...
+                    + 0.5*tmpV;
+end
+    
 
 %%% Compute Gradients with respect to X_u %%%
 gKX = kernGradX(model.kern, model.X_u, model.X_u);
@@ -263,11 +270,15 @@ else
 end
 
 
+%if model.kern.comp{1}.variance > 100 | model.kern.comp{1}.variance < 0.001
+%     model.kern.comp{1}
+%end
+
 % delete afterwards
 %g = [gVarmeans2 gVarcovs2 (gX_u(:)'+ gInd2) (gKern3+gKern2) 0*gBeta];
 
 
-function [gK_uu, gPsi0, gPsi1, gPsi2, g_Lambda, gBeta] = vargpCovGrads(model)
+function [gK_uu, gPsi0, gPsi1, gPsi2, g_Lambda, gBeta, tmpV] = vargpCovGrads(model)
 
 gPsi1 = model.beta * model.m * model.B';
     gPsi1 = gPsi1'; % because it is passed to "kernVardistPsi1Gradient" as gPsi1'...
@@ -281,9 +292,10 @@ gK_uu = 0.5 * (model.T1 - (model.beta * model.d) * model.invLmT * model.C * mode
 sigm = 1/model.beta; % beta^-1
 
 PLm = model.invLatT*model.P;
+tmpV = sum(sum(PLm.*PLm));
 gBeta = 0.5*(model.d*(model.TrC + (model.N-model.k)*sigm -model.Psi0) ...
 	- model.TrYY + model.TrPP ...
-	+ (1/(model.beta^2)) * model.d * sum(sum(model.invLat.*model.invLat)) + sigm*sum(sum(PLm.*PLm)));
+	+ (1/(model.beta^2)) * model.d * sum(sum(model.invLat.*model.invLat)) + sigm*tmpV);
 
 %%%%TEMP
 %{

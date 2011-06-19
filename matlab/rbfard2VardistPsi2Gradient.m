@@ -47,6 +47,9 @@ partInd2 = zeros(M,Q);
 partA1 = - 0.25*sum(sum((ZmDZm.*ZmDZm).*repmat(sumKern.*covGrad,[1 Q 1]),3),1);
 partA2 = zeros(1,Q);
 
+gVarcovars = zeros(N,Q); 
+gVarmeans = zeros(N,Q);
+
 % Compute the gradient wrt lengthscales, variational means and variational variances  
 % For loop over training points  
 for n=1:N
@@ -61,7 +64,9 @@ for n=1:N
     %MunZmZmA = MunZmZm./repmat(AS_n,[M 1 M]);
     MunZmZmA =  bsxfun(@rdivide, MunZmZm, AS_n);
     
-    k2Kern_n = sum((MunZmZm.^2).*repmat(aDasPlus1(n,:),[M 1 M]),2);
+    %k2Kern_n = sum((MunZmZm.^2).*repmat(aDasPlus1(n,:),[M 1 M]),2);    
+    k2Kern_n = sum(  bsxfun(@times, MunZmZm.^2,aDasPlus1(n,:)),2);
+    
     k2Kern_n = exp(-k2Kern_n)/prod(sqrt(AS_n));
     
     % derivatives wrt to variational means
@@ -69,12 +74,13 @@ for n=1:N
     %tmp2 = tmp + reshape(diag(diag(squeeze(tmp))),[M 1 M]);
     %diagCorr = diag(diag(squeeze(tmp))); 
     tmp = MunZmZmA.*k2ncovG;
-    gVarmeans(n,:) = - 2*A.*(sum(sum(tmp,3),1));
+    tmp = sum(tmp,3);
+    gVarmeans(n,:) = - 2*A.*(sum(tmp,1));
     
     % derivatives wrt inducing inputs 
     %diagCorr = diagCorr*(repmat(mu_n,[M 1]) - Z).*repmat(aDasPlus1(n,:),[M 1]);
     %partInd2 = partInd2 + Amq.*(sum(tmp,3) + diagCorr);
-    partInd2 = partInd2 + Amq.*sum(tmp,3);
+    partInd2 = partInd2 + Amq.*tmp;
     
     
     % Derivative wrt input scales  

@@ -1,4 +1,4 @@
-function logProb = vargplvmProbabilityCompute(model, y, indexPresent)
+function logProb = vargplvmProbabilityCompute(model, y, display, iters)
 
 % VARGPLVMPROBABILITYCOMPUTE description
   
@@ -7,6 +7,11 @@ function logProb = vargplvmProbabilityCompute(model, y, indexPresent)
 % Takes an input a trained vargplvm and a test data point (with possibly missing values)
 % Computes the probability density in the test data point 
 
+
+% Indices of missing dimension
+indexMissing = find(isnan(y(1,:)));
+indexPresent = setdiff(1:model.d, indexMissing);
+y = y(:,indexPresent); 
 
 
 % compute the variational lower without the new data point 
@@ -20,13 +25,14 @@ dst = dist2(y(indexPresent), model.y(:,indexPresent));
 vardistx = vardistCreate(model.vardist.means(mini,:), model.q, 'gaussian');
 
 % optimize over the latent point 
-iters = 100;
-display = 0;
 model.vardistx = vardistx;
-vardistx = vargplvmOptimisePoint(model, vardistx, y(indexPresent), indexPresent, display, iters);
+[X, varX] = vargplvmOptimisePoint(model, vardistx, y, display, iters);
 
 % compute the variational lower with the new data point included
-Fnew = vargplvmPointLogLikelihood(model, vardistx, y(indexPresent), indexPresent);
+vardistx = model.vardistx;
+vardistx.means = X; 
+vardistx.covars = varX;
+Fnew = vargplvmPointLogLikelihood(model, vardistx, y);
 
 % compute the probability 
 logProb = Fnew - Fold;
