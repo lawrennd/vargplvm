@@ -1,4 +1,18 @@
 function [x, options, flog, pointlog, scalelog] = scg(f, x, options, gradf, varargin)
+% NOTE!! This is a temporary file with a slight modification of scg so that
+% it uses an ObjectiveGradient function instead of an Objective. This means
+% that, when possible, the precomputations will be made only once and used for
+% both, the objective and the gradient. However, the gradient function must also
+% be used, because in certain cases scg is interested in only finding the gradient
+% (whereas every calculation of the objective is also accompanyied by a calculation
+% of the gradient). 
+% The function can work as the traditional scg if 'f' is a function with only one
+% output argument, otherwise, (if 'f' is a function with more than one outputs) 
+% the behaviour described above will take effect. This is done, therefore, only
+% in the places of the original scg where f and gradf are evaluated with the same
+% set of parameters x (before they change in the next optimisation cycle).
+% This is a temporary solution, in the future we must rename this function.
+
 %SCG	Scaled conjugate gradient optimization.
 %
 %	Description
@@ -50,6 +64,14 @@ function [x, options, flog, pointlog, scalelog] = scg(f, x, options, gradf, vara
 
 %	Copyright (c) Ian T Nabney (1996-2001)
 
+%%%_------
+% f = 'vargplvmObjective';
+% x = vargplvmExtractParam(model); %?
+% gradf = 'vargplvmGradient';
+% varargin{:} = varargin{1} = {model};
+%%%_----
+
+
 %  Set up the options.
 if length(options) < 18
   error('Options vector too short')
@@ -65,8 +87,8 @@ display = options(1);
 gradcheck = options(9);
 
 % Set up strings for evaluating function and gradient
-f = fcnchk(f, length(varargin));
-gradf = fcnchk(gradf, length(varargin));
+f = fcnchk(f, length(varargin)); % f = @vargplvmObjective
+gradf = fcnchk(gradf, length(varargin)); % gradf = @vargplvmGradient
 
 nparams = length(x);
 
@@ -76,10 +98,15 @@ if (gradcheck)
 end
 
 sigma0 = 1.0e-4;
-fold = feval(f, x, varargin{:});	% Initial function value.
+if  nargout(f) > 1
+   [fold, gradnew] = feval(f, x, varargin{:}); 
+else
+    fold = feval(f, x, varargin{:});	% Initial function value. %%%% F
+    gradnew = feval(gradf, x, varargin{:});	% Initial gradient.  %%%% GRADF
+end
 fnow = fold;
 options(10) = options(10) + 1;		% Increment function evaluation counter.
-gradnew = feval(gradf, x, varargin{:});	% Initial gradient.
+%gradnew = feval(gradf, x, varargin{:});	% Initial gradient.  %%%% GRADF
 gradold = gradnew;
 options(11) = options(11) + 1;		% Increment gradient evaluation counter.
 d = -gradnew;				% Initial search direction.
@@ -95,50 +122,32 @@ if nargout >= 3
     pointlog(j, :) = x;
   end
 end
- 
+
 % Main optimization loop.
 while (j <= niters)
 
   % Calculate first and second directional derivatives.
   if (success == 1)
     mu = d*gradnew';
-    if (mu >= 0) % Only in convergence we get inside
+    if (mu >= 0)
       d = - gradnew;
       mu = d*gradnew';
-    end    
-    kappa = d*d'; % gradient's norm squared
+    end
+    kappa = d*d';
     if kappa < eps
       options(8) = fnow;
       return
     end
-    sigma = sigma0/sqrt(kappa); % sqrt(kappa) is the gradient's norm
+    sigma = sigma0/sqrt(kappa);
     xplus = x + sigma*d;
-    gplus = feval(gradf, xplus, varargin{:});
-    options(11) = options(11) + 1; 
-    theta = (d*(gplus' - gradnew'))/sigma; 
-    %theta= (-gradnew*plus' + gradnew*gradnew')*sqrt(kappa)/ sigma0
-    %%%%%% DEBUG_
-   % fprintf(1,'In scg:\n');
     
-    %max(gplus'-gradnew')
-    %min(gplus'-gradnew')
-    % All of the below are ok.
-   %fprintf(1,' max(abs(xplus))=%d\n',max(abs(xplus)));
-   %fprintf(1,' min(xplus)=%d\n',min(xplus));
-    % fprintf(1,' max(abs(beta))=%d\n',max(abs(beta)));
-   % fprintf(1,' max(abs(gplus))=%d\n',max(abs(gplus)));
-   %fprintf(1,' min(gplus))=%d\n min(gradnew)=%d\n min(sigma)=%d\n',min(gplus), min(gradnew), min(sigma) );
-    %%%%%% _DEBUG
+    gplus = feval(gradf, xplus, varargin{:}); %%%% GRADF
+    options(11) = options(11) + 1; 
+    theta = (d*(gplus' - gradnew'))/sigma;
   end
 
   % Increase effective curvature and evaluate step size alpha.
   delta = theta + beta*kappa;
-  %theta
-  %%% DEBUG_
-      %fprintf(1,' delta=%d\n max(abs(theta))=%d\n max(abs(kappa))=%d\n max(abs(beta))=%d\n',delta, max(abs(theta)), max(abs(kappa)),max(abs(beta)));
-      %  fprintf(1,' delta=%d\n min(theta)=%d\n min(kappa)=%d\n min(beta)=%d\n',delta, min(theta), min(kappa),min(beta));
-  %%% _DEBUG
-  
   if (delta <= 0) 
     delta = beta*kappa;
     beta = beta - theta/kappa;
@@ -147,23 +156,11 @@ while (j <= niters)
   
   % Calculate the comparison ratio.
   xnew = x + alpha*d;
-    %%% DEBUG_
-    %fprintf(1,' max(abs(params)) = %d\n max(abs(oldParams)=%d\n max(abs(alpha))=%d\n max(abs(d))=%d\n',max(abs(xnew)), max(abs(x)), max(abs(alpha)), max(abs(d)));
-%    fprintf(1,' min(params) = %d\n min(oldParams)=%d\n min(alpha)=%d\n min(d)=%d\n',min(xnew), min(x), min(alpha), min(d));
-%     save 'xnew.mat' 'xnew'
-%     save 'alpha.mat' 'alpha'
-%     save 'd.mat' 'd'
-    %%%%_DEBUG
-  fnew = feval(f, xnew, varargin{:});
-  
-  %%%%% DEBUG
-%   if j==14
-%    f = fcnchk(f, length(varargin));
-%    gradf = fcnchk(gradf, length(varargin));
-%    feval('gradchek', xnew, f, gradf, varargin{:});
-%   end
-  %%%%%%%% DEBUG
-  
+  if nargout(f) > 1
+    [fnew, gradf2] = feval(f, xnew, varargin{:}); %%%_NEW
+  else
+    fnew = feval(f, xnew, varargin{:}); %%%% F
+  end
   options(10) = options(10) + 1;
   Delta = 2*(fnew - fold)/(alpha*mu);
   if (Delta  >= 0)
@@ -189,24 +186,31 @@ while (j <= niters)
   if display > 0
     fprintf(1, 'Cycle %4d  Error %11.6f  Scale %e\n', j, fnow, beta);
   end
-
+  
+  
+  %%% If success==1 (in the vast majority of iterations), then from above, x=xnew, so in this case the
+  %%% calculation for F and G will be done for the same set of params and
+  %%% in that case we can re-use the precomputations for F.
   if (success == 1)
     % Test for termination
 
     if (max(abs(alpha*d)) < options(2) & max(abs(fnew-fold)) < options(3))
       options(8) = fnew;
       return;
-
     else
       % Update variables for new position
       fold = fnew;
       gradold = gradnew;
-      gradnew = feval(gradf, x, varargin{:});
+      if nargout(f) > 1
+          gradnew = gradf2; %%%_NEW
+      else
+          gradnew = feval(gradf, x, varargin{:}); %%%% GRADF
+      end
       options(11) = options(11) + 1;
       % If the gradient is zero then we are done.
       if (gradnew*gradnew' == 0)
-	options(8) = fnew;
-	return;
+           options(8) = fnew;
+           return;
       end
     end
   end

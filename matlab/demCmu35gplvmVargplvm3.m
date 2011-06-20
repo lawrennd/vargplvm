@@ -175,13 +175,15 @@ modelInit = model;
 
 
 % do not learn beta for few iterations for intitilization
-model.learnBeta = 0;
-display = 1;
-fprintf(1,'# Intitiliazing the model (fixed beta) %d iterations...\n',fixedBetaIters);
-model = vargplvmOptimise(model, display, fixedBetaIters);
-model.fixedBetaIters = fixedBetaIters;
-disp('# Saving model after optimising beta...')
-modelWriteResult(model, dataSetName, experimentNo);
+if fixedBetaIters > 0
+    model.learnBeta = 0;
+    display = 1;
+    fprintf(1,'# Intitiliazing the model (fixed beta) %d iterations...\n',fixedBetaIters);
+    model = vargplvmOptimise(model, display, fixedBetaIters);
+    model.fixedBetaIters = fixedBetaIters;
+    disp('# Saving model after optimising beta...')
+    modelWriteResult(model, dataSetName, experimentNo);
+end
 
 % Optimise the model.
 display = 1;
@@ -200,9 +202,9 @@ for i=1:length(itNo)
     modelWriteResult(model, dataSetName, experimentNo);
 end
 
-bar(model.kern.comp{1}.inputScales)
-prefix = 'scales';
-saveAllOpenFigures(['Results/CMU/NEW/' num2str(experimentNo) '/'], prefix,1)
+%bar(model.kern.comp{1}.inputScales)
+%prefix = 'scales';
+%saveAllOpenFigures(['Results/CMU/NEW/' num2str(experimentNo) '/'], prefix,1)
 
 
 % Reconstruction can also be done separately calling demCmu35vargplvmReconstructTaylor
