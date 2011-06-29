@@ -14,7 +14,7 @@
 	PRIOR0p22
 
 # 2) All the demos used to produce the paper's results can be found in the file: 
-	'demosPaper.m'. Alternatively, the submitted .tex file also contains the same code
+	'demosDynamics.m'. Alternatively, the submitted .tex file also contains the same code
 	and can be run as a regular .m file using MATweave:
 	http://staffwww.dcs.shef.ac.uk/people/N.Lawrence/matweave.html
 

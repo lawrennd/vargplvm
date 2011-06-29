@@ -1,4 +1,4 @@
-% DEMOSPAPER: Reproduce all results and plots used for the VGPDS ARXIV 2011 paper.
+% DEMOSDYNAMICS: Reproduce all results and plots used for the VGPDS ARXIV 2011 paper.
 % COPYRIGHT : Andreas C. Damianou, 2011
 % NOTE: In case you wish to reproduce the results without doing the whole optimisation procedure
 % but instead by loading part of the precomputed results, you will need to have in the path the following
