@@ -1,6 +1,6 @@
 function [gKern, gVarmeans, gVarcovars, gInd] = rbfardjitVardistPsi2Gradient(rbfardKern, vardist, Z, covGrad)
 
-% RBFARD2VARDISTPSI2GRADIENT description.
+% RBFARDJITVARDISTPSI2GRADIENT description.
   
 % VARGPLVM
   

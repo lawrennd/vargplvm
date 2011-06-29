@@ -33,8 +33,10 @@ else
 end
 
 f = - vargplvmLogLikelihood(model);
+% fprintf(1,'# F: %.13f\n',f); %%% DEBUG
 if nargout > 1
   g = - vargplvmLogLikeGradients(model);
+%  fprintf(1,'# G: %.13f .\n',sum(abs(g))); %%% DEBUG
 end
 if transpose
   g = g';

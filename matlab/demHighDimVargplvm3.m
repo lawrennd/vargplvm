@@ -31,6 +31,7 @@ if ~exist('fixedBetaIters'), fixedBetaIters = 0;      end     % DEFAULT: 23
 % Set to 1 to tie the inducing points with the latent vars. X
 if ~exist('fixInd')        ,     fixInd = 0;                             end
 if ~exist('dynamicKern')   ,     dynamicKern = {'rbf', 'white', 'bias'}; end
+if ~exist('mappingKern')   ,     mappingKern = {'rbfard2', 'bias', 'white'}; end
 if ~exist('reconstrIters') ,     reconstrIters = 1000;                   end
 % 0.1 gives around 0.5 init.covars. 1.3 biases towards 0.
 if ~exist('vardistCovarsMult'),  vardistCovarsMult=1.3;                  end
@@ -113,12 +114,16 @@ switch dataSetName
         width=249;
         height=187;
     otherwise
-        try
-            [Y, lbls] = lvmLoadData(dataSetName);
-            height = lbls(1);
-            width = lbls(2);
-        catch
-            load(dataSetName);
+        % Y might have been loaded before this script is run. Otherwise
+        % call lvmLoadData
+        if ~(exist('Y') && exist('width') && exist('height'))
+            try
+                [Y, lbls] = lvmLoadData(dataSetName);
+                height = lbls(1);
+                width = lbls(2);
+            catch
+                load(dataSetName);
+            end
         end
 end
 
@@ -332,7 +337,7 @@ clear Y % Free up some memory
 
 % Set up model
 options = vargplvmOptions('dtcvar');
-options.kern = {'rbfard2', 'bias', 'white'};
+options.kern = mappingKern; %{'rbfard2', 'bias', 'white'};
 options.numActive = indPoints;
 options.optimiser = 'scg';
 d = size(Ytr, 2);

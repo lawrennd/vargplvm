@@ -56,6 +56,7 @@ if strcmp(func2str(optim), 'optimiMinimize')
 else
   % NETLAB style optimization.
    params = optim('vargplvmObjective', params,  options,  'vargplvmGradient', model);
+  
   % Comment the previous command and uncomment the following to use the ObjectiveGradient where possible.
   % This only works for the locally stored 'scg.m' which has been altered a bit so that in certain points
   % we can take advantage of the precomputations done for calculating the Objective so as to use them

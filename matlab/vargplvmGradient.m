@@ -23,4 +23,4 @@ function g = vargplvmGradient(params, model)
 
 model = vargplvmExpandParam(model, params);
 g = - vargplvmLogLikeGradients(model);
-
+% fprintf(1,'# G: %.13f\n',sum(abs(g))); %%% DEBUG
