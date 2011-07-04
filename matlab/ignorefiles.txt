@@ -25,10 +25,14 @@ DEBUG_compareXuMeans.m
 DEBUG_fixInducing.m
 DEBUGdemCmu35gplvmVargplvm1.m
 DEBUG_testPointFunctions.m
-DEBUGdemStickTestPoint.m  
+DEBUGdemStickTestPoint.m
 DEBUG_testSeq.m
 DEBUG_testPointLogLikelihoodScript.m
 DEPENDENCIES_needed.txt
 README_NIPS.txt
 demosToKeep.m
 vargpTimeDynamicsOut.m
+demWalkSitJogVargplvmDyn1.m
+minimize.m
+vargpTimeDynamicsSampleSeq.m
+

@@ -1,4 +1,4 @@
-% DEFMFINANCE2 Demonstrate Variational GPLVM with dynamics on financial data for multivariate time series (i.e multiple univariate time series)
+% DEMFINANCE2 Demonstrate Variational GPLVM with dynamics on financial data for multivariate time series (i.e multiple univariate time series)
 % DESC The dimensionality of the data is the number of the correlated timeseries. The data number is the points in a timeseries
 % (the number of which is the same for all timeseries)
 % COPYRIGHT : Andreas C. Damianou, 2011

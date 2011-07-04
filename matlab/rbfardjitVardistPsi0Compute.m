@@ -1,6 +1,6 @@
 function k0 = rbfardjitVardistPsi0Compute(rbfardKern, vardist)
 
-% RBFARDJItVARDISTPSI0COMPUTE description.
+% RBFARDJITVARDISTPSI0COMPUTE description.
   
 % VARGPLVM
   
