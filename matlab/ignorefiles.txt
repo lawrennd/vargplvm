@@ -1,6 +1,6 @@
 adpaths.m
-demOil100Point.m  
-demoVargplvm1.m       
+demOil100Point.m
+demoVargplvm1.m
 demFinance.m
 loadWalkSitJog.m
 testDemFinance2.m
