@@ -24,6 +24,9 @@
 % demOceanVargplvm60.mat
 % demOceanVargplvm60Pred.mat
 
+% To obtain the above .mat files, visit:
+% http://staffwww.dcs.shef.ac.uk/people/A.Damianou/downloads/mat_dynamics.html
+
 % Also, you will need the datasets for 'missa', 'ocean' and 'dog' demos,
 % in the README file there are detailed instructions of how to obtain and process them.
 
