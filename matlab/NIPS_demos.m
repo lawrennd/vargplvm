@@ -1,5 +1,5 @@
-% NIPS_demos Reproduce all results and plots used for the NIPS 2011 paper.
-%
+% NIPS_DEMOS Reproduce all results and plots used for the NIPS 2011 paper.
+
 % NOTE: In case you wish to reproduce the results without doing the whole optimisation procedure
 % but instead by loading the precomputed results, you will need to have in the path the following
 % .mat files with the precomputed results:
