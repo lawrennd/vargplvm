@@ -10,8 +10,8 @@ dataSetName = 'brendan';
 experimentNo = 3;
 printDiagram = 1;
 
-%{
-if 0
+
+if 1
 % load data
 [Y, lbls] = lvmLoadData(dataSetName);
 
@@ -37,15 +37,16 @@ model = vargplvmCreate(latentDim, d, Ytr, options);
 %
 model = vargplvmParamInit(model, model.m, model.X); 
 
-iters = 1500;
+iters = 3;
 display = 1;
 
 model = vargplvmOptimise(model, display, iters);
 
-iters = 100;
-display = 0;
+iters = 1;
+display = 1;
 end
-%}
+
+%%
 
 % 50% missing outputs from the each test point
 numIndPresent = round(0.5*model.d);
@@ -55,6 +56,7 @@ Testmeans = [];
 Testcovars = [];
 Varmu = [];
 Varsigma = [];
+YtsOriginal = Yts; %%%NEW
 % patrial reconstruction of test points
 for i=1:size(Yts,1)
     %
@@ -62,7 +64,8 @@ for i=1:size(Yts,1)
     permi = randperm(model.d);
     indexPresent =  permi(1:numIndPresent);
     indexP(i,:) = indexPresent;
-    
+    indexMissing = setdiff(1:model.d, indexPresent); %
+    Yts(i,indexMissing) = NaN; %
     % initialize the latent point using the nearest neighbour 
     % from he training data
     dst = dist2(Yts(i,indexPresent), Ytr(:,indexPresent));
@@ -75,7 +78,8 @@ for i=1:size(Yts,1)
    
     % optimize mean and vars of the latent point 
     model.vardistx = vardistx;
-    [x, varx] = vargplvmOptimisePoint(model, vardistx, Yts(i, indexPresent), indexPresent, display, iters);
+%    [x, varx] = vargplvmOptimisePoint(model, vardistx, Yts(i, indexPresent), indexPresent, display, iters); %old
+     [x, varx] = vargplvmOptimisePoint(model, vardistx, Yts(i, :), display, iters); %
     Testmeans(i,:) = x;
     Testcovars(i,:) = varx;
     
@@ -94,3 +98,4 @@ modelType(1) = upper(modelType(1));
 save(['dem' capName modelType num2str(experimentNo) '.mat'], 'model', 'perm', 'indexP', 'Varmu', 'Varsigma');
 
     
+
