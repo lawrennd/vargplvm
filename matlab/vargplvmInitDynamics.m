@@ -25,18 +25,28 @@ end
 %model = vargplvmExpandParam(model, params);
 
 % Initialize barmu
-if isfield(optionsDyn,'initX')
-    initFunc = str2func([optionsDyn.initX 'Embed']);
-else
-    initFunc=str2func('ppcaEmbed');
+if ~isfield(optionsDyn, 'initX')
+    optionsDyn.initX = 'ppca';
 end
 
-% If the model is in "D greater than N" mode, then we want initializations
-% to be performed with the original model.m
-if isfield(model, 'DgtN') && model.DgtN
-    X = initFunc(model.mOrig, model.q);
+if isstr(optionsDyn.initX)
+    initFunc = str2func([optionsDyn.initX 'Embed']);
+    
+    % If the model is in "D greater than N" mode, then we want initializations
+    % to be performed with the original model.m
+    if isfield(model, 'DgtN') && model.DgtN
+        X = initFunc(model.mOrig, model.q);
+    else
+        X = initFunc(model.m, model.q);
+    end
 else
-    X = initFunc(model.m, model.q);
+    if size(optionsDyn.initX, 1) == size(model.y, 1) ...
+            & size(optionsDyn.initX, 2) == model.q
+        X = optionsDyn.initX;
+    else
+        error('optionsDun.initX not in recognisable form.');
+    end
+    
 end
 
 
@@ -172,9 +182,4 @@ model.dynamics.learnVariance = optionsDyn.learnVariance; %%% RE-OPT-CODE-NEW  DE
 
 params = vargplvmExtractParam(model);
 model = vargplvmExpandParam(model, params);
-
-
-
-
-
 
