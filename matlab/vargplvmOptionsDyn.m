@@ -66,14 +66,21 @@ if strcmp(optionsDyn.type, 'vargpTime')
         optionsDyn.seq=[];
     end
     
+    % Set to 1 to reoptimise all inducing points during test time
      if ~isfield(optionsDyn, 'testReoptimise')
      	optionsDyn.testReoptimise = 1;  % !!! SET THE DEFAULT TO 1
      end
     
+     % Set to 0 so that if you use a kernel from the exp. family for the
+     % dynamics, then its variance is not learned and the lenghtscale
+     % compensates this (we have one less free parameter then).
     if ~isfield(optionsDyn, 'learnVariance')
         optionsDyn.learnVariance = 0; % !!! SET THE DEFAULT TO 0
     end
-
+    
+    % If set to 1 (not recommended) then the initial means have some
+    % smoothing in the first and last values (i.e. closer to zero). Useful
+    % mostly for periodic kernels.
     if ~isfield(optionsDyn, 'regularizeMeans')
         optionsDyn.regularizeMeans = 0; 
      end

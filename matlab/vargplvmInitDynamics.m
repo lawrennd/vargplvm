@@ -24,13 +24,19 @@ end
 %params = vargplvmExtractParam(model);
 %model = vargplvmExpandParam(model, params);
 
-% Initialize barmu
-if ~isfield(optionsDyn, 'initX')
-    optionsDyn.initX = 'ppca';
-end
 
-if isstr(optionsDyn.initX)
-    initFunc = str2func([optionsDyn.initX 'Embed']);
+% Initialize barmu: first initialize X (mu) and then (see lines below)
+% initialize barmu. The first 'if' statement checks if optionsDyn.initX is
+% the initial X itself (e.g. calculated before in the demo) and there is no
+% need to recalculate it.
+if isfield(optionsDyn,'initX') && ~isstr(optionsDyn.initX)
+    X = optionsDyn.initX;
+else 
+    if isfield(optionsDyn,'initX')
+        initFunc = str2func([optionsDyn.initX 'Embed']);
+    else
+        initFunc=str2func('ppcaEmbed');
+    end
     
     % If the model is in "D greater than N" mode, then we want initializations
     % to be performed with the original model.m
@@ -39,21 +45,13 @@ if isstr(optionsDyn.initX)
     else
         X = initFunc(model.m, model.q);
     end
-else
-    if size(optionsDyn.initX, 1) == size(model.y, 1) ...
-            & size(optionsDyn.initX, 2) == model.q
-        X = optionsDyn.initX;
-    else
-        error('optionsDun.initX not in recognisable form.');
-    end
-    
 end
-
 
 
 %---------------------- TEMP -------------------------------%
 % The following are several tries to make the init. of the means better.
-
+% It does that by "squeezing" the ends of the means to values closer to
+% zero.
 
 % X(1,:)=zeros(size(X(1,:)));
 % X(end,:)=zeros(size(X(1,:)));
@@ -171,15 +169,20 @@ else
                 model.X_u(i,:) = model.vardist.means(ind,:)+0.001*randn(1,model.q);
             end
         end
-    end   
+    end
 end
 
 if isfield(optionsDyn, 'testReoptimise')
-    model.dynamics.reoptimise = optionsDyn.testReoptimise; %%% RE-OPT-CODE-NEW
+    model.dynamics.reoptimise = optionsDyn.testReoptimise;
 end
 
-model.dynamics.learnVariance = optionsDyn.learnVariance; %%% RE-OPT-CODE-NEW  DEFAULT: 0
+model.dynamics.learnVariance = optionsDyn.learnVariance; % DEFAULT: 0
 
 params = vargplvmExtractParam(model);
 model = vargplvmExpandParam(model, params);
+
+
+
+
+
 

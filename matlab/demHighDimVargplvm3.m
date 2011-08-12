@@ -38,12 +38,15 @@ if ~exist('vardistCovarsMult'),  vardistCovarsMult=1.3;                  end
 if ~exist('dataSetSplit')   ,    dataSetSplit = 'everyTwo';              end
 if ~exist('blockSize')      ,    blockSize = 8;                          end
 % 720x1280
-if ~exist('dataSetName')    ,    dataSetName = 'ocean';                  end
+if ~exist('dataSetName')    ,    dataSetName = 'missa';                  end
 if ~exist('testReoptimise') ,    testReoptimise = 1;                     end
 if ~exist('invWidthMultDyn'),    invWidthMultDyn = 100;                     end
 if ~exist('invWidthMult'),       invWidthMult = 5;                     end
 if ~exist('initX'),     initX ='ppca';   end
 if ~exist('regularizeMeans'),  regularizeMeans = 0; end
+if ~exist('initVardistIters'),  initVardistIters = 0; end
+if ~ exist('enableParallelism'), enableParallelism = 1; end
+
 
 if strcmp(dataSetName, 'missa') & strcmp(dataSetSplit,'randomBlocks')
     rand; % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
@@ -79,18 +82,18 @@ if exist('dataToKeep')  fprintf(1,'# DataToKeep: %d \n',dataToKeep); end
 
 switch dataSetName
     case 'missa'
-        try
-            load 'miss-americaHD'
-        catch
-            Y = lvmLoadData(dataSetName);
-        end
-        width=360;
-        height=288;
+     %   try
+     %       load 'miss-americaHD'
+     %   catch
+            Y = vargplvmLoadData(dataSetName);
+     %   end
+     %   width=360;
+     %   height=288;
     case 'ocean'
         try
             load 'DATA_Ocean'
         catch
-            Y=lvmLoadData('ocean');
+            Y=vargplvmLoadData('ocean');
         end
         width=1280;
         height=720;
@@ -98,7 +101,7 @@ switch dataSetName
         try
             load 'DATA_Horse'
         catch
-            Y=lvmLoadData('horse');
+            Y=vargplvmLoadData('horse');
         end
         %%%%
         Y = Y(90:end,:);
@@ -106,11 +109,11 @@ switch dataSetName
         width=249;
         height=187;
     case 'horse2'
-        Y=lvmLoadData('horse2');
+        Y=vargplvmLoadData('horse2');
         width=320;
         height=240;
     case 'horse2cropped'
-        Y=lvmLoadData('horse2cropped');
+        Y=vargplvmLoadData('horse2cropped');
         width=249;
         height=187;
     otherwise
@@ -118,7 +121,7 @@ switch dataSetName
         % call lvmLoadData
         if ~(exist('Y') && exist('width') && exist('height'))
             try
-                [Y, lbls] = lvmLoadData(dataSetName);
+                [Y, lbls] = vargplvmLoadData(dataSetName);
                 height = lbls(1);
                 width = lbls(2);
             catch
@@ -339,7 +342,11 @@ clear Y % Free up some memory
 options = vargplvmOptions('dtcvar');
 options.kern = mappingKern; %{'rbfard2', 'bias', 'white'};
 options.numActive = indPoints;
-options.optimiser = 'scg';
+if ~isempty(which('scg2'))
+    options.optimiser = 'scg2';
+else
+    options.optimiser = 'scg';
+end
 d = size(Ytr, 2);
 
 
@@ -515,6 +522,10 @@ if trainModel
         %____
     end
     
+    if model.N > 50 && enableParallelism
+        fprintf('# Parallel computations w.r.t the datapoints!\n');
+         model.vardist.parallel = 1;
+    end
     
     %%%
     model.dataSetInfo.dataSetName = dataSetName;
@@ -551,6 +562,15 @@ if trainModel
         
         modelBetaFixed = model;
         model.fixedBetaIters=fixedBetaIters;
+    end
+    
+    if initVardistIters ~=0
+        model.initVardist = 1;
+        fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
+        model = vargplvmOptimise(model, display, initVardistIters); % Default: 20
+        fprintf(1,'1/b = %.4d\n',1/model.beta);
+        
+         model.initVardist = 0;
     end
     
     model.learnBeta = 1;

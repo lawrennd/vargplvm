@@ -22,6 +22,63 @@ function [K, outKern, sumKern, Kgvar] = rbfard2VardistPsi2Compute(rbfardKern, va
 
 % VARGPLVM
 
+try
+    pool_open = matlabpool('size')>0;
+catch e
+    pool_open = 0;
+end
+
+% The conditions for the parallel code to run, is the workers pool to be
+% open, the parallel flag to be active and the number of datapoints N to be
+% larger than a reasonable threshold (otherwise there is unecessary
+% thread-communication overhead).
+if pool_open && (isfield(vardist,'parallel') && vardist.parallel) && size(vardist.means,1) > 15
+    [K, outKern, sumKern, Kgvar] = rbfard2VardistPsi2ComputePar(rbfardKern, vardist, Z);
+else
+    [K, outKern, sumKern, Kgvar] = rbfard2VardistPsi2ComputeOrig(rbfardKern, vardist, Z);
+end
+
+
+
+
+function [K, outKern, sumKern, Kgvar] = rbfard2VardistPsi2ComputePar(rbfardKern, vardist, Z)
+
+% variational means
+N  = size(vardist.means,1);
+%  inducing variables 
+M = size(Z,1); 
+
+A = rbfardKern.inputScales;
+    
+% first way
+sumKern = zeros(M,M); 
+
+parfor n=1:N
+    %    
+    AS_n = (1 + 2*A.*vardist.covars(n,:)).^0.5;  
+    
+    normfactor =  1./prod(AS_n);
+    
+    %Z_n = (repmat(vardist.means(n,:),[M 1]) - Z)*0.5; 
+    Z_n = bsxfun(@minus, vardist.means(n,:), Z)*0.5;
+    %Z_n = Z_n.*repmat(sqrt(A)./AS_n,[M 1]);
+    Z_n = bsxfun(@times, Z_n, sqrt(A)./AS_n);
+    distZ = dist2(Z_n,-Z_n); 
+    
+    sumKern = sumKern + normfactor*exp(-distZ);  
+    %
+end
+    
+% ZZ = Z.*(repmat(sqrt(A),[M 1]));
+ZZ =  bsxfun(@times, Z, sqrt(A));
+distZZ = dist2(ZZ,ZZ);
+outKern = exp(-0.25*distZZ);
+
+Kgvar = rbfardKern.variance*(outKern.*sumKern); 
+K = rbfardKern.variance*Kgvar;
+
+
+function [K, outKern, sumKern, Kgvar] = rbfard2VardistPsi2ComputeOrig(rbfardKern, vardist, Z)
 
 % variational means
 N  = size(vardist.means,1);
@@ -56,6 +113,7 @@ outKern = exp(-0.25*distZZ);
 Kgvar = rbfardKern.variance*(outKern.*sumKern); 
 K = rbfardKern.variance*Kgvar;
 
+%{
 % second way
 %sumKern2 = zeros(M,M); 
 %for n=1:N
@@ -113,4 +171,4 @@ K = rbfardKern.variance*Kgvar;
 %KK
 %pause
 %sum(sum(abs(outKern - outKern2)))
-    
+ %}   

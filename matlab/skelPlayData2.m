@@ -1,14 +1,14 @@
-function skelPlayData2(skelStruct, frameLength, channels1, channels2, channels3, lbls)
+function skelPlayData2(skelStruct, channels, frameLength, lbls)
 % SKELPLAYDATA2 Play skel motion capture data for more than one dataset (for comparison).
 %
 %	Description:
 %
-%	SKELPLAYDATA2(SKEL, FRAMELENGTH, CHANNELS, CHANNELS2, CHANNELS3, lbls) plays channels from a
+%	SKELPLAYDATA2(SKEL, FRAMELENGTH, CHANNELS, lbls) plays channels from a
 %	motion capture skeleton and channels. This function just extends the original one by allowing
 % 	more datasets to be presented side by side for comparison
 %	 Arguments:
 %	  SKEL - the skeleton for the motion.
-%	  CHANNELS - the channels for the motion.
+%	  CHANNELS - the channels for each motion arranged in a cell aray.
 %	  FRAMELENGTH - the framelength for the motion.
 %
 %
@@ -34,30 +34,18 @@ scrsz = get(0,'ScreenSize');
 figure('Position',[scrsz(3)/4.86 scrsz(4)/6.666 scrsz(3)/1.6457 scrsz(4)/1.4682])
 
 
+figNo = size(channels,2);
 
-
-
-subplot(1,3,1);
-gca1 = gca;
-handle1 = skelVisualise(channels1(1, :), skelStruct);
-if exist('lbls')
-    title(lbls{1})
-end
-subplot(1,3,2);
-gca2 = gca;
-handle2 = skelVisualise(channels2(1, :), skelStruct);
-if exist('lbls')
-    title(lbls{2})
-end
-
-if exist('channels3') && ~isempty(channels3)
-    subplot(1,3,3);
-    gca3 = gca;
-    handle3 = skelVisualise(channels3(1, :), skelStruct);
+for i=1:figNo
+    subplot(1,figNo,i);
+    gcas{i} = gca;
+    handle{i} = skelVisualise(channels{i}(1, :), skelStruct);
     if exist('lbls')
-        title(lbls{3})
+        title(lbls{i})
     end
 end
+
+
 
 % Get the limits of the motion.
 xlim = get(gca, 'xlim');
@@ -69,8 +57,8 @@ maxY3 = ylim(2);
 zlim = get(gca, 'zlim');
 minY2 = zlim(1);
 maxY2 = zlim(2);
-for i = 1:size(channels1, 1)
-    Y = skel2xyz(skelStruct, channels1(i, :));
+for i = 1:size(channels{1}, 1)
+    Y = skel2xyz(skelStruct, channels{1}(i, :));
     minY1 = min([Y(:, 1); minY1]);
     minY2 = min([Y(:, 2); minY2]);
     minY3 = min([Y(:, 3); minY3]);
@@ -81,28 +69,18 @@ end
 xlim = [minY1 maxY1];
 ylim = [minY3 maxY3];
 zlim = [minY2 maxY2];
-set(gca1, 'xlim', xlim, ...
-    'ylim', ylim, ...
-    'zlim', zlim);
 
-set(gca2, 'xlim', xlim, ...
-    'ylim', ylim, ...
-    'zlim', zlim);
-
-set(gca3, 'xlim', xlim, ...
-    'ylim', ylim, ...
-    'zlim', zlim);
-
+for i=1:figNo
+    set(gcas{i}, 'xlim', xlim, ...
+        'ylim', ylim, ...
+        'zlim', zlim);
+end
 
 % Play the motion
-for j = 1:size(channels1, 1)
+for j = 1:size(channels{i}, 1)
     pause(frameLength)
-    subplot(1,3,1)
-    skelModify(handle1, channels1(j, :), skelStruct);
-    subplot(1,3,2)
-    skelModify(handle2, channels2(j, :), skelStruct);
-    if exist('channels3') && ~isempty(channels3)
-        subplot(1,3,3)
-        skelModify(handle3, channels3(j, :), skelStruct);
+    for i=1:figNo
+        subplot(1,figNo,i)
+        skelModify(handle{i}, channels{i}(j, :), skelStruct);
     end
 end

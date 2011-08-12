@@ -120,7 +120,7 @@ switch dataSetName
         try
             load 'miss-americaHD'
         catch
-            Y = lvmLoadData(dataSetName);
+            Y = vargplvmLoadData(dataSetName);
         end
         width=360;
         height=288;
@@ -128,7 +128,7 @@ switch dataSetName
         try
             load 'DATA_Ocean'
         catch
-            Y=lvmLoadData('ocean');
+            Y=vargplvmLoadData('ocean');
         end
         width=1280;
         height=720;
@@ -136,7 +136,7 @@ switch dataSetName
         try
             load 'DATA_Horse'
         catch
-            Y=lvmLoadData('horse');
+            Y=vargplvmLoadData('horse');
         end
         %%%%
         Y = Y(90:end,:);
@@ -144,16 +144,16 @@ switch dataSetName
         width=249;
         height=187;
     case 'horse2'
-        Y=lvmLoadData('horse2');
+        Y=vargplvmLoadData('horse2');
         width=320;
         height=240;
     case 'horse2cropped'
-        Y=lvmLoadData('horse2cropped');
+        Y=vargplvmLoadData('horse2cropped');
         width=249;
         height=187;
     otherwise
         try
-            [Y, lbls] = lvmLoadData(dataSetName);
+            [Y, lbls] = vargplvmLoadData(dataSetName);
             height = lbls(1);
             width = lbls(2);
         catch

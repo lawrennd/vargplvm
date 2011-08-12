@@ -53,18 +53,14 @@ end
 if strcmp(func2str(optim), 'optimiMinimize')
   % Carl Rasmussen's minimize function 
   params = optim('vargplvmObjectiveGradient', params, options, model);
+elseif strcmp(func2str(optim), 'scg2')
+   % NETLAB style optimization with a slight modification so that an
+   % objectiveGradient can be used where applicable, in order to re-use
+   % precomputed quantities.
+    params = optim('vargplvmObjectiveGradient', params,  options,  'vargplvmGradient', model);
 else
   % NETLAB style optimization.
    params = optim('vargplvmObjective', params,  options,  'vargplvmGradient', model);
-  
-  % Comment the previous command and uncomment the following to use the ObjectiveGradient where possible.
-  % This only works for the locally stored 'scg.m' which has been altered a bit so that in certain points
-  % we can take advantage of the precomputations done for calculating the Objective so as to use them
-  % (without recomputing them) for the calculation of the gradient. Having the modified optimiser with the
-  % same name 'scg.m' is only a temporary solution, in the future we should define a new optimiser, e.g.
-  % scg2.m and modify our demos to choose that from the options. 
-
-  % params = optim('vargplvmObjectiveGradient', params,  options,  'vargplvmGradient', model);
 end
 
 model = vargplvmExpandParam(model, params);

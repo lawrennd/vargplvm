@@ -44,9 +44,9 @@ for i=1:length(fieldsToKeep)
         f = getfield(model,fieldsToKeep{i});
         mm=setfield(mm,fieldsToKeep{i},f);
     else
-        if ~strcmp(fieldsToKeep{i}, 'inducingIndices') && ~strcmp(fieldsToKeep{i}, 'iters') && ~strcmp(fieldsToKeep{i}, 'fixedBetaIters')
-            fprintf(['??? Field ' fieldsToKeep{i} ' was missing from model! This field was skipped...\n']);
-        end
+        %if ~strcmp(fieldsToKeep{i}, 'inducingIndices') && ~strcmp(fieldsToKeep{i}, 'iters') && ~strcmp(fieldsToKeep{i}, 'fixedBetaIters')
+        %    fprintf(['??? Field ' fieldsToKeep{i} ' was missing from model! This field was skipped...\n']);
+        %end
     end
 end
 

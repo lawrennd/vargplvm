@@ -33,17 +33,24 @@ function g = vargplvmLogLikeGradients(model)
 % VARGPLVM
 
 
-% KL divergence terms  
-
 % The gradient of the kernel of the dynamics (e.g. temporal prior)
 gDynKern = [];
 
+% KL divergence terms: If there are no dynamics, the only params w.r.t to
+% which we need derivatives are the var. means and covars. With dynamics
+% (see below) we also need derivs. w.r.t theta_t (dyn. kernel's params).
 if ~isfield(model, 'dynamics') || isempty(model.dynamics)
-    gVarmeansKL = - model.vardist.means(:)';
-    % !!! the covars are optimized in the log space 
-    gVarcovsKL = 0.5 - 0.5*model.vardist.covars(:)';
+    if ~(isfield(model, 'onlyLikelihood') && model.onlyLikelihood)
+        gVarmeansKL = - model.vardist.means(:)';
+        % !!! the covars are optimized in the log space 
+        gVarcovsKL = 0.5 - 0.5*model.vardist.covars(:)';
+    else
+        gVarmeansKL = 0;
+        gVarcovsKL = 0;
+    end
 end
 
+%fprintf(' %d \n',sum([gVarmeansKL gVarcovsKL]));%%%%%TEMP
 
 % Likelihood terms (coefficients)
 [gK_uu, gPsi0, gPsi1, gPsi2, g_Lambda, gBeta, tmpV] = vargpCovGrads(model);
@@ -64,13 +71,29 @@ gKern = gKern0 + gKern1 + gKern2 + gKern3;
 gVarmeansLik = gVarmeans0 + gVarmeans1 + gVarmeans2;
 
 
+% if strcmp(model.kern.type, 'rbfardjit')
+%     % different derivatives for the variance, which is super-numerically stable for 
+%     % this particular kernel  
+%     gKern(1) = 0.5*model.d*( - model.k+ sum(sum(model.invLat.*model.invLat))/model.beta - model.beta*(model.Psi0-model.TrC)  )...
+%                     + 0.5*tmpV;
+% end
+
 if strcmp(model.kern.type, 'rbfardjit')
     % different derivatives for the variance, which is super-numerically stable for 
-    % this particular kernel  
-    gKern(1) = 0.5*model.d*( - model.k+ sum(sum(model.invLat.*model.invLat))/model.beta - model.beta*(model.Psi0-model.TrC)  )...
+    % this particular kernel. In the phase where the variational
+    % distribution is initialized, we want to keep the signal/noise ratio
+    % fixed, i.e. model.beta and the kernel's variance are fixed. The rest
+    % of the hyperparameters that are closely related with the variational
+    % distribution (e.g. input scales) are still adjusted to fit the data.
+    if isfield(model, 'initVardist')
+        if model.initVardist
+            gKern(1) = 0;
+        else
+            gKern(1) = 0.5*model.d*( - model.k+ sum(sum(model.invLat.*model.invLat))/model.beta - model.beta*(model.Psi0-model.TrC)  )...
                     + 0.5*tmpV;
+        end
+    end
 end
-    
 
 %%% Compute Gradients with respect to X_u %%%
 gKX = kernGradX(model.kern, model.X_u, model.X_u);
@@ -141,18 +164,6 @@ else
     gVarcovs = gVarcovsLik + gVarcovsKL;
 end
 
-
-%%%Moved that a few lines below
-% gVar = [gVarmeans gVarcovs];
-% 
-% % gVarmeans = gVarmeans0 + gVarmeans1 + gVarmeans2 + gVarmeansKL;
-% % gVarcovs = gVarcovs0 + gVarcovs1 + gVarcovs2 + gVarcovsKL; 
-% 
-% 
-% 
-% if isfield(model.vardist,'paramGroups')
-%     gVar = gVar*model.vardist.paramGroups;
-% end
 
 
     
@@ -233,8 +244,6 @@ end
 % minima where the noise beta explains all the data) 
 % The learnBeta option deals with the above. 
 
-
-
 % This constrains the variance of the dynamics kernel to one
 % (This piece of code needs to be done in better way with unit variance dynamic 
 %  kernels. The code below also will only work for rbf dynamic kernel)
@@ -242,7 +251,7 @@ end
 % structure
 if isfield(model, 'dynamics') && ~isempty(model.dynamics)
    if strcmp(model.dynamics.kern.comp{1}.type,'rbf') || strcmp(model.dynamics.kern.comp{1}.type,'matern32') || strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic') || strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic2')
-       if ~isfield(model.dynamics, 'learnVariance') || ~model.dynamics.learnVariance   %%%%% NEW
+       if ~isfield(model.dynamics, 'learnVariance') || ~model.dynamics.learnVariance  
            gDynKern(2) = 0;
        end
    end
@@ -255,19 +264,36 @@ if isfield(model, 'dynamics') && ~isempty(model.dynamics)
            gDynKern(end) = 0;
        end
     %end
-%     if isfield(model.dynamics, 'learnSecondWidth') && ~model.dynamics.learnSecondWidth   %%%%% NEW
-%            gDynKern(end-1) = 0;
-%     end
     %___
 end
-    
-if model.learnBeta == 1
-    % optimize all parameters including beta
-    g = [gVar gDynKern gInd gKern gBeta];
-else 
-    % keep beta fixed  
-    g = [gVar gDynKern gInd gKern 0*gBeta];
+
+% In case we are in the phase where the vardistr. is initialised (see above
+% for the variance of the kernel), beta is kept fixed. For backwards
+% compatibility this can be controlled either with the learnBeta field or
+% with the initVardist field. The later overrides the first.
+if isfield(model, 'learnBeta') && model.learnBeta
+    gBetaFinal = gBeta;
+else
+    gBetaFinal = 0*gBeta;
 end
+if isfield(model, 'initVardist')
+    if model.initVardist == 1
+        gBetaFinal = 0*gBeta;
+    else
+        gBetaFinal = gBeta;
+    end
+end
+
+% At this point, gDynKern will be [] if there are no dynamics.
+g = [gVar gDynKern gInd gKern gBetaFinal];
+
+% if model.learnBeta == 1
+%     % optimize all parameters including beta
+%     g = [gVar gDynKern gInd gKern gBeta];
+% else 
+%     % keep beta fixed  
+%     g = [gVar gDynKern gInd gKern 0*gBeta];
+% end
 
 
 %if model.kern.comp{1}.variance > 100 | model.kern.comp{1}.variance < 0.001

@@ -50,7 +50,8 @@ else
     if returnNames
         %[varParams, varNames] = vardistExtractParam(model.vardist);
         [varParams, varNames] = modelExtractParam(model.vardist);
-        names = varNames{:}; 
+        %names = varNames{:}; %%% ORIGINAL
+        names = varNames; %%% NEW
     else
         %varParams = vardistExtractParam(model.vardist);
         varParams = modelExtractParam(model.vardist);

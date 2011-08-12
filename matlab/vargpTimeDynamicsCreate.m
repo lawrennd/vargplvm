@@ -110,7 +110,7 @@ end
 if isstruct(options.kern) 
   model.kern = options.kern;
 else
-  model.kern = kernCreate(t, options.kern); % This should probably be the vector t
+  model.kern = kernCreate(t, options.kern); 
 end
 
 
@@ -120,7 +120,7 @@ model.vardist = vardistCreate(latentVals, q, 'gaussian');
 
 % Must find a formula which, given Kt, relates initial lambdas to initial Sqs
 % so that Sqs are around 0.5
-model.vardist.covars = 0.25 * ones(size(model.vardist.covars)); % 0.25 is a good value for the stick data
+model.vardist.covars = 0.25 * ones(size(model.vardist.covars));
 
 model.vardist.means = latentVals; % vardistCreate does that
 
