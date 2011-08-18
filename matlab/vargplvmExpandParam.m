@@ -69,8 +69,17 @@ model.kern = kernExpandParam(model.kern, params(startVal:endVal));
 if model.optimiseBeta
   startVal = endVal + 1;
   endVal = endVal + prod(size(model.beta));
-  fhandle = str2func([model.betaTransform 'Transform']);
-  model.beta = fhandle(params(startVal:endVal), 'atox');
+  if ~isstruct(model.betaTransform)
+    fhandle = str2func([model.betaTransform 'Transform']);
+    model.beta = fhandle(params(startVal:endVal), 'atox');
+  else
+      if isfield(model.betaTransform,'transformsettings') && ~isempty(model.betaTransform.transformsettings)
+          fhandle = str2func([model.betaTransform.type 'Transform']);
+          model.beta = fhandle(params(startVal:endVal), 'atox', model.betaTransform.transformsettings);
+      else
+          error('vargplvmExtractParam: Invalid transform specified for beta.'); 
+      end
+  end
 end
 
 model.nParams = endVal;

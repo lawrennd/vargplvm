@@ -89,9 +89,21 @@ params = [params kernParams];
 
 % beta in the likelihood 
 if model.optimiseBeta
-   fhandle = str2func([model.betaTransform 'Transform']);
-   betaParam = fhandle(model.beta, 'xtoa');
+   
+   if ~isstruct(model.betaTransform)
+       fhandle = str2func([model.betaTransform 'Transform']);
+       betaParam = fhandle(model.beta, 'xtoa');
+   else
+      if isfield(model.betaTransform,'transformsettings') && ~isempty(model.betaTransform.transformsettings)
+          fhandle = str2func([model.betaTransform.type 'Transform']);
+          betaParam = fhandle(model.beta, 'xtoa', model.betaTransform.transformsettings);
+      else
+          error('vargplvmExtractParam: Invalid transform specified for beta.'); 
+      end
+   end   
+
    params = [params betaParam(:)'];
+   
    if returnNames
      for i = 1:length(betaParam)
        betaParamNames{i} = ['Beta ' num2str(i)];

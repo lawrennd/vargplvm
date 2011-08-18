@@ -356,7 +356,13 @@ save 'TEMPbetaGradPlm.mat' 'TEMPbetaGradPlm';
 %	- model.TrYY + model.TrPP ...
 %	+ sigm * sum(sum(model.K_uu .* model.Tb))); 
 
-fhandle = str2func([model.betaTransform 'Transform']);
-gBeta = gBeta*fhandle(model.beta, 'gradfact');
+if ~isstruct(model.betaTransform)
+    fhandle = str2func([model.betaTransform 'Transform']);
+    gBeta = gBeta*fhandle(model.beta, 'gradfact');
+else
+    fhandle = str2func([model.betaTransform.type 'Transform']);
+    gBeta = gBeta*fhandle(model.beta, 'gradfact', model.betaTransform.transformsettings);
+end
+
 
 g_Lambda = repmat(-0.5*model.beta*model.d, 1, model.N);

@@ -36,6 +36,10 @@ elseif strcmp(model.kern.type,'cmpnd')
   end
 end
 
+if isstruct( model.betaTransform )
+    options.betaTransform = model.betaTransform;
+end   
+
 mm = vargplvmCreate(P, model.d, model.y, options);
 N = size(model.vardist.means,1);
 

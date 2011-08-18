@@ -36,7 +36,12 @@ model.learnScales = options.learnScales;
 %model.scaleTransform = optimiDefaultConstraint('positive');
 
 model.optimiseBeta = options.optimiseBeta;
-model.betaTransform =  optimiDefaultConstraint('positive');
+
+if isfield(options, 'betaTransform') && isstruct( options.betaTransform )
+    model.betaTransform = options.betaTransform;
+else
+    model.betaTransform =  optimiDefaultConstraint('positive');
+end
 
 model.q = q;
 model.d = size(Y, 2);
