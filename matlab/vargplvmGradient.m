@@ -21,6 +21,13 @@ function g = vargplvmGradient(params, model)
 
 % VARGPLVM
 
-model = vargplvmExpandParam(model, params);
-g = - vargplvmLogLikeGradients(model);
+model = modelExpandParam(model, params);
+
+g = - modelLogLikeGradients(model);
+
+% sum gradients of tied parameters, then assign corresponding summed gradients to each
+% group of tied parameters
+% if isfield( model, 'ties' )
+%     g = g * model.T; % model.T == model.ties' * model.ties;
+% end
 % fprintf(1,'# G: %.13f\n',sum(abs(g))); %%% DEBUG

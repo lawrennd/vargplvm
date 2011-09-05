@@ -30,7 +30,7 @@ for q=1:vardist.latentDimension
     B_q = repmat(A(q)/(A(q)*S_q + 1), [1 M]).*(repmat(Mu_q,[1 M]) - repmat(Z_q,[N 1]));
  
     % derivatives wrt variational means and inducing inputs 
-    tmp = (K_fu.*B_q).*covGrad);
+    tmp = (K_fu.*B_q).*covGrad;
     
     % variational means: you sum out the columns (see report)
     gVarmeans(:,q) = sum(tmp,2); 
@@ -45,13 +45,13 @@ for q=1:vardist.latentDimension
     B1_q = -(0.5./repmat((A(q)*S_q + 1), [1 M])).*(repmat(S_q, [1 M]) + B_q);
     
     % gradients wrt kernel hyperparameters (lengthscales) 
-    gKernlengcs(q) = sum(sum((K_fu.*B1_q).*covGrad))); 
+    gKernlengcs(q) = sum(sum((K_fu.*B1_q).*covGrad)); 
     
     % B2_q term (see report) 
     B1_q = ((0.5*A(q))./repmat((A(q)*S_q + 1), [1 M])).*(B_q - 1); 
     
     % gradient wrt variational covars (diagonal covariance matrices) 
-    gVarcovars(:,q) = sum((K_fu.*B1_q).*covGrad),2);
+    gVarcovars(:,q) = sum((K_fu.*B1_q).*covGrad,2);
   
     %
 end

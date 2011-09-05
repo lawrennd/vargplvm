@@ -80,18 +80,12 @@ gVarmeansLik = gVarmeans0 + gVarmeans1 + gVarmeans2;
 
 if strcmp(model.kern.type, 'rbfardjit')
     % different derivatives for the variance, which is super-numerically stable for 
-    % this particular kernel. In the phase where the variational
-    % distribution is initialized, we want to keep the signal/noise ratio
-    % fixed, i.e. model.beta and the kernel's variance are fixed. The rest
-    % of the hyperparameters that are closely related with the variational
-    % distribution (e.g. input scales) are still adjusted to fit the data.
-    if isfield(model, 'initVardist')
-        if model.initVardist
-            gKern(1) = 0;
-        else
-            gKern(1) = 0.5*model.d*( - model.k+ sum(sum(model.invLat.*model.invLat))/model.beta - model.beta*(model.Psi0-model.TrC)  )...
+    % this particular kernel    
+    if model.learnSigmaf == 1
+         gKern(1) = 0.5*model.d*( - model.k+ sum(sum(model.invLat.*model.invLat))/model.beta - model.beta*(model.Psi0-model.TrC)  )...
                     + 0.5*tmpV;
-        end
+    else
+         gKern(1) = 0;
     end
 end
 

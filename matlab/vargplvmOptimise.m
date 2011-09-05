@@ -29,7 +29,8 @@ if nargin < 3
 end
 
 
-params = vargplvmExtractParam(model);
+%params = vargplvmExtractParam(model);
+params = modelExtractParam(model);
 
 options = optOptions;
 options(2) = 0.1*options(2); 
@@ -63,5 +64,6 @@ else
    params = optim('vargplvmObjective', params,  options,  'vargplvmGradient', model);
 end
 
-model = vargplvmExpandParam(model, params);
+%model = vargplvmExpandParam(model, params);
+model = modelExpandParam(model, params);
 
