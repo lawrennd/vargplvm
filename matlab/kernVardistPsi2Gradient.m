@@ -105,11 +105,10 @@ function gKern = paramTransformPsi2(kern, gKern)
     params  = fhandle(kern);
 
     for i=1:length(kern.transforms)        
-        if ~isstruct(kern.transforms(i))
-            fhandle = str2func([kern.transform(i) 'Transform']);
+        fhandle = str2func([kern.transforms(i).type 'Transform']);
+        if ~isfield(kern.transforms(i), 'transformsettings')
             gKern(kern.transforms(i).index) = gKern(kern.transforms(i).index).*fhandle(params(kern.transforms(i).index), 'gradfact');
         else
-            fhandle = str2func([kern.transforms(i).type 'Transform']);
             gKern(kern.transforms(i).index) = gKern(kern.transforms(i).index).*fhandle(params(kern.transforms(i).index), 'gradfact', kern.transforms(i).transformsettings);
         end
     end
