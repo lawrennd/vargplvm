@@ -24,9 +24,6 @@ if ~exist('latentDim')    ,  latentDim = 40;          end
 % Set to 1 to use dynamics or to 0 to use the standard var-GPLVM
 if ~exist('dynUsed')      ,  dynUsed = 1;             end
 % Set to 1 to keep only the dimensions modelling the head (missa dataset)
-if ~exist('cropVideo')    ,  cropVideo = 0;           end
-% Set to 1 to remove the frames with the translation (missa dataset)
-if ~exist('removeTransl') ,  removeTransl = 0;        end
 if ~exist('fixedBetaIters'), fixedBetaIters = 0;      end     % DEFAULT: 23
 % Set to 1 to tie the inducing points with the latent vars. X
 if ~exist('fixInd')        ,     fixInd = 0;                             end
@@ -48,12 +45,12 @@ if ~exist('initVardistIters'),  initVardistIters = 0; end
 if ~ exist('enableParallelism'), enableParallelism = 1; end
 
 
-if strcmp(dataSetName, 'missa') & strcmp(dataSetSplit,'randomBlocks')
-    rand; % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
-end
-if strcmp(dataSetName, 'ocean') & strcmp(dataSetSplit,'randomBlocks')
-    for i=1:5, rand; end % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
-end
+% if strcmp(dataSetName, 'missa') & strcmp(dataSetSplit,'randomBlocks')
+%     rand; % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
+% end
+% if strcmp(dataSetName, 'ocean') & strcmp(dataSetSplit,'randomBlocks')
+%     for i=1:5, rand; end % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
+% end
 
 % dataSetName = 'susie';
 % load susie_352_240
@@ -73,7 +70,6 @@ if dynUsed
     disp(dynamicKern);
 end
 
-fprintf(1,'# CropVideo / removeTranslation: %d / %d \n', cropVideo, removeTransl);
 fprintf(1,'# VardistCovarsMult: %d \n', vardistCovarsMult);
 fprintf(1,'# InvWidthMultDyn: %d \n', invWidthMultDyn);
 fprintf(1,'# InvWidthMult: %d \n', invWidthMult);
@@ -81,41 +77,28 @@ if exist('dataToKeep')  fprintf(1,'# DataToKeep: %d \n',dataToKeep); end
 %fprintf(1,'#----------------------------------------------------\n');
 
 switch dataSetName
-    case 'missa'
-     %   try
-     %       load 'miss-americaHD'
-     %   catch
+    case 'missa' % There is a translation between frames 65...102
             Y = vargplvmLoadData(dataSetName);
-     %   end
-     %   width=360;
-     %   height=288;
     case 'ocean'
         try
             load 'DATA_Ocean'
         catch
             Y=vargplvmLoadData('ocean');
         end
-        width=1280;
-        height=720;
+        width=1280; height=720;
     case 'horse'
         try
             load 'DATA_Horse'
         catch
             Y=vargplvmLoadData('horse');
         end
-        %%%%
         Y = Y(90:end,:);
-        %%%%
         width=249;
         height=187;
     case 'horse2'
         Y=vargplvmLoadData('horse2');
         width=320;
         height=240;
-    case 'horse2cropped'
-        Y=vargplvmLoadData('horse2cropped');
-        width=249;
-        height=187;
     otherwise
         % Y might have been loaded before this script is run. Otherwise
         % call lvmLoadData
@@ -134,85 +117,9 @@ if exist('dataToKeep')
     Y = Y(1:dataToKeep,:);
 end
 
-% Remove the translation part (only for the "missa" dataset)
-if removeTransl
-    % For this dataset there is a translation in space between frames 66-103
-    if strcmp(dataSetName,'missa')
-        Y = [Y(1:64,:) ; Y(103:end,:)];
-    else
-        error('removeTranslation option only for the missa dataset');
-    end
-end
 
-% Crop video
-% Note: plot one frame and write "imcrop" on the console. Select the region
-% you want to keep and right click -> copy position. this is the cropVector.
-% The newHeight and width may be +-1 of
-% that, see size(fr) to get it right.
-if cropVideo
-    switch dataSetName
-        case 'missa'
-            % Keep only the head
-            newWidth=144;
-            newHeight=122;
-            Ynew = zeros(size(Y,1), newWidth*newHeight);
-            for i=1:size(Y,1)
-                fr=reshape(Y(i,:),height,width);
-                fr=imcrop(fr,[129.5 91.5 newWidth-1 newHeight-1]);
-                Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
-            end
-            Y = Ynew; width=newWidth; height=newHeight;
-        case 'ocean'
-            % Keep only the water
-            %[1.5 288.5 1279 432]
-            newWidth=width;
-            newHeight=round(height/1.6666);
-            Ynew = zeros(size(Y,1), newWidth*newHeight);
-            for i=1:size(Y,1)
-                fr=reshape(Y(i,:),height,width);
-                fr=imcrop(fr,[1 288.5 newWidth-1 newHeight-1]);
-                Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
-            end
-            Y = Ynew; width=newWidth; height=newHeight;
-        case 'horse'
-            % Step 1
-            cropVector=[24.5 1.5 224 height]; % horse
-            %%%
-            newHeight=cropVector(4)-1;
-            newWidth=cropVector(3)+1;
-            Ynew = zeros(size(Y,1), newWidth*newHeight);
-            for i=1:size(Y,1)
-                fr=reshape(Y(i,:),height,width);
-                fr=imcrop(fr,cropVector);
-                Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
-            end
-            Y = Ynew; width=newWidth; height=newHeight;
-            
-            % Step 2
-            cropVector = [0 0 188 159];
-            newHeight=cropVector(4);
-            newWidth=cropVector(3);
-            Ynew = zeros(size(Y,1), newWidth*newHeight);
-            for i=1:size(Y,1)
-                fr=reshape(Y(i,:),height,width);
-                fr=imcrop(fr,cropVector);
-                Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
-            end
-            Y = Ynew; width=newWidth; height=newHeight;
-        case 'dog2'
-            cropVector=[11.5 3.5 316 357];
-            newHeight=cropVector(4);
-            newWidth=cropVector(3)+1;
-            Ynew = zeros(size(Y,1), newWidth*newHeight);
-            for i=1:size(Y,1)
-                fr=reshape(Y(i,:),height,width);
-                fr=imcrop(fr,cropVector);
-                Ynew(i,:) = reshape(fr,1,newWidth*newHeight);
-            end
-            Y = Ynew; width=newWidth; height=newHeight;
-    end
-    
-end
+% Crop video: keep only "window" of each frame
+% vargplvmCropVideo
 
 
 
@@ -394,114 +301,15 @@ if trainModel
         optionsDyn.regularizeMeans = regularizeMeans;
         
         kern = kernCreate(t, dynamicKern); % Default: {'rbf','white','bias'}
-        
-        %         if strcmp(kern.comp{2}.type, 'white')
-        %              if ~exist('whiteVar')
-        %                 whiteVar = 1e-4;
-        %             end
-        %             kern.comp{2}.variance = whiteVar; % Usual values: 1e-1, 1e-3
-        %         end
-        %
-        %         if strcmp(kern.comp{2}.type, 'whitefixed')
-        %             if ~exist('whiteVar')
-        %                 whiteVar = 1e-6;
-        %             end
-        %             kern.comp{2}.variance = whiteVar;
-        %             fprintf(1,'# fixedwhite variance: %d\n',whiteVar);
-        %         end
-        
-        
-        
-        
-        
-        %-- Initialize each element of the compound kernel
+           
+                
+        %-- Initialize each element of the compound kernel (optional but
+        % recommended) 
         % ATTENTION: For the gradients we assume that the base kernel (rbf,
         % matern etc) must be the FIRST one and if a second base kernel
         % (not white or bias) exist must be the LAST one!!!!!!!!!!!!!!
-        if isfield(kern,'comp')
-            fprintf('# Dynamics Kernel initialization: \n')
-            kernFound = 0;
-            for i=1:numel(kern.comp)
-                type = kern.comp{i}.type;
-                if strcmp(type, 'rbfperiodic') || strcmp(type, 'rbfperiodic2')
-                    if exist('periodicPeriod')
-                        kern.comp{i}.period = periodicPeriod;
-                        kern.comp{i}.factor = 2*pi/periodicPeriod;
-                    end
-                    fprintf(1,'\t # periodic period: %d\n',kern.comp{i}.period);
-                elseif strcmp(type, 'whitefixed')
-                    if ~exist('whiteVar')
-                        whiteVar = 1e-6;
-                    end
-                    kern.comp{i}.variance = whiteVar;
-                    fprintf(1,'\t # fixedwhite variance: %d\n',whiteVar);
-                elseif strcmp(type, 'white')
-                    if ~exist('whiteVar')
-                   %     whiteVar = 1e-4; % Some models have been trained
-                   %     with this!!
-                        whiteVar = 0.1;
-                    end
-                    fprintf(1,'\t # white variance: %d\n',whiteVar);
-                    kern.comp{i}.variance = whiteVar; % Usual values: 1e-1, 1e-3
-                elseif strcmp(type, 'bias')
-                    if exist('biasVar')
-                        kern.comp{i}.bias = biasVar;
-                        fprintf('\t # bias variance: %d \n', biasVar);
-                    end
-                end
-                % The following is related to the expected number of
-                % zero-crossings.(larger inv.width numerator, rougher func)
-                if strcmp(type,'rbfperiodic') || strcmp(type,'rbfperiodic2') || strcmp(type,'rbf') || strcmp(type,'matern32')
-                    kern.comp{i}.inverseWidth = optionsDyn.inverseWidth./(((max(t)-min(t))).^2);
-                    kern.comp{i}.variance = 1;
-                    % This is a bit hacky: if this is the second time an
-                    % rbf, or rbfperiodic or... kernel is found, then the
-                    % second variance can be initialised to be smaller
-                    if kernFound
-                        if ~exist('secondVarInit')
-                            kern.comp{i}.variance = 0.006;
-                        else
-                            kern.comp{i}.variance = secondVarInit;
-                        end
-                        fprintf('\t # Second variance initialized to %d \n',kern.comp{i}.variance);
-                        
-                    end
-                    kernFound = i;
-                end
-            end
-        end
+        vargplvmInitDynKernel;
         
-        
-        %         if strcmp(kern.comp{1}.type, 'rbfperiodic')
-        %             if exist('periodicPeriod')
-        %                 kern.comp{1}.period = periodicPeriod;
-        %             end
-        %             fprintf(1,'# periodic period: %d\n',kern.comp{1}.period);
-        %         end
-        %         if strcmp(kern.comp{1}.type, 'rbfperiodic2')
-        %             if exist('periodicPeriod')
-        %                 kern.comp{1}.period = periodicPeriod;
-        %                 kern.comp{1}.factor = 2*pi/periodicPeriod;
-        %             end
-        %             fprintf(1,'# periodic period: %d\n',kern.comp{1}.period);
-        %         end
-        
-        
-        %         % The following is related to the expected number of
-        %         % zero-crossings.(larger inv.width numerator, rougher func)
-        %         if ~strcmp(kern.comp{1}.type,'ou')
-        %             kern.comp{1}.inverseWidth = optionsDyn.inverseWidth./(((max(t)-min(t))).^2);
-        %             kern.comp{1}.variance = 1;
-        %         end
-        
-        %         if numel(kern.comp) > 3 && (strcmp(kern.comp{4}.type,'rbf') || strcmp(kern.comp{4}.type,'rbfperiodic') || strcmp(kern.comp{4}.type,'matern32') || strcmp(kern.comp{4}.type,'rbfperiodic2'))
-        %              kern.comp{4}.inverseWidth = optionsDyn.inverseWidth./(((max(t)-min(t))).^2);
-        %              if ~exist('secondVarInit')
-        %                 kern.comp{4}.variance = 0.006;
-        %              else
-        %                  kern.comp{4}.variance = secondVarInit;
-        %              end
-        %         end
         
         optionsDyn.kern = kern;
         optionsDyn.vardistCovars = vardistCovarsMult; % 0.23 gives true vardist.covars around 0.5 (DEFAULT: 0.23) for the ocean dataset
@@ -550,6 +358,8 @@ if trainModel
     modelType(1) = upper(modelType(1));
     fileToSave = ['dem' capName modelType num2str(experimentNo) '.mat'];
     %%---
+    
+    if exist('experimentDesc'), model.expDesc = experimentDesc; end
     
     display = 1;
     %     %%%% Optimisation
@@ -823,7 +633,8 @@ if predWithMs
     
     errorFullPr2 = sum(sum( abs(Varmu2(:,indexPresent) - YtsOriginal(:,indexPresent)) ))/prod(size(YtsOriginal(:,indexPresent)));
     fprintf(1,'# GPLVM Error (in the present dims) only times:%d\n', errorFullPr2);
-    %     % Visualization of the reconstruction
+    %{
+     % Visualization of the reconstruction
     %     for i=1:Nstar
     %         subplot(1,2,1);
     %         fr=reshape(YtsOriginal(i,:),height,width);
@@ -835,7 +646,7 @@ if predWithMs
     %         colormap('gray');
     %         pause(0.5);
     %     end
-    
+    %}
     prunedModelUpdated = vargplvmPruneModel(modelUpdated,1);
     save([fileToSave(1:end-4) 'Pred.mat'], 'Testmeans', 'Testcovars', 'prunedModelUpdated');
     fprintf(1,'# Saved %s\n',[fileToSave(1:end-4) 'Pred.mat']);

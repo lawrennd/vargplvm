@@ -45,13 +45,12 @@ if exist('printDiagram') & printDiagram
   lvmPrintPlot(mm, lbls, dataSetName, experimentNo);
 end
 
-% load connectivity matrix
-[void, connect] = mocapLoadTextData('run1');
+
 % Load the results and display dynamically.
 lvmResultsDynamic(model.type, dataSetName, experimentNo, 'plot3', model.y)
 
 
 lvmScatterPlotColor(mm, model.y(:, 2)); %%% ?
 
-
+% See also: plotting with scatter3
 
