@@ -23,7 +23,7 @@ if exist('onlyData') && onlyData
     %  model.mOrig = model.m;
     model.bias = mean(Ytr); % Default, has to be changed later if it was different
     
-    if exist('options') && isfield(options,'scale2var1')
+    if (nargin > 3) && isfield(options,'scale2var1')
         if(options.scale2var1)
             model.scale = std(Ytr);
             model.scale(find(model.scale==0)) = 1;
@@ -34,7 +34,7 @@ if exist('onlyData') && onlyData
                 warning('Both scale2var1 and scaleVal set for GP');
             end
         end
-    elseif exist('options') && isfield(options, 'scaleVal')
+    elseif  (nargin > 3) && isfield(options, 'scaleVal')
         model.scale = repmat(options.scaleVal, 1, size(Ytr,2));
     else
         model.scale = ones(1,size(Ytr,2));

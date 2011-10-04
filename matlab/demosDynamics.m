@@ -127,6 +127,7 @@ fr=reshape(Yts(17,:),height,width); imagesc(fr); colormap('gray');
 print -depsc ../diagrams/missaGpdsPredFrame17_part1.eps; system('epstopdf ../diagrams/missaGpdsPredFrame17_part1.eps');
 fr=reshape(Varmu(17,:),height,width); imagesc(fr); colormap('gray');
 print -depsc ../diagrams/missaGpdsPredFrame17_part2.eps; system('epstopdf ../diagrams/missaGpdsPredFrame17_part2.eps');
+%playMov(height, width, [],Yts, Varmu2);
 %%
 
 

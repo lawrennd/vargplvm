@@ -90,7 +90,11 @@ function g = vargplvmLogLikeGradients(model)
                 gKern(1) = gKern(1).*fhandle(model.kern.variance, 'gradfact');
             else
                 fhandle = str2func([model.kern.transforms(1).type 'Transform']);
-                gKern(1) = gKern(1).*fhandle(model.kern.variance, 'gradfact', model.kern.transforms(1).transformsettings);
+                if ~isfield(model.kern.transforms(1), 'transformsettings')
+                    gKern(1) = gKern(1).*fhandle(model.kern.variance, 'gradfact');
+                else
+                    gKern(1) = gKern(1).*fhandle(model.kern.variance, 'gradfact', model.kern.transforms(1).transformsettings);
+                end
             end
         else
              gKern(1) = 0;

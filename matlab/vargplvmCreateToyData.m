@@ -43,3 +43,32 @@ Z3p = Z3p + noiseLevel.*randn(size(Z3p));%
 % Form dataset by concatenating the signals
 Y = [Z1p Z2p Z3p];
 t = t';
+
+
+%{
+% Alternatively
+t = linspace(0,4*pi,100);
+% The original signal will be a cosine, a sine and a squared cosine.
+Z{1} = cos(t)';
+Z{2} = sin(t)';
+Z{3}= (cos(t)').^2;
+Z{4} = cos(t)' + 0.3;
+Z{5} = cos(t)' + 0.6;
+Z{6} = cos(t)' + 0.9;
+Z{7} = sin(t)' + 0.3;
+Z{8} = sin(t)' + 0.6;
+Z{9} = sin(t)' + 0.9;
+Z{10} = (cos(t)').^2 + 0.3;
+
+noiseLevel = 0.4; % Default: 0.1
+Y=[];
+for i=1:10
+    bias = mean(Z{i});
+    Z{i} = Z{i} - repmat(bias,size(Z{i},1),1);
+    scale = max(max(abs(Z{i})));
+    Z{i} = Z{i} ./scale;
+    Z{i} = Z{i} + noiseLevel.*randn(size(Z{i}));
+    Y = [Y Z{i}];
+end
+t = t';
+%}

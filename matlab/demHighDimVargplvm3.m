@@ -539,8 +539,8 @@ if trainModel
     model.beta=1/(0.01*var(model.mOrig(:)));
     modelInit = model;
     
-    disp(model.vardist.covars)
-    disp(model.kern.comp{1}.inputScales)
+   % disp(model.vardist.covars)
+   % disp(model.kern.comp{1}.inputScales)
     
     
     %%---
@@ -566,10 +566,11 @@ if trainModel
     
     if initVardistIters ~=0
         model.initVardist = 1;
+		model.learnBeta = 0; model.learnSigmaf = 0; % This should be merged with the initVardist field
         fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
         model = vargplvmOptimise(model, display, initVardistIters); % Default: 20
         fprintf(1,'1/b = %.4d\n',1/model.beta);
-        
+        model.learnSigmaf = 1;
          model.initVardist = 0;
     end
     
