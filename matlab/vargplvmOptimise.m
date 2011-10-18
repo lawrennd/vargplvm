@@ -1,4 +1,4 @@
-function model = vargplvmOptimise(model, display, iters);
+function model = vargplvmOptimise(model, display, iters, varargin)
 
 % VARGPLVMOPTIMISE Optimise the VARGPLVM.
 % FORMAT
@@ -28,11 +28,24 @@ if nargin < 3
   end
 end
 
-
-%params = vargplvmExtractParam(model);
-params = modelExtractParam(model);
-
 options = optOptions;
+if length(varargin) == 2
+    if strcmp(varargin{1}, 'gradcheck')
+        assert(islogical(varargin{2}));
+        options(9) = varargin{2};
+        if options(9)
+            [params, names] = modelExtractParam(model);
+            for i=1:length(names)
+                fprintf('%d\t%s\n', i, names{i});
+            end
+        else
+            params = modelExtractParam(model);
+        end
+    end
+else
+    params = modelExtractParam(model);
+end
+
 options(2) = 0.1*options(2); 
 options(3) = 0.1*options(3);
 

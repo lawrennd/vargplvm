@@ -1,4 +1,4 @@
-function [X, varX, model] = vargplvmOptimisePoint(model, vardistx, y, display, iters);
+function [X, varX, model] = vargplvmOptimisePoint(model, vardistx, y, display, iters)
 
 % VARGPLVMOPTIMISEPOINT Optimise the postion of one or more latent points.
 % FORMAT
