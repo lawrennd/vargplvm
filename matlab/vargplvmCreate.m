@@ -169,7 +169,7 @@ if model.d > limitDimensions && model.N < limitDimensions
 %             if(model.learnScales)
 %                 warning('Both learn scales and scale2var1 set for GP');
 %             end
-%             if(isfield(options, 'scaleVal'))
+%             if(isfield(options, 'scaleVal'))numel(cidx{count});
 %                 warning('Both scale2var1 and scaleVal set for GP');
 %             end
 %         end
@@ -229,7 +229,7 @@ end
 %  model.gamma = zeros(size(y));
 %
 %  % Initate noise model
-%  model.noise = noiseCreate(noiseType, y);
+%  model.noise = noiseCreate(noiseType, y);numel(cidx{count});
 %
 %  % Set up storage for the expectations
 %  model.expectations.f = model.y;
@@ -258,9 +258,30 @@ switch options.approx
         else
             %%%NEW_: make it work even if k>N
             if model.k <= model.N
-                ind = randperm(model.N);
-                ind = ind(1:model.k);
-                model.X_u = model.X(ind, :);
+                if ~isfield(options, 'labels')
+                    ind = randperm(model.N);
+                    ind = ind(1:model.k);
+                    model.X_u = model.X(ind, :);
+                else
+                    % in the case that class labels are supplied, make sure that inducing inputs
+                    % from all classes are chosen
+                    [idcs, nSmpls] = class_samples( options.labels, model.k );
+                    
+                    count = 1;
+                    midx = [];
+                    for inds = idcs
+                        ind   = inds{:};
+                        ind   = ind(randperm(numel(ind)));                            
+                        idx  = ind(1:nSmpls(count));
+                        
+                        % test that there is no overlap between index sets
+                        assert(isempty(intersect(midx, idx)));
+                        midx = [midx, idx];
+                        
+                        count = count+1;
+                    end    
+                    model.X_u = model.X(midx,:);
+                end                    
             else
                 % TODO: sample from the variational distr. (this should probably go
                 % to the dynamics as well because the vardist. changes in the initialization for the dynamics.
@@ -293,8 +314,6 @@ switch options.approx
                 end
             end
             %%%_NEW
-
-
         end
         model.beta = options.beta;
 end
@@ -385,4 +404,61 @@ model.numParams = length(initParams);
 % This forces kernel computation.
 model = vargplvmExpandParam(model, initParams);
 %}
+
+end
+
+
+function [idcs, nSmpls] = class_samples( lbls, nActive )
+
+    if size(lbls,1) ~= 1
+        lbls = lbls';
+    end
+    
+    clids  = unique(lbls);
+    nEx    = zeros(1, numel(clids));
+    nSmpls = zeros(1, numel(clids));
+    idcs   = cell( 1, numel(clids));
+    
+    count = 1;
+    for c = clids 
+        tmp = find(lbls==c);
+        idcs{count} = tmp;
+        nEx(count)  = numel(tmp);
+        nSmpTmp =  ceil(nEx(count)/length(lbls)*nActive);
+        if nSmpTmp > nEx(count)
+            nSmpTmp = nEx(count);
+        end
+        nSmpls(count) = nSmpTmp;
+       
+        count = count + 1;
+    end
+    
+    if sum(nEx) < nActive
+       error('There must be at least as many training samples as inducing variables.');
+    end
+    
+    nRes = nActive - sum(nSmpls);
+    if nRes > 0
+        while nRes > 0
+            [nSmplsSort, ind] = sort(nSmpls,'ascend');
+            for count = ind
+                if nSmpls(count) < nEx(count)
+                    nSmpls(count) = nSmpls(count)+1;
+                    nRes = nRes-1;
+                end
+
+                if nRes == 0
+                    break;
+                end
+            end
+        end
+    else
+       while nRes < 0
+          [mx, ind] = max(nSmpls);
+          nSmpls(ind) = nSmpls(ind) - 1;
+          nRes = nRes + 1;
+       end
+    end
+end
+
 

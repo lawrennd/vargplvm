@@ -57,24 +57,33 @@ if display
 end
 options(14) = iters;
 
-if isfield(model, 'optimiser')
-  optim = str2func(model.optimiser);
-else
-  optim = str2func('scg');
-end
+if isfield(model, 'optimiser') && ~isa(model.optimiser, 'function_handle')
+    
+    if isfield(model, 'optimiser')
+      optim = str2func(model.optimiser);
+    else
+      optim = str2func('scg');
+    end
 
 
-if strcmp(func2str(optim), 'optimiMinimize')
-  % Carl Rasmussen's minimize function 
-  params = optim('vargplvmObjectiveGradient', params, options, model);
-elseif strcmp(func2str(optim), 'scg2')
-   % NETLAB style optimization with a slight modification so that an
-   % objectiveGradient can be used where applicable, in order to re-use
-   % precomputed quantities.
-    params = optim('vargplvmObjectiveGradient', params,  options,  'vargplvmGradient', model);
+    if strcmp(func2str(optim), 'optimiMinimize')
+        % Carl Rasmussen's minimize function 
+        params = optim('vargplvmObjectiveGradient', params, options, model);
+    elseif strcmp(func2str(optim), 'scg2')
+        % NETLAB style optimization with a slight modification so that an
+        % objectiveGradient can be used where applicable, in order to re-use
+        % precomputed quantities.
+        params = optim('vargplvmObjectiveGradient', params,  options,  'vargplvmGradient', model);
+    else
+        % NETLAB style optimization.
+        params = optim('vargplvmObjective', params,  options,  'vargplvmGradient', model);
+    end
+    
+elseif isfield(model, 'optimiser') && isa(model.optimiser, 'function_handle')
+    f = fcnchk(model.optimiser);
+    params = f(model);
 else
-  % NETLAB style optimization.
-   params = optim('vargplvmObjective', params,  options,  'vargplvmGradient', model);
+    error('vargplvmOptimise: Invalid optimiser setting.');
 end
 
 %model = vargplvmExpandParam(model, params);
