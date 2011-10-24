@@ -9,8 +9,10 @@ function model = vargplvmCreate(q, d, Y, options)
 % ARG Y : the data to be modelled in design matrix format (as many
 % rows as there are data points).
 % ARG options : options structure as returned from
-% FGPLVMOPTIONS. This structure determines the type of
+% VARGPLVMOPTIONS. This structure determines the type of
 % approximations to be used (if any).
+% ARG enableDgtN: if set to true, the model will be created in D >> N
+% mode (if this is indeed the case).
 % RETURN model : the GP-LVM model.
 %
 % COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009-2011
@@ -24,10 +26,21 @@ if size(Y, 2) ~= d
     error(['Input matrix Y does not have dimension ' num2str(d)]);
 end
 
+
+if isfield(options,'enableDgtN')
+	enableDgtN = options.enableDgtN;
+else
+	enableDgtN = true; % default behaviour is to enable D >> N mode
+end
+
 % Datasets with dimensions larger than this number will run the
 % code which is more efficient for large D. This will happen only if N is
 % smaller than D, though.
-limitDimensions = 5000; % Default: 5000
+if enableDgtN
+    limitDimensions = 5000; % Default: 5000
+else
+    limitDimensions = 1e+10;
+end
 
 model.type = 'vargplvm';
 model.approx = options.approx;
