@@ -80,8 +80,10 @@ if isfield(model, 'optimiser') && ~isa(model.optimiser, 'function_handle')
     end
     
 elseif isfield(model, 'optimiser') && isa(model.optimiser, 'function_handle')
+    
     f = fcnchk(model.optimiser);
     params = f(model);
+    
 else
     error('vargplvmOptimise: Invalid optimiser setting.');
 end

@@ -254,7 +254,13 @@ end
 %end
 %}
 
-model.vardist = vardistCreate(X, q, 'gaussian'); %%%
+% check if parameters are to be optimised in model space (and constraints are handled
+% by optimiser)
+if isfield(options, 'notransform') && options.notransform == true
+    model.vardist = vardistCreate(X, q, 'gaussian', 'identity');
+else
+    model.vardist = vardistCreate(X, q, 'gaussian'); %%%
+end
 
 switch options.approx
     case {'dtcvar'}
@@ -356,6 +362,10 @@ else
     if ~isempty(options.prior)
         model.prior = priorCreate(options.prior);
     end
+end
+
+if isfield(options, 'notransform') && options.notransform == true
+    model.prior.transforms.type = 'identity';    
 end
 
 %model.vardist = vardistCreate(X, q, 'gaussian');

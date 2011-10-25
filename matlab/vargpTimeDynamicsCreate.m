@@ -115,8 +115,12 @@ end
 
 
 % Initialize the model
-
-model.vardist = vardistCreate(latentVals, q, 'gaussian');
+if isfield(options, 'notransform') && options.notransform == true
+    model.vardist = vardistCreate(latentVals, q, 'gaussian', 'identity');
+else
+    model.vardist = vardistCreate(latentVals, q, 'gaussian');
+end
+    
 
 % Must find a formula which, given Kt, relates initial lambdas to initial Sqs
 % so that Sqs are around 0.5

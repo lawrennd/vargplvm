@@ -1,4 +1,4 @@
-function vardist = vardistCreate(X, Q, type)
+function vardist = vardistCreate(X, Q, type, constraint)
 
 % VARDISTCREATE description.
   
@@ -14,6 +14,12 @@ function vardist = vardistCreate(X, Q, type)
 %
 % The structure of the vardist is similar to the structure of a kernel
 
+if nargin == 3
+    constraint = optimiDefaultConstraint('positive');
+else
+    constraint = 'identity';
+end
+
 
 vardist.type = 'vardist';
 vardist.vartype = type; 
@@ -25,7 +31,7 @@ vardist.nParams = 2*vardist.numData*vardist.latentDimension;
 N = size(X,1);
 
 vardist.transforms(1).index = [(N*Q+1):vardist.nParams];
-vardist.transforms(1).type = optimiDefaultConstraint('positive');
+vardist.transforms(1).type = constraint;
 
 % initialize the parameters
 vardist.means  = X;
