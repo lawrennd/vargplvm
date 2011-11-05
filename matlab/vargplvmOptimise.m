@@ -38,6 +38,7 @@ if length(varargin) == 2
             for i=1:length(names)
                 fprintf('%d\t%s\n', i, names{i});
             end
+            feval('gradchek2', params, @vargplvmObjective, @vargplvmGradient, model, names);
         else
             params = modelExtractParam(model);
         end

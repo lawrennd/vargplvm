@@ -1,4 +1,4 @@
-function mm = vargplvmReduceModel(model, P, dims)
+function [mm, order] = vargplvmReduceModel(model, P, dims)
 
 % VARGPLVMREDUCEMODEL prunes out dimensions of the model.
 % FORMAT

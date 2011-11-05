@@ -155,7 +155,9 @@ function g = vargplvmLogLikeGradients(model)
         % Variational variances are positive: Now that the final covariances
         % are obtained we amend with the partial derivatives due to the
         % exponential transformation to ensure positiveness.
-        gVarcovs = (gVarcovs(:).*model.dynamics.vardist.covars(:))';
+        if ~isfield(model, 'notransform') || (isfield(model,'notransform') && model.notransform == false)
+            gVarcovs = (gVarcovs(:).*model.dynamics.vardist.covars(:))';
+        end
     else
         % For the non-dynamical GPLVM these cov. derivatives are the final, so
         % it is time to amend with the partial derivative due to exponing them

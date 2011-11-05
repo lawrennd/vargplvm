@@ -257,6 +257,9 @@ end
 % check if parameters are to be optimised in model space (and constraints are handled
 % by optimiser)
 if isfield(options, 'notransform') && options.notransform == true
+    % store notransform option in model:
+    % this is needed when computing gradients
+    model.notransform = true;
     model.vardist = vardistCreate(X, q, 'gaussian', 'identity');
 else
     model.vardist = vardistCreate(X, q, 'gaussian'); %%%
