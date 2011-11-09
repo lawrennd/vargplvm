@@ -1,4 +1,4 @@
-function [gradient, delta] = gradchek2(w, func, grad, varargin)
+function [gradient, delta, delta_percent] = gradchek2(w, func, grad, varargin)
 %GRADCHEK Checks a user-defined gradient function using finite differences.
 %
 %	Description
