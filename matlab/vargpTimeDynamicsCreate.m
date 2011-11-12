@@ -124,7 +124,11 @@ end
 
 % Must find a formula which, given Kt, relates initial lambdas to initial Sqs
 % so that Sqs are around 0.5
-model.vardist.covars = 0.25 * ones(size(model.vardist.covars));
+if ~isfield(options, 'lambda_init') 
+    model.vardist.covars = 0.25 * ones(size(model.vardist.covars));
+else
+    model.vardist.covars = options.lambda_init * ones(size(model.vardist.covars));
+end
 
 model.vardist.means = latentVals; % vardistCreate does that
 
