@@ -21,6 +21,19 @@ rand('seed', 1e5);
 dataSetName = 'robotWireless';
 clear timeStamps; % in case it's left from a previous experiment
 
+%-- Constants
+if ~exist('trainModel'), trainModel=1; end
+if ~exist('indPoints'), indPoints = 70; end % Default: 50
+if ~exist('latentDim'), latentDim = 10; end
+if ~exist('dynUsed'),  dynUsed = 1; end
+if ~exist('printDiagram'), printDiagram = 1; end
+if ~exist('experimentNo'), experimentNo = 404; end
+if ~exist('doPredictions'), doPredictions = 0; end
+if ~exist('itNo'), itNo = 2000; end
+if ~exist('initVardistIters'), initVardistIters = 180; end
+if ~exist('dynamicKern')   ,     dynamicKern = {'rbf', 'white', 'bias'}; end
+if ~exist('vardistCovarsMult'), vardistCovarsMult = 2.5; end
+
 % load data
 %[Y, lbls] = lvmLoadData(dataSetName);
 %%% Like lvmLoadData but also parse times.
@@ -31,21 +44,15 @@ dirSep = filesep;
 Ydat = (Ydat + 85)/15;
 lbls = 'connect';
 
-%Y = Ydat;
-Y = Ydat(1:215, :);
-timeStampsTraining = timeStampsdat(1:215);
-Ytest = Ydat(216:end, :);
-timeStampsTest = timeStampsdat(216:end);
+if ~exist('dataToKeep')
+    dataToKeep = size(Ydat,1); % Default should be: 215
+end
+
+Y = Ydat(1:dataToKeep, :);
+timeStampsTraining = timeStampsdat(1:dataToKeep);
+Ytest = Ydat((dataToKeep+1):end, :);
+timeStampsTest = timeStampsdat((dataToKeep+1):end);
 %%%
-
-
-trainModel=1;
-indPoints = 50; % Default: 50
-latentDim = 10;
-dynUsed = 1;
-printDiagram = 1;
-experimentNo = 1;
-
 
 
 % Set up model
@@ -55,6 +62,12 @@ options.numActive = indPoints; % Default: 50
 
 options.optimiser = 'scg';
 d = size(Y, 2);
+
+capName = dataSetName;
+capName(1) = upper(capName(1));
+modelType = 'Vargplvm';
+saveName = ['dem' capName modelType num2str(experimentNo) '.mat'];
+
 
 if trainModel
     % demo using the variational inference method for the gplvm model
@@ -67,76 +80,53 @@ if trainModel
         optionsDyn.type = 'vargpTime';
         optionsDyn.t=timeStampsTraining;
         optionsDyn.inverseWidth=20;
+        optionsDyn.kern = dynamicKern;
+        optionsDyn.vardistCovars = vardistCovarsMult;
         
         % Fill in with default values whatever is not already set
         optionsDyn = vargplvmOptionsDyn(optionsDyn);
         model = vargplvmAddDynamics(model, 'vargpTime', optionsDyn, optionsDyn.t, 0, 0,optionsDyn.seq);
-
+        
         fprintf(1,'# Further calibration of the initial parameters...\n');
-        model = vargplvmInitDynamics(model,optionsDyn);  
+        model = vargplvmInitDynamics(model,optionsDyn);
     end
     modelInit = model;
+    
     
     %     for q=1:model.q, plot(X(:,q)); hold on; plot(model.vardist.means(:,q),'r');
     %         plot(model.X_u(:,q),'+r');  pause(1); hold off;
     %     end
     %
     
-    % model.dynamics.vardist.covars =
-    % ones(size(model.dynamics.vardist.covars)); % Good initialization
+    %model.dynamics.vardist.covars = ones(size(model.dynamics.vardist.covars)); % Good initialization
     
     % Optimise the model.
-    model.learnBeta = 0;
-    iters = 20; % Default: 2000
+    model.initVardist = 1; model.learnSigmaf = 0;
     display = 1;
-    fprintf(1,'# Optimising the model (fixed beta)...\n');
-    model = vargplvmOptimise(model, display, iters);
+    fprintf(1,'# Optimising the model (initialising var.distr) for %d iters...\n',initVardistIters);
+    model = vargplvmOptimise(model, display, initVardistIters);
     
-    model.learnBeta = 1;
-    iters = 30; % Default: 2000
-    fprintf(1,'# Optimising the model...\n');
-    model = vargplvmOptimise(model, display, iters);
+    model.initVardist = 0; model.learnSigmaf = 1;
     
-    if dynUsed
-        save 'finalDemRobotDyn1.mat' 'model'
-    else
-        save 'finalDemRobotStatic1.mat' 'model'
-        fprintf(1,'# Saving the model...\n');
-        capName = dataSetName;
-        capName(1) = upper(capName(1));
-        modelType = model.type;
-        modelType(1) = upper(modelType(1));
-        
-        % order wrt to the inputScales
-        mm = vargplvmReduceModel(model,2);
-        % plot the two largest twe latent dimensions
-        if exist('printDiagram') & printDiagram
-            lvmPrintPlot(mm, lbls, capName, experimentNo);
-        end
-        return
-        
+    fprintf(1,'# Optimising the model for %d iters...\n',itNo);
+    model = vargplvmOptimise(model, display, itNo);
+    
+    fprintf(1,'# Saving the model...(%s)\n',saveName);
+    
+    prunedModel = vargplvmPruneModel(model);
+    save(saveName, 'prunedModel');
+    
+    
+    % order wrt to the inputScales
+    mm = vargplvmReduceModel(model,2);
+    % plot the two largest twe latent dimensions
+    if exist('printDiagram') & printDiagram
+        lvmPrintPlot(mm, lbls, capName, experimentNo);
     end
+    
 else
-    %clear
-    %load workspaceRobot500ItersPred.mat
-    if dynUsed
-        load finalDemRobotDyn1
-    else
-        load finalDemRobotStatic1
-        fprintf(1,'# Saving the model...\n');
-        capName = dataSetName;
-        capName(1) = upper(capName(1));
-        modelType = model.type;
-        modelType(1) = upper(modelType(1));
-        
-        % order wrt to the inputScales
-        mm = vargplvmReduceModel(model,2);
-        % plot the two largest twe latent dimensions
-        if exist('printDiagram') & printDiagram
-            lvmPrintPlot(mm, lbls, capName, experimentNo);
-        end
-        return
-    end
+    load(saveName);
+    model = vargplvmRestorePrunedModel(prunedModel, Y);
 end
 
 
@@ -151,16 +141,9 @@ end
 % Varmutr=mu;
 % % TODO
 
-
-fprintf(1,'# Saving the model...\n');
-capName = dataSetName;
-capName(1) = upper(capName(1));
-modelType = model.type;
-modelType(1) = upper(modelType(1));
-save(['dem' capName modelType num2str(experimentNo) '.mat'], 'model');
-
-
-return
+if ~(doPredictions && dynUsed)
+    return
+end
 
 %%%% predictions
 Yts = Ytest;

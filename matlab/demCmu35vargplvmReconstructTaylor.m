@@ -78,14 +78,20 @@ timeStampsTest = ([0:size(Ytest,1)-1].*dt)';
 %load(['dem' capName num2str(experimentNo) '.mat']);
 load(fileName); % From demCmu35gplvmVargplvm1.m
 fprintf(1,'# Loaded %s\n',fileName);
-fprintf(1,'# Dynamics kernel:');
-kernDisplay(model.dynamics.kern);
+if isfield(model, 'dynamics') & ~isempty(model.dynamics)
+    fprintf(1,'# Dynamics kernel:');
+    kernDisplay(model.dynamics.kern);
+    model.dynamics.t_star = timeStampsTest;
+    kernName = model.dynamics.kern.comp{1}.type;
+else
+    kernName = 'static';
+end
 fprintf(1,'# experimentNo=%d\n',experimentNo);
 fprintf(1,'# Reconstruction Iters=%d\n',model.reconstrIters);
 
-% model.reconstrIters = 2500; %%%TEMP
+ model.reconstrIters = 2000; %%%TEMP
 
-model.dynamics.t_star = timeStampsTest;
+
 
 startInd = 63;
 
@@ -93,8 +99,16 @@ legErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origSca
     'Leg'], experimentNo);
 
 save(['dem' capName 'ReconstructLegs' num2str(experimentNo) '.mat'], 'legErrs');
-prefix = [num2str(experimentNo) '/Leg/'];
-%saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
+
+%----
+figPath = ['Results/CMU/' num2str(experimentNo) kernName '/Leg/'];
+try
+    saveAllOpenFigures(figPath, [],1)
+catch 
+    %
+end
+%----
+
 legErrs
 
 
@@ -103,8 +117,16 @@ bodyErrs = vargplvmTaylorAngleErrors(model, Y, Ytest, startInd, origBias, origSc
     'Body'], experimentNo);
 
 save(['dem' capName 'ReconstructBody' num2str(experimentNo) '.mat'], 'bodyErrs');
-prefix = [num2str(experimentNo) '/Body/'];
-%saveAllOpenFigures('Results/CMU/NEWRec2500it/', prefix,1)
+
+
+figPath = ['Results/CMU/' num2str(experimentNo) kernName '/Body/'];
+try
+    saveAllOpenFigures(figPath, [],1)
+catch 
+    %
+end
+
+%----
 bodyErrs
 
 % bar(model.kern.comp{1}.inputScales)

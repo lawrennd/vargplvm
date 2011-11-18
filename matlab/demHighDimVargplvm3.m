@@ -254,6 +254,9 @@ if ~isempty(which('scg2'))
 else
     options.optimiser = 'scg';
 end
+if ~exist('DgtN') || ~DgtN
+    options.enableDgtN = false;
+end
 d = size(Ytr, 2);
 
 

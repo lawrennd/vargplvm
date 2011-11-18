@@ -158,8 +158,18 @@ if ~isempty(gInd)
     gInd = reshape(gInd, dynModel.N, dynModel.q); %%%%%
 end
 
+% Flag, indicating/multiplier that we need derivatives only w.r.t the
+% likelihood part of the bound.
+if ~(isfield(dynModel, 'onlyLikelihood') && dynModel.onlyLikelihood)
+    onlyLikelihood = 0;
+else
+    onlyLikelihood = 1;
+end
 
-gVarmeans = dynModel.Kt * (gVarmeansLik - dynModel.vardist.means);
+% The second term in the parenthesis, corresponds to the KL term. The
+% multiplier will set it to zero, if we need only the derivatives
+% corresponding only to the likelihood part.
+gVarmeans = dynModel.Kt * (gVarmeansLik - (~onlyLikelihood) * dynModel.vardist.means);
 
 gVarcovs = zeros(dynModel.N, dynModel.q); % memory preallocation
 sumTrGradKL = 0;
@@ -176,14 +186,23 @@ for q=1:dynModel.q
     % Find Sq
     Sq = dynModel.Kt - G'*G;
     
-    gVarcovs(:,q) = - (Sq .* Sq) * (gVarcovsLik(:,q) + 0.5*dynModel.vardist.covars(:,q));
+    % If onlyLikelihood is set to 1, then the KL part will be multiplied
+    % with zero, thus being ignored.
+    gVarcovs(:,q) = - (Sq .* Sq) * (gVarcovsLik(:,q) + ...
+        (~onlyLikelihood)*0.5*dynModel.vardist.covars(:,q));
     
     % Find the coefficient for the grad. wrt theta_t (params of Kt)
     G1T=G1';
     Bhat=G1T*G1;
     BhatKt=G1T*G;
     
-    trGradKL = -0.5*(BhatKt*Bhat + dynModel.vardist.means(:,q) * dynModel.vardist.means(:,q)');
+    % If we only need the derivatives from the likelihood part of the
+    % bound, set the corrsponding KL part to zero.
+    if onlyLikelihood
+        trGradKL = 0;
+    else
+        trGradKL = -0.5*(BhatKt*Bhat + dynModel.vardist.means(:,q) * dynModel.vardist.means(:,q)');
+    end
     
     IBK = eye(dynModel.N) - BhatKt;
     diagVarcovs = repmat(gVarcovsLik(:,q)', dynModel.N,1);
