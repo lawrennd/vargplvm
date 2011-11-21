@@ -1,4 +1,8 @@
 adpaths.m
+globalExperimentNumber.m
+demSimple.m
+gradchek2.m
+demCmuVargplvmSimple.m
 demOil100Point.m
 demoVargplvm1.m
 demFinance.m

@@ -1,3 +1,5 @@
+% VARGPLVMINITDYNKERNEL Initialise a compound dynamics kernel
+% VARGPLVM
 
         if isfield(kern,'comp')
             fprintf('# Dynamics Kernel initialization: \n')

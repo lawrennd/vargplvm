@@ -1,3 +1,8 @@
+% DEMYALEONEFACEVARGPLVM1 Run the variational GP-LVM on one of the faces in the YALE dataset.
+% COPYRIGHT: Andreas C. Damianou, Carl Henrik Ek, 2011
+
+% VARGPLVM
+
 % Fix seeds
 randn('seed', 1e5);
 rand('seed', 1e5);

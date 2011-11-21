@@ -1,8 +1,8 @@
 function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi1Gradient(kern, vardist, Z, covGrad)
 
-    % KERNVARDISTPSI1GRADIENT description.  
+% KERNVARDISTPSI1GRADIENT description.  
 
-    % VARGPLVM
+% VARGPLVM
 
 
     if ~strcmp(kern.type,'cmpnd')
