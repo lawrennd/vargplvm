@@ -57,8 +57,12 @@ else
 end
 
 if exist('onlyData') && onlyData
-    model.P = model.P1 * (model.Psi1' * model.m);
-    model.B = model.P1' * model.P;
+    try
+        model.P = model.P1 * (model.Psi1' * model.m);
+        model.B = model.P1' * model.P;
+    catch e
+        warning(e.message);
+    end
     model = orderfields(model);
     return
 end
