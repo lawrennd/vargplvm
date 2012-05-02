@@ -136,9 +136,31 @@ if isfield(optionsDyn,'X_u')
     model.X_u = optionsDyn.X_u;
 else
     % inducing point need to initilize based on model.vardist.means
-    if model.k <= model.N % model.N = size(mode.vardist.means,1)
-        perm = randperm(model.k);
-        model.X_u = model.vardist.means(perm(1:model.k),:);
+    if model.k <= model.N % model.N = size(mode.vardist.means,1) 
+        if ~isfield(optionsDyn, 'labels')
+            ind = randperm(model.N);
+            ind = ind(1:model.k);
+            model.X_u = model.X(ind, :);
+        else
+            % in the case that class labels are supplied, make sure that inducing inputs
+            % from all classes are chosen
+            [idcs, nSmpls] = class_samples( optionsDyn.labels, model.k );
+            
+            count = 1;
+            midx = [];
+            for inds = idcs
+                ind   = inds{:};
+                ind   = ind(randperm(numel(ind)));
+                idx  = ind(1:nSmpls(count));
+                
+                % test that there is no overlap between index sets
+                assert(isempty(intersect(midx, idx)));
+                midx = [midx, idx];
+                
+                count = count+1;
+            end
+            model.X_u = model.X(midx,:);
+        end
     else
         samplingInd=0; %% TEMP
         if samplingInd
@@ -178,11 +200,14 @@ end
 
 model.dynamics.learnVariance = optionsDyn.learnVariance; % DEFAULT: 0
 
+if isfield(optionsDyn, 'constrainType') && ~isempty(optionsDyn.constrainType)
+    model.dynamics.constrainType = optionsDyn.constrainType;
+end
+    
 params = vargplvmExtractParam(model);
 model = vargplvmExpandParam(model, params);
 
 
 
 
-
-
+end

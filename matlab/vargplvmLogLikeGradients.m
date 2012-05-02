@@ -42,7 +42,8 @@ gDynKern = [];
 if ~isfield(model, 'dynamics') || isempty(model.dynamics)
     if ~(isfield(model, 'onlyLikelihood') && model.onlyLikelihood)
         gVarmeansKL = - model.vardist.means(:)';
-        % !!! the covars are optimized in the log space
+        % !!! the covars are optimized in the log space (otherwise the *
+        % becomes a / and the signs change)
         gVarcovsKL = 0.5 - 0.5*model.vardist.covars(:)';
     else
         gVarmeansKL = 0;
@@ -283,6 +284,20 @@ if ~(isfield(model, 'onlyKernel') && model.onlyKernel)
         end
         %end
         %___
+        
+        %--
+       % if strcmp(model.dynamics.kern.type,'invcmpnd')
+            if ~isfield(model.dynamics, 'learnVariance') || ~model.dynamics.learnVariance
+                % The field model.dynamics.fixedVariance must have the
+                % indexes of the gradient vector that correspond to
+                % variances of kernels of the matern class and we wish to
+                % not learn them.
+                if isfield(model.dynamics, 'fixedKernVariance') && ~isempty(model.dynamics.fixedKernVariance)
+                    gDynKern(model.dynamics.fixedKernVariance) = 0;
+                end
+            end
+        % end
+        %--
     end
 end
 

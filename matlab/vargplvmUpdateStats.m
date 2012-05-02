@@ -56,8 +56,13 @@ model.TrC = sum(diag(model.C)); % Tr(C)
 % since it has a much smaller condition number than A=sigma^2 K_uu + Psi2
 model.At = (1/model.beta) * eye(size(model.C,1)) + model.C; % At = beta^{-1} I + C
 
-
+%try %%%% DEBUG
 model.Lat = jitChol(model.At)';
+%catch e %%% DEBUG
+%    model_At = model.At;
+%    save('modellAt', 'model_At'); %%% DEBUG
+%    e.throw %%% DEBUG
+%end %%%% DEBUG
 
 model.invLat = model.Lat\eye(size(model.Lat,1));  
 model.invLatT = model.invLat';

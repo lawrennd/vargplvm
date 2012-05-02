@@ -19,7 +19,7 @@ if ~isempty(globalOpt.diaryFile)
 end
 
 [Ytr, lbls, Yts] = vargplvmLoadData(globalOpt.dataSetName);
-height = lbls(1); width = lbls(2); % height, width = 32
+height = lbls(1); width = lbls(2);
 YtsOriginal = Yts;
 
 % Binarize values
@@ -62,8 +62,12 @@ modelInit = model; %%%
 %%
 model = vargplvmOptimiseModel(model, true, true, {globalOpt.initVardistIters,globalOpt.itNo});
 
+%vargplvmWriteResult(model, model.type, globalOpt.dataSetName, globalOpt.experimentNo);
+%if exist('printDiagram') & printDiagram
+%    lvmPrintPlot(model, [], globalOpt.dataSetName, globalOpt.experimentNo);
+%end
 
-% Load the results and display dynamically. <-- Uncomment for visualisation
+% Load the results and display dynamically.
 %lvmVisualise(model,[],'imageVisualise','imageModify', [32 32], 1, 0, 1);
 
 %%
@@ -78,7 +82,10 @@ if ~globalOpt.doPredictions
     return
 end
 
-
+%clear modelTr %%
+%model.y = Ytr;
+%model.m= gpComputeM(model); %%%
+%model.y=[];
 Nstar = size(YtsOriginal,1);
 
 %
@@ -87,6 +94,8 @@ indexP = [];
 Init = [];
 
 fprintf(1, '# Partial reconstruction of test points...\n');
+% w=360; % width
+% h=288; % height
 w=width; h=height;
 
 if ~exist('cut')
@@ -162,17 +171,6 @@ for i=1:size(Yts,1)
     %
 end
 
-fprintf(1,'# NN prediction...\n');
-mini =[];
-sortedInd = zeros(size(Yts,1), size(Ytr,1));
-for i=1:size(Yts,1)
-    dst = dist2(Yts(i,indexPresent), Ytr(:,indexPresent));
-    % mind: smaller distance %mini(i): smaller index
-    %[mind, mini(i)] = min(dst);
-    [void ,sortedInd(i,:)] = sort(dst,2);
-end
-clear dst %%%
-
 
 VarmuOrig = Varmu;
 Varmu(Varmu>=0.4)=1;
@@ -186,6 +184,65 @@ errorFullPr = sum(sum( abs(Varmu(:,indexPresent) - YtsOriginal(:,indexPresent)) 
 fprintf(1,'# GPLVM Error (in the present dims) with missing inputs:%d\n', errorFullPr);
 
 
+
+%-------- NN  ----------
+fprintf(1,'# NN prediction...\n');
+mini =[];
+sortedInd = zeros(size(Yts,1), size(Ytr,1));
+for i=1:size(Yts,1)
+    dst = dist2(Yts(i,indexPresent), Ytr(:,indexPresent));
+    % mind: smaller distance %mini(i): smaller index
+    %[mind, mini(i)] = min(dst);
+    [void ,sortedInd(i,:)] = sort(dst,2);
+end
+clear dst %%%
+
+NNmuPart = zeros(Nstar, size(Ytr,2));
+% Set to 1 to find the two NN's in time space. set to 0 to find in
+% data space. timeNN=1 should be set only for datasets created with
+% the "everyTwo" option for the split.
+k=2; % the k parameter in k-NN
+for i=1:Nstar
+    NNmuPart(i,indexMissing) = Ytr(sortedInd(i,1),indexMissing);
+    for n=2:k
+        NNmuPart(i,indexMissing) = NNmuPart(i,indexMissing)+Ytr(sortedInd(i,n),indexMissing);
+    end
+    NNmuPart(i,indexMissing) = NNmuPart(i,indexMissing)*(1/k);
+    NNmuPart(i, indexPresent) = Yts(i, indexPresent);
+end
+
+% Mean absolute error per pixel
+%errorNNPart = mean(abs(NNmuPart(:) - YtsOriginal(:)));
+errorNNPart = sum(sum( abs(NNmuPart(:,indexMissing) - YtsOriginal(:,indexMissing)) ))/prod(size(YtsOriginal(:,indexMissing)));
+fprintf(1,'# NN(2) Error (in the missing dims) with missing inputs:%d\n', errorNNPart);
+
+
+%%%%%%  Try different k for k-NN to see which is best
+
+bestK=2; bestErr = errorNNPart; NNmuPartBest = NNmuPart;
+clear NNmuPart %%%
+for k=[1 3 4 5]; % the k parameter in k-NN, try different values
+    NNmuPartK = zeros(Nstar, size(Ytr,2));
+    for i=1:Nstar
+        NNmuPartK(i,indexMissing) = Ytr(sortedInd(i,1),indexMissing); % first NN
+        for n=2:k % more NN's, if k>1
+            NNmuPartK(i,indexMissing) = NNmuPartK(i,indexMissing)+Ytr(sortedInd(i,n),indexMissing);
+        end
+        NNmuPartK(i,indexMissing) = NNmuPartK(i,indexMissing)*(1/k); % normalise with the number of NN's
+        
+        NNmuPartK(i, indexPresent) = Yts(i, indexPresent);
+    end
+    errorNNPartK = sum(sum( abs(NNmuPartK(:,indexMissing) - YtsOriginal(:,indexMissing)) ))/prod(size(YtsOriginal(:,indexMissing)));
+    if errorNNPartK < bestErr
+        bestErr = errorNNPartK;
+        bestK=k;
+        NNmuPartBest = NNmuPartK;
+    end
+end
+clear NNmuPartK
+% Mean absolute error per pixel
+fprintf(1,'# NNbest(%d) Error (in the missing dims) with missing inputs:%d\n',bestK, bestErr);
+%%%%%%%%%%%%%
 
 Varmu2 = VarmuOrig;
 Varmu2(Varmu2>0.75)=1;

@@ -25,6 +25,14 @@ if strcmp(optionsDyn.type, 'vargpTime')
         optionsDyn.initX = 'ppca';
     end
     
+    if  ~isfield(optionsDyn, 'constrainType') || isempty(optionsDyn.constrainType)
+        % If the dynamics kernel is of type invcmpnd, this cell will
+        % explain what type of constraints each element will impose (if
+        % other kernel is used, then this cell will only have one element).
+        % Possible values (so far) include: "time" and "data".
+        optionsDyn.constrainType = {'time'};
+    end
+    
     % Create time vector for each dimension; if t is not given, assume an
     % equally spaced time vector.
     if  ~isfield(optionsDyn, 't') || isempty(optionsDyn.t)

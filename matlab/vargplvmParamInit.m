@@ -22,7 +22,11 @@ if ~strcmp(model.kern.type,'cmpnd')
       % 
        model.kern.inputScales = 5./(((max(X)-min(X))).^2);
        %model.kern.variance = max(var(Y)); % !!! better use mean(var(Y)) here...
-       model.kern.variance = mean(var(Y)); % NEW!!!
+       if isfield(model, 'mOrig')
+            model.kern.variance = var(model.mOrig(:)); %mean(var(Y)); % NEW!!!
+       else
+            model.kern.variance = var(model.m(:)); %mean(var(Y)); % NEW!!!
+       end
       %
    elseif strcmp(model.kern.type,'linard2')
       %
@@ -38,7 +42,11 @@ else
       % 
          model.kern.comp{i}.inputScales = 5./(((max(X)-min(X))).^2);
          %model.kern.comp{i}.variance = max(var(Y));
-         model.kern.comp{i}.variance = var(model.m(:));
+         if isfield(model, 'mOrig')
+             model.kern.comp{i}.variance = var(model.mOrig(:));
+         else
+            model.kern.comp{i}.variance = var(model.m(:));
+         end
       %
       elseif strcmp(model.kern.comp{i}.type,'linard2')
       %

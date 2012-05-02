@@ -72,8 +72,10 @@ end
 % KL divergence term
 if ~(isfield(model, 'onlyLikelihood') && model.onlyLikelihood)
     if isfield(model, 'dynamics') && ~isempty(model.dynamics)
-        % A dynamics model is being used.
+        % A dynamics model is being used. (The following is actually
+        % the -KL term)
         KLdiv = modelVarPriorBound(model);
+        KLdiv = KLdiv + 0.5*model.q*model.N; %%% The constant term!!
     else
         varmeans = sum(sum(model.vardist.means.*model.vardist.means));
         varcovs = sum(sum(model.vardist.covars - log(model.vardist.covars)));

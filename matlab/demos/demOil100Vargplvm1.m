@@ -31,7 +31,7 @@ model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(m
 %model.vardist.covars = 0.2*ones(size(model.vardist.covars));
 
 % Optimise the model.
-iters = 2000;
+iters = 2000; % Default: 2000
 display = 1;
 
 model = vargplvmOptimise(model, display, iters);

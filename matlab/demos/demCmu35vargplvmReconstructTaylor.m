@@ -15,8 +15,8 @@ rand('seed', 1e5);
 % dynUsed=1;
 %
 % % Get the sequence numbers.
-% [Y, lbls] = lvmLoadData('cmu35WalkJog');
-% seq = cumsum(sum(lbls)) - [1:31];
+ [Y, lbls] = lvmLoadData('cmu35WalkJog'); %%%
+ seq = cumsum(sum(lbls)) - [1:31]; %%%
 
 dataSetName = 'cmu35gplvm';
 
@@ -37,21 +37,21 @@ fileName=['dem' capName 'Vargplvm' num2str(experimentNo)];
 % load data
 [Y, lbls, Ytest, lblstest] = lvmLoadData(dataSetName);
 
-% %%% Remove some sequences
-% seqFrom=2;
-% seqEnd=4;
-%
-%
-% if seqFrom ~= 1
-%     Yfrom = seq(seqFrom-1)+1;
-% else
-%     Yfrom = 1;
-% end
-% Yend=seq(seqEnd);
-% Y=Y(Yfrom:Yend,:);
-% seq=seq(seqFrom:seqEnd);
-% seq=seq - ones(1,length(seq)).*(Yfrom-1);
+%---- Remove some sequences %%%%%%
+seqFrom=7;
+seqEnd=7;
 
+
+if seqFrom ~= 1
+    Yfrom = seq(seqFrom-1)+1;
+else
+    Yfrom = 1;
+end
+Yend=seq(seqEnd);
+Y=Y(Yfrom:Yend,:);
+seq=seq(seqFrom:seqEnd);
+seq=seq - ones(1,length(seq)).*(Yfrom-1);
+%-----
 
 origBias = mean(Y);
 origScale = 1./sqrt(var(Y));
@@ -102,11 +102,11 @@ save(['dem' capName 'ReconstructLegs' num2str(experimentNo) '.mat'], 'legErrs');
 
 %----
 figPath = ['Results/CMU/' num2str(experimentNo) kernName '/Leg/'];
-try
-    saveAllOpenFigures(figPath, [],1)
-catch 
-    %
-end
+%try
+%    saveAllOpenFigures(figPath, [],1)
+%catch 
+%    %
+%end
 %----
 
 legErrs
@@ -120,11 +120,11 @@ save(['dem' capName 'ReconstructBody' num2str(experimentNo) '.mat'], 'bodyErrs')
 
 
 figPath = ['Results/CMU/' num2str(experimentNo) kernName '/Body/'];
-try
-    saveAllOpenFigures(figPath, [],1)
-catch 
-    %
-end
+%try
+%    saveAllOpenFigures(figPath, [],1)
+%catch 
+%    %
+%end
 
 %----
 bodyErrs
