@@ -123,6 +123,8 @@ model.learnBeta = 1; % Newly added: deafault value for learnBeta.
 if model.d > limitDimensions && model.N < limitDimensions
     model.DgtN = 1; % D greater than N mode on.
     fprintf(1, '# The dataset has a large number of dimensions (%d)! Switching to "large D" mode!\n',model.d);
+    model.computeS = true;
+    model.S = model.m*model.m';
 
     % If we have test data, we can prepare some multiplications in
     % advance, obtain NxN matrices and then never store Y.
