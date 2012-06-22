@@ -1,2 +1,0 @@
-useDynLib(vargplvm)
-exportPattern("^[[:alpha:]]+")
