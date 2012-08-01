@@ -260,27 +260,39 @@ gVarmeans = zeros(N,Q);
 % end
 
 %%%%%%%%5
-writeMatrixFile('means.txt', vardist.means);
-writeMatrixFile('covars.txt',vardist.covars);
-writeMatrixFile('asPlus1.txt',asPlus1);
-writeMatrixFile('aDasPlus1.txt', aDasPlus1);
-writeMatrixFile('ZmZm.txt', ZmZm);
-writeMatrixFile('covGrad.txt', covGrad);
+%writeMatrixFile('means.txt', vardist.means);
+%writeMatrixFile('covars.txt',vardist.covars);
+%writeMatrixFile('asPlus1.txt',asPlus1);
+%writeMatrixFile('aDasPlus1.txt', aDasPlus1);
+%writeMatrixFile('ZmZm.txt', ZmZm);
+%writeMatrixFile('covGrad.txt', covGrad);
 
-ZmZm_arr = size(ZmZm,2);
-covGrad_arr = size(covGrad,2);
+covGrad_dim2 = size(covGrad,2);
 % mex vargplvm.cpp
-vargplvm([M,N,Q],A,ZmZm_arr, covGrad_arr)
 
 
-partInd2= dlmread('partInd2.txt',  '\t');
-partInd2 = partInd2';
-partA2= dlmread('partA2.txt',  '\t');
-partA2 = partA2';
-gVarmeans= dlmread('gVarmeans.txt',  '\t');
-gVarmeans = gVarmeans';
-gVarcovars= dlmread('gVarcovars.txt', '\t');
-gVarcovars = gVarcovars';
+%vargplvm([M,N,Q],A,ZmZm_arr, covGrad_dim2)
+ZmZmRes = reshape(ZmZm, size(ZmZm,1),size(ZmZm,2)*size(ZmZm,3));
+covGradRes = reshape(covGrad, size(covGrad,1), size(covGrad,2)*size(covGrad,3));
+
+[partInd2,partA2,gVarmeans,gVarcovars] = vargplvm([M,N,Q],A,covGrad_dim2, vardist.means', vardist.covars', asPlus1', aDasPlus1', ZmZmRes, covGradRes);
+
+partInd2 = reshape(partInd2, M, Q);
+gVarmeans = reshape(gVarmeans, N,Q);
+gVarcovars = reshape(gVarcovars, N,Q);
+
+
+%partInd2Old= dlmread('partInd2.txt',  '\t');
+%partInd2Old = partInd2Old';
+%partA2Old= dlmread('partA2.txt',  '\t');
+%partA2Old = partA2Old';
+%gVarmeansOld= dlmread('gVarmeans.txt',  '\t');
+%gVarmeansOld = gVarmeansOld';
+%gVarcovarsOld= dlmread('gVarcovars.txt', '\t');
+%gVarcovarsOld = gVarcovarsOld';
+%sum(sum(abs(gVarmeans - gVarmeansOld)))
+%sum(sum(abs(gVarcovars - gVarcovarsOld)))
+%sum(sum(abs(partInd2 - partInd2Old)))
 %%%%%%%
 
 

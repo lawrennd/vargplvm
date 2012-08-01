@@ -44,6 +44,12 @@ void MtoA (matrix *M, array3d *A, int d2);
 void read_txtf(matrix *data, char filename[]);
 void tM (matrix *Min, matrix *Mout);
 
+matrix reshapeMatrix(double* A, int N, int Q) ;
+array3d reshapeMatrix(double* A, int N, int Q, int M) ;
+void printMatrix(matrix mat) ;
+void printMatrix(array3d ar3d);
+void DEBUGwrite();
+
 
 //#include "vargplvmheader.h"
 /*void repmatRow(row * vec, int x, int y, int z, array3d *arr)
