@@ -71,7 +71,7 @@ vargplvmCreate <-
     model$bias <- colMeans(Y) 
     model$scale <- rep(1, model$d) 
     
-    if("scale2var1"%in%names(options))
+    if ("scale2var1"%in%names(options))
     {
       if(options$scale2var1)
       {
@@ -89,7 +89,7 @@ vargplvmCreate <-
     
     
     model$y <- Y 
-    model$m <- gpComputeM(model) 
+    model$m <- data.matrix(gpComputeM(model)) 
     
     
     if (is.character(options$initX))

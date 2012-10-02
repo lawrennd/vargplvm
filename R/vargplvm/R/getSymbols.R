@@ -15,7 +15,7 @@ function (number)
   # % NDLUTIL
   
 #   symbolColour <- c("r", "g", "b", "c", "m")  #  %, "y"
-  symbolColour <- c(2:6)
+  symbolColour <- c(2:(number+1))
 #   symbolShape <- c("x", "o", "+", "*", "s", "d", "v", "^", "<", ">", "p") 
   symbolShape <-c(4,1,3,8,0,5,6,2,15,16,17)
   counter <- 0 

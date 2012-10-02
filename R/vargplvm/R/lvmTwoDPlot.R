@@ -13,8 +13,10 @@ lvmTwoDPlot <-
     # % COPYRIGHT : Neil D. Lawrence, 2004, 2005, 2006, 2008
     # 
     # % MLTOOLS
+#     X = model$X[, dims]
+#     lbl = YLbls
     
-    if(is.character(lbl) && lbl == "connect")
+    if (is.character(lbl) && lbl == "connect")
     {
       connect <- TRUE 
       lbl <- NULL 
@@ -48,9 +50,15 @@ lvmTwoDPlot <-
       # set(axisHand, 'nextplot', 'add') 
       
       if (!is.null(lbl))
+      {
         labelNo <- which(lbl[i, ] != 0) 
+        if (length(labelNo) == 0)
+          next
+      }
       else
+      {
         labelNo <- 1 
+      }
       
       # %try 
       # returnVal <- c(returnVal,  plot(X[i, 1], X[i, 2], cex = 3, 

@@ -1,8 +1,8 @@
 # library(gptk)
 
-# dataSetName <- "oil"
-# mm <-demo(dataSetName)
-vargplvm<-function(dataSetName ="oil",  
+# dataSet <- "oil"
+# mm <-demo(dataSet)
+vargplvm<-function(dataSet ="oil",  
                    dataDir = system.file("extdata",package="vargplvm"), 
                    iters = 2, seed = 1e5, kernoptions = "rbfard2",
                    createDir = TRUE, runVargplvmDir = getwd(),
@@ -10,6 +10,7 @@ vargplvm<-function(dataSetName ="oil",
 {
   if (createDir) {
     dirA<-newDir(runVargplvmDir = runVargplvmDir, overwriteFile = overwriteDir)
+    if (missing (dataDir))
     dataDir <-dirA[2]
   } else {
     extdir<-system.file("extdata",package="batman")
@@ -40,15 +41,15 @@ vargplvm<-function(dataSetName ="oil",
   #randn('seed', 1e5) 
   #rand('seed', 1e5) 
   set.seed(setseed)
-  # dataSetName <- "oil" 
+  # dataSet <- "oil" 
   experimentNo <- 1 
   printDiagram <- 1 
   
   # load data
   
-  data <- lvmLoadData(dataSetName, dataDir)
-  Y <- data$DataTrn
-  lbls <- data$DataTrnLbls
+  data <- lvmLoadData(dataSet, dataDir)
+  Y <- data.matrix(data$DataTrn)
+  lbls <- data.matrix(data$DataTrnLbls)
   
   # Set up model
   options <- vargplvmOptions("dtcvar") 
@@ -83,7 +84,7 @@ vargplvm<-function(dataSetName ="oil",
 #   print(stim)
   
   
-  capName <- dataSetName 
+  capName <- dataSet
   substring(capName[1], 1, 1) <- toupper(substring(capName[1], 1, 1)) 
   modelType <- model$type 
   substring(modelType[1], 1, 1) <- toupper(substring(modelType[1], 1, 1)) 
