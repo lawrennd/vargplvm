@@ -1,8 +1,12 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = linard2VardistPsi1Gradient(linard2Kern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = linard2VardistPsi1Gradient(linard2Kern, vardist, Z, covGrad, learnInducing)
 
 % LINARD2VARDISTPSI1GRADIENT description.
 
 % VARGPLVM
+
+if nargin < 5
+    learnInducing = 1;
+end
 
 A = linard2Kern.inputScales;
 %
@@ -24,7 +28,12 @@ covVarm = covGrad'*vardist.means;
 gKern = sum(covVarm.*Z,1); 
 gVarmeans = AA.*(covGrad*Z);
 AA = ones(size(Z,1),1)*A;
-gInd = AA.*covVarm;
+if learnInducing
+    gInd = AA.*covVarm;
+else
+    [M Q] = size(Z); 
+    gInd = zeros(M,Q);
+end
 
 %sum(sum(abs(gKern1-gKern)))
 %sum(sum(abs(gVarmeans1 - gVarmeans)))

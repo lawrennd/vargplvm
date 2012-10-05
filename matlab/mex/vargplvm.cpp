@@ -16,7 +16,6 @@
 int DEBUGno =0; ////// DEBUG (init)
 
 
-/***************** Copied and pasted from individual files... */
 //row-wise
 /*
 mxArray*  serializeMatrix(matrix mat) {
@@ -43,6 +42,7 @@ mxArray*  serializeMatrix(matrix mat) {
         }
     }
     mxArray * mx = mxCreateDoubleMatrix(1,v.size(), mxREAL);
+	// memory copy so that matlab doesnt free the memory after this point
     std::copy(v.begin(), v.end(), mxGetPr(mx));
     
     return mx;
@@ -490,19 +490,7 @@ void  VVproddot(row * arr1, row* arr2, double M, row *result)
 
 /****************************************/
 
-/*
- * //void getArray(SEXP Rvec, array3d * arr);
- * //    void getMatrix(SEXP Rvec, matrix * data);
- * // SEXP covertMatrix(matrix *inmat);
- * //SEXP covertVector(row *inmat);
- * SEXP vargplvm(SEXP M_int, SEXP N_int, SEXP Q_int, SEXP A_vec,
- * //SEXP means_mat, SEXP covars_mat, SEXP asPlus1_mat, SEXP aDasPlus1_mat,
- * SEXP ZmZm_arr, SEXP covGrad_arr);
- *
- * SEXP vargplvm(SEXP M_int, SEXP N_int, SEXP Q_int, SEXP A_vec,
- * // SEXP means_mat, SEXP covars_mat, SEXP asPlus1_mat, SEXP aDasPlus1_mat,
- * SEXP ZmZm_arr, SEXP covGrad_arr)
- */
+
 //void mexFunction(int nlhs, mxArray* plhs[], int nrhs, mxArray *prhs[]){
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     double *MNQ, *A_vec, *covGrad_dim2, *means_arr, *covars_arr, *asPlus1_arr, *aDasPlus1_arr, *ZmZm_arr, *covGrad_arr;

@@ -84,7 +84,7 @@ fntSz=18;
     end
     
     
-    figure('Position',[scrsz(3)/4.86 scrsz(4)/6.666 scrsz(3)/1.6457 scrsz(4)/1.4682])
+    figure('Position',[scrsz(3)/4.86 scrsz(4)/6.666 1.2*scrsz(3)/1.6457 0.6*scrsz(4)/1.4682])
 
     % if sz is zero pause to allow user to fix manually the size
     if exist('sz') && ~sz

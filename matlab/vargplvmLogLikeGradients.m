@@ -57,12 +57,18 @@ end
 [gK_uu, gPsi0, gPsi1, gPsi2, g_Lambda, gBeta, tmpV] = vargpCovGrads(model);
 
 
+if isfield(model, 'learnInducing')
+    learnInducing = model.learnInducing;
+else
+    learnInducing = true;
+end
+
 % Get (in three steps because the formula has three terms) the gradients of
 % the likelihood part w.r.t the data kernel parameters, variational means
 % and covariances (original ones). From the field model.vardist, only
 % vardist.means and vardist.covars and vardist.lantentDimension are used.
-[gKern1, gVarmeans1, gVarcovs1, gInd1] = kernVardistPsi1Gradient(model.kern, model.vardist, model.X_u, gPsi1');
-[gKern2, gVarmeans2, gVarcovs2, gInd2] = kernVardistPsi2Gradient(model.kern, model.vardist, model.X_u, gPsi2);
+[gKern1, gVarmeans1, gVarcovs1, gInd1] = kernVardistPsi1Gradient(model.kern, model.vardist, model.X_u, gPsi1', learnInducing);
+[gKern2, gVarmeans2, gVarcovs2, gInd2] = kernVardistPsi2Gradient(model.kern, model.vardist, model.X_u, gPsi2, learnInducing);
 [gKern0, gVarmeans0, gVarcovs0] = kernVardistPsi0Gradient(model.kern, model.vardist, gPsi0);
 gKern3 = kernGradient(model.kern, model.X_u, gK_uu);
 
@@ -112,22 +118,24 @@ for i = 1:model.k
     gKX(i, :, i) = dgKX(i, :);
 end
 
-% Allocate space for gX_u
-gX_u = zeros(model.k, model.q);
-% Compute portion associated with gK_u
-for i = 1:model.k
-    for j = 1:model.q
-        gX_u(i, j) = gKX(:, j, i)'*gK_uu(:, i);
+if learnInducing
+    % Allocate space for gX_u
+    gX_u = zeros(model.k, model.q);
+    % Compute portion associated with gK_u
+    for i = 1:model.k
+        for j = 1:model.q
+            gX_u(i, j) = gKX(:, j, i)'*gK_uu(:, i);
+        end
     end
+    
+    % This should work much faster
+    %gX_u2 = kernKuuXuGradient(model.kern, model.X_u, gK_uu);
+    
+    %sum(abs(gX_u2(:)-gX_u(:)))
+    %pause
+    
+    gInd = gInd1 + gInd2 + gX_u(:)';
 end
-
-% This should work much faster
-%gX_u2 = kernKuuXuGradient(model.kern, model.X_u, gK_uu);
-
-%sum(abs(gX_u2(:)-gX_u(:)))
-%pause
-
-gInd = gInd1 + gInd2 + gX_u(:)';
 
 % If the inducing points are fixed (tied to the latent points) then
 % X_u=K_t*dynamics.vardist.means and the derivatives w.r.t theta_t must be
@@ -135,7 +143,9 @@ gInd = gInd1 + gInd2 + gX_u(:)';
 % in that case, as an argument to the function which calculates the
 % derivatives for the reparametrized quantities.
 if isfield(model, 'fixInducing') & model.fixInducing
-    gIndRep = gInd;
+    if learnInducing
+        gIndRep = gInd;
+    end
 else
     gIndRep=[];
 end
@@ -224,7 +234,7 @@ end
 % dynamics case X_u=X=mu=Kt*mu_bar so we further need to amend with
 % d mu/ d mu_bar = K_t because we need
 % d F/ d mu_bar instead of d F/ d mu.
-if isfield(model, 'fixInducing') & model.fixInducing
+if isfield(model, 'fixInducing') && model.fixInducing && learnInducing
     % If there are dynamics the derivative must further be amended with the
     % partial deriv. due to the mean reparametrization.
     if isfield(model, 'dynamics') && ~isempty(model.dynamics)
@@ -269,12 +279,16 @@ if ~(isfield(model, 'onlyKernel') && model.onlyKernel)
     % Assume that the base rbf/matern/etc kernel is first in the compound
     % structure
     if isfield(model, 'dynamics') && ~isempty(model.dynamics)
-        if strcmp(model.dynamics.kern.comp{1}.type,'rbf') || strcmp(model.dynamics.kern.comp{1}.type,'matern32') || strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic') || strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic2')
-            if ~isfield(model.dynamics, 'learnVariance') || ~model.dynamics.learnVariance
-                gDynKern(2) = 0;
+        if isfield(model.dynamics.kern, 'comp')
+            if strcmp(model.dynamics.kern.comp{1}.type,'rbf') || ...
+                    strcmp(model.dynamics.kern.comp{1}.type,'matern32') || ...
+                    strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic') || ...
+                    strcmp(model.dynamics.kern.comp{1}.type,'rbfperiodic2')
+                if ~isfield(model.dynamics, 'learnVariance') || ~model.dynamics.learnVariance
+                    gDynKern(2) = 0;
+                end
             end
         end
-        
         
         %___NEW: assume that the second rbf/matern etc kernel is last in the
         %compound kernel
@@ -318,8 +332,18 @@ if isfield(model, 'initVardist')
     end
 end
 
+if ~learnInducing
+    gInd = [];
+end
+
 % At this point, gDynKern will be [] if there are no dynamics.
 g = [gVar gDynKern gInd gKern gBetaFinal];
+
+
+% A 'dirty' trick to fix some parameters
+if isfield(model, 'fixParamIndices') && ~isempty(model.fixParamIndices)
+    g(model.fixParamIndices) = 0;
+end
 
 % if model.learnBeta == 1
 %     % optimize all parameters including beta

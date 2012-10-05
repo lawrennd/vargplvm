@@ -1,8 +1,17 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi2Gradient(kern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi2Gradient(kern, vardist, Z, covGrad, learnInducing)
 
 % KERNVARDISTPSI2GRADIENT description.  
 
 % VARGPLVM
+
+if nargin < 5
+    % If learnInducing == 0, then gInd will be returned as a a vector of
+    % zeros. It would be better if nargout was checked and gInd was not
+    % returned at all if not needed, but the code is very hierarchical and
+    % recursive and that would require more complicated code than just
+    % including the "learnInducing" flag.
+    learnInducing = 1;
+end
 
 
     %% compute first the "square" terms of Psi2 
@@ -10,7 +19,7 @@ function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi2Gradient(kern, va
     if ~strcmp(kern.type,'cmpnd')
        % 
        fhandle = str2func([kern.type 'VardistPsi2Gradient']);
-       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern, vardist, Z, covGrad);    
+       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern, vardist, Z, covGrad, learnInducing);    
 
        % Transformations
        gKern = paramTransformPsi2(kern, gKern); 
@@ -18,14 +27,14 @@ function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi2Gradient(kern, va
     else % the kernel is cmpnd
        %
        fhandle = str2func([kern.comp{1}.type 'VardistPsi2Gradient']);
-       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern.comp{1}, vardist, Z, covGrad);
+       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern.comp{1}, vardist, Z, covGrad, learnInducing);
        % Transformations
        gKern = paramTransformPsi2(kern.comp{1}, gKern); 
        %
        for i = 2:length(kern.comp)
            %
            fhandle = str2func([kern.comp{i}.type 'VardistPsi2Gradient']);
-           [gKerni, gVarmeansi, gVarcovarsi, gIndi] = fhandle(kern.comp{i}, vardist, Z, covGrad);
+           [gKerni, gVarmeansi, gVarcovarsi, gIndi] = fhandle(kern.comp{i}, vardist, Z, covGrad, learnInducing);
 
            % Transformations
            gKerni = paramTransformPsi2(kern.comp{i}, gKerni); 
@@ -52,7 +61,7 @@ function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi2Gradient(kern, va
       for i=1:length(kern.comp)  
         for j=i+1:length(kern.comp)
 
-           [gKerni, gKernj, gVarm, gVarc, gI] = kernkernVardistPsi2Gradient(kern.comp{i}, kern.comp{j}, vardist, Z, covGrad);  
+           [gKerni, gKernj, gVarm, gVarc, gI] = kernkernVardistPsi2Gradient(kern.comp{i}, kern.comp{j}, vardist, Z, covGrad, learnInducing);  
 
            % Transformations
            gKerni = paramTransformPsi2(kern.comp{i}, gKerni);

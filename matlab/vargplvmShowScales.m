@@ -1,4 +1,4 @@
-function vargplvmShowScales(model, printPlots)
+function scales = vargplvmShowScales(model, printPlots)
 
 
 if nargin < 2
@@ -7,18 +7,18 @@ end
 
 if printPlots
         if strcmp(model.kern.type, 'rbfardjit')
-            bar(model.kern.inputScales)
+            scales = model.kern.inputScales;
         else
-            bar(model.kern.comp{1}.inputScales)
+            scales = model.kern.comp{1}.inputScales;
         end
+        bar(scales)
 else
         if strcmp(model.kern.type, 'rbfardjit')
-            fprintf('# Scales of model %d: ', i)
-            fprintf('%.4f  ',model.kern.inputScales);
-            fprintf('\n');
+            scales = model.kern.inputScales;
         else
-            fprintf('# Scales of model %d: ', i)
-            fprintf('%.4f  ',model.kern.comp{1}.inputScales);
-            fprintf('\n');
+            scales = model.kern.comp{1}.inputScales;
         end
+        fprintf('# Scales: ')
+        fprintf('%.4f  ',scales);
+        fprintf('\n');
 end

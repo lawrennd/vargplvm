@@ -1,9 +1,13 @@
-function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = linard2biasVardistPsi2Gradient(linardKern, biasKern, vardist, Z, covGrad)
+function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = linard2biasVardistPsi2Gradient(linardKern, biasKern, vardist, Z, covGrad, learnInducing)
 
 % LINARD2BIASVARDISTPSI2GRADIENT description.
   
 % VARGPLVM
   
+if nargin < 6
+    learnInducing = 1;
+end
+
 % variational means
 N = size(vardist.means,1);
 %  inducing variables 
@@ -20,12 +24,16 @@ gKern2 = sum(sum(Pnobias.*covGrad));
 Bnm = biasKern.variance*ones(size(Psi1)); 
 BPsi1Covg = (Bnm*covGrad);
 
+gInd = zeros(M, Q);
+
 for q=1:vardist.latentDimension
    % 
    gKern(q) = sum(sum((vardist.means(:,q)*(Z(:,q)')).*BPsi1Covg));
    
    gVarmeans(:,q) = A(q)*sum((ones(vardist.numData,1)*Z(:,q)').*BPsi1Covg,2);
-   gInd(:,q) = A(q)*sum((vardist.means(:,q)*ones(1,size(Z,1))).*BPsi1Covg,1)';
+   if learnInducing
+        gInd(:,q) = A(q)*sum((vardist.means(:,q)*ones(1,size(Z,1))).*BPsi1Covg,1)';
+   end
    %   
 end
 %

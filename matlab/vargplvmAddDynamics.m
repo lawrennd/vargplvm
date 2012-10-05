@@ -29,5 +29,5 @@ model = vargplvmExpandParam(model, params);
 
 med = median(model.vardist.covars(:));
 if med < 0.3 || med > 0.7
-   fprintf('WARNING: Median value of variational covariances is %1.2f.\n', med);
+   warning('!!! Median value of variational covariances is %1.2f.\n', med);
 end

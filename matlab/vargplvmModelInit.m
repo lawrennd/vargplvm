@@ -35,6 +35,15 @@ else
     model.beta = 1/((1/globalOpt.initSNR * var(model.m(:))));
 end
 
+%%% NEW
+if model.beta < 1e-7
+    warning('Beta was too small... Setting beta to 1e-7')
+    model.beta = 1e-7;
+elseif model.beta > 1e+7
+    warning('Beta was too big... Setting beta to 1e+7')
+    model.beta = 1e+7;
+end
+
 model.dataSetInfo.dataSetName = globalOpt.dataSetName;
 
 params = vargplvmExtractParam(model);

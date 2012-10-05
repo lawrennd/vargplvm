@@ -43,6 +43,11 @@ end
 
 model.y = Ytr;
 model.m= gpComputeM(model);
+model.X = model.vardist.means; %%%% NEW
+
+if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+    model.dynamics.X = model.X;
+end
 
 if model.DgtN
     model.mOrig = model.m;

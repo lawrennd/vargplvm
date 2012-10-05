@@ -56,13 +56,28 @@ model.TrC = sum(diag(model.C)); % Tr(C)
 % since it has a much smaller condition number than A=sigma^2 K_uu + Psi2
 model.At = (1/model.beta) * eye(size(model.C,1)) + model.C; % At = beta^{-1} I + C
 
-%try %%%% DEBUG
-model.Lat = jitChol(model.At)';
+model.Lat = jitChol(model.At)'; % UNCOMMENT THIS IF YOU ARE NOT DOING THE DEBUG BELOW
+
+%try %%%% DEBUG1
+% model.Lat = jitChol(model.At)';
 %catch e %%% DEBUG
 %    model_At = model.At;
-%    save('modellAt', 'model_At'); %%% DEBUG
+%    save('modellAt', 'model_At');
 %    e.throw %%% DEBUG
 %end %%%% DEBUG
+
+
+% DEBUG2
+% warning('') %%% DEBUG
+% model.Lat = jitChol(model.At)';
+% tmpWarn = lastwarn; %%% DEBUG
+% if length(tmpWarn) > 41 && strcmp(tmpWarn(1:42), 'Matrix is not positive definite in jitChol') %%% DEBUG
+%     % do stuff...
+%     %%%model.id
+%     warning('') % This is a good place to put a stop for the debugger...
+% end %%% DEBUG
+
+
 
 model.invLat = model.Lat\eye(size(model.Lat,1));  
 model.invLatT = model.invLat';

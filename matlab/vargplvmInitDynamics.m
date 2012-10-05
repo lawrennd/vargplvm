@@ -108,8 +108,9 @@ end
 
 
 vX = var(X);
+noise = 0;%.01;
 for q=1:model.q
-    Lkt = chol(model.dynamics.Kt + 0.01*vX(q)*eye(model.N))';
+    Lkt = chol(model.dynamics.Kt + noise*vX(q)*eye(model.N))';
     % barmu = inv(Kt + s*I)*X, so that  mu = Kt*barmu =  Kt*inv(Kt +
     % s*I)*X, which is jsut the GP prediction, is temporally smoothed version
     % of the PCA latent variables X (for the data Y)
@@ -206,8 +207,6 @@ end
     
 params = vargplvmExtractParam(model);
 model = vargplvmExpandParam(model, params);
-
-
 
 
 end

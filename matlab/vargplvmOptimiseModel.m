@@ -1,23 +1,34 @@
-
-
-                                     % model, pruneModel, saveModel, {initVardistIters, itNo}
+                                     % model, pruneModel, saveModel, {initVardistIters, itNo}, display
+                                     % OR
+                                     % model, pruneModel, globalOpt % Take all values from globalOpt struct
 function model = vargplvmOptimiseModel(model, varargin)
 
 pruneModel = true;
 saveModel = true;
+display = true;
 
 globalOpt = model.globalOpt;
 
-
 if nargin > 2
     pruneModel = varargin{1};
-    if length(varargin) > 1
-        saveModel = varargin{2};
-    end
-
-    if length(varargin) > 2
-        globalOpt.initVardistIters = varargin{3}{1};
-        globalOpt.itNo = varargin{3}{2};
+    if length(varargin) > 1 && isstruct(varargin{2})
+        % Take all values from given struct (globalOpt)
+        globalOpt = varargin{2};
+        saveModel = globalOpt.saveModel;
+        display = globalOpt.optimisationDisplay;
+    else
+        if length(varargin) > 1
+            saveModel = varargin{2};
+        end
+        
+        if length(varargin) > 2
+            globalOpt.initVardistIters = varargin{3}{1};
+            globalOpt.itNo = varargin{3}{2};
+        end
+        
+        if length(varargin) > 3
+            display = varargin{4};
+        end
     end
 end
 
@@ -28,7 +39,6 @@ end
 if ~isfield(model, 'initVardistIters')
     model.initVardistIters = 0;
 end
-display = 1;
 
 
 i=1;

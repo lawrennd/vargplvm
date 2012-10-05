@@ -35,8 +35,10 @@ end
 
 fieldsToKeep = ...
     {'type','approx','learnScales', 'optimiseBeta','betaTransform','q','d','N','optimiser','nPrivateParams','learnSigmaf',...
-    'bias','scale','X','DgtN', 'kern','k','fixInducing','inducingIndices','X_u','beta','prior','vardist','numParams', ...
-    'nParams','K_uu','learnBeta', 'dynamics', 'iters', 'date', 'fixedBetaIters', 'dataSetInfo','id','initVardist', 'initVardistIters'}';
+    'bias','scale','DgtN', 'kern','k','fixInducing','inducingIndices','X_u','beta','prior','vardist','numParams', ...
+    'nParams','learnBeta', 'dynamics', 'iters', 'date', 'fixedBetaIters', 'dataSetInfo','id', ...
+    'initVardist', 'initVardistIters', 'saveName', 'globalOpt', ...
+    'latentIndices'}'; % This line for hsvargplvm
 
 mm=[];
 for i=1:length(fieldsToKeep)
@@ -50,3 +52,6 @@ for i=1:length(fieldsToKeep)
     end
 end
 
+if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+    mm.dynamics.X = [];
+end

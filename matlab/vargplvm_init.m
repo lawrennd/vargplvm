@@ -18,7 +18,8 @@ defaults.vardistCovarsMult=1.3;
 defaults.dataSetSplit = 'everyTwo';
 defaults.blockSize = 8;
 % 720x1280
-defaults.dataSetName = 'missa';
+defaults.dataSetName = [];  % For vargplvmLoadData
+defaults.dataSetField = []; % For vargplvmLoadData
 defaults.testReoptimise = 1;
 defaults.invWidthMultDyn = 100;
 defaults.invWidthMult = 5;
@@ -32,7 +33,7 @@ defaults.initSNR = 100;
 defaults.scale2var1 = 0;
 defaults.initVardistIters = 50;
 defaults.diaryFile = [];
-
+defaults.doGradChek = false;
  fnames = fieldnames(defaults);
  for i=1:length(fnames)
     if ~exist(fnames{i})
@@ -43,5 +44,5 @@ defaults.diaryFile = [];
  end
  
  
- clear('defaults', 'fnames');
+ clear('defaults', 'fnames','i');
 

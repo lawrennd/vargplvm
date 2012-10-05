@@ -1,4 +1,4 @@
-function [mu, varsigma] = vargplvmPosteriorMeanVar(model, X, varX);
+function [mu, varsigma] = vargplvmPosteriorMeanVar(model, X, varX)
 
 % VARGPLVMPOSTERIORMEANVAR Mean and variances of the posterior at points given by X.
 % FORMAT

@@ -1,9 +1,15 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi1Gradient(rbfard2Kern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi1Gradient(rbfard2Kern, vardist, Z, covGrad, learnInducing)
 
 % RBFARD2VARDISTPSI1GRADIENT description.
   
 % VARGPLVM
   
+
+if nargin < 5
+    learnInducing = 1;
+end
+
+
 % variational means
 N = size(vardist.means,1);
 %  inducing variables 
@@ -20,6 +26,12 @@ A = rbfard2Kern.inputScales;
 gKernvar = sum(sum(Knovar.*covGrad));  
 
 KfuCovGrad = K_fu.*covGrad;
+
+%--- new: preallocation
+gVarmeans = zeros(vardist.numData, vardist.latentDimension);
+gVarcovars = gVarmeans;
+gInd = zeros(size(Z));
+%--
 
 % compute the gradient wrt lengthscales, variational means and variational variances  
 for q=1:vardist.latentDimension
@@ -39,8 +51,10 @@ for q=1:vardist.latentDimension
     % variational means: you sum out the columns (see report)
     gVarmeans(:,q) = -A(q)*sum(tmp,2); 
     
-    % inducing inputs: you sum out the rows 
-    gInd(:,q) = A(q)*sum(tmp,1)'; 
+    if learnInducing
+        % inducing inputs: you sum out the rows 
+        gInd(:,q) = A(q)*sum(tmp,1)'; 
+    end
     
     % 
     %B_q = repmat(1./(A(q)*S_q + 1), [1 M]).*dist2(Mu_q, repmat(Z_q);

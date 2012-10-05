@@ -1,9 +1,13 @@
-function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = rbfard2biasVardistPsi2Gradient(rbfardKern, biasKern, vardist, Z, covGrad)
+function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = rbfard2biasVardistPsi2Gradient(rbfardKern, biasKern, vardist, Z, covGrad, learnInducing)
 
 % RBFARD2BIASVARDISTPSI2GRADIENT description.
   
 % VARGPLVM
   
+if nargin < 6
+    learnInducing = 1;
+end
+
 % variational means
 N = size(vardist.means,1);
 %  inducing variables 
@@ -22,6 +26,13 @@ gKern2 = sum(sum(Pnobias.*covGrad));
 Bnm = biasKern.variance*ones(size(Psi1)); 
 BPsi1Covg = Psi1.*(Bnm*covGrad); 
 
+%-- New: preallocation
+    gVarmeans = zeros(N,Q);
+    gVarcovars = zeros(N,Q);
+    gInd = zeros(M,Q);
+%---
+
+
 % compute the gradient wrt lengthscales, variational means and variational variances  
 for q=1:vardist.latentDimension
 %
@@ -39,7 +50,9 @@ for q=1:vardist.latentDimension
     gVarmeans(:,q) = -A(q)*sum(tmp,2); 
     
     % inducing inputs: you sum out the rows 
-    gInd(:,q) = A(q)*sum(tmp,1)'; 
+    if learnInducing
+        gInd(:,q) = A(q)*sum(tmp,1)'; 
+    end
     
     % 
     B_q = (B_q.*(repmat(Mu_q,[1 M]) - repmat(Z_q,[N 1])));

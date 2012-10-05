@@ -4,7 +4,7 @@
 % parameters to set appear in the first lines, but some also appear throughout
 % the code. All parameters are set by first checking existance, which means that
 % any parameter that is not set just takes a default value.
-% 
+%
 % COPYRIGHT: Andreas C. Damianou, Michalis K. Titsias, 2010 - 2011
 % SEEALSO: demHighDimVargplvmTrained.m
 % VARGPLVM
@@ -43,14 +43,16 @@ if ~exist('initX'),     initX ='ppca';   end
 if ~exist('regularizeMeans'),  regularizeMeans = 0; end
 if ~exist('initVardistIters'),  initVardistIters = 0; end
 if ~ exist('enableParallelism'), enableParallelism = 1; end
-
+% Set it to 1 to retrain the model. Set it to 0 to load an already trained
+% one.
+if ~exist('trainModel'), trainModel = 1; end
 
 % if strcmp(dataSetName, 'missa') & strcmp(dataSetSplit,'randomBlocks')
 %     rand; % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
 % end
-% if strcmp(dataSetName, 'ocean') & strcmp(dataSetSplit,'randomBlocks')
-%     for i=1:5, rand; end % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
-% end
+ if strcmp(dataSetName, 'ocean') & strcmp(dataSetSplit,'randomBlocks')
+     for i=1:5, rand; end % TMP (just to make the random seed more convenient! (this results in Ytr close to Yts).
+ end
 
 % dataSetName = 'susie';
 % load susie_352_240
@@ -78,7 +80,8 @@ if exist('dataToKeep')  fprintf(1,'# DataToKeep: %d \n',dataToKeep); end
 
 switch dataSetName
     case 'missa' % There is a translation between frames 65...102
-            Y = vargplvmLoadData(dataSetName);
+        [Y, lbls] = vargplvmLoadData(dataSetName);
+        height = lbls(1); width = lbls(2);
     case 'ocean'
         try
             load 'DATA_Ocean'
@@ -136,7 +139,6 @@ end
 
 dims = size(Y,2);
 
-trainModel = 1;% Set it to 1 to retrain the model. Set it to 0 to load an already trained one.
 
 % Take a downsample version of the video for training and test on the
 % remaining frames
@@ -229,18 +231,18 @@ fprintf(1,'#----------------------------------------------------\n');
 clear Y % Free up some memory
 
 %{
-% % Play movie
-% for i=1:size(Ytr,1)
-%     fr=reshape(Ytr(i,:),height,width);
-%     imagesc(fr); colormap('gray');
-%     pause(0.08);
-% end
-% %pause
-% for i=1:size(Yts,1)
-%     fr=reshape(Yts(i,:),height,width);
-%     imagesc(fr); colormap('gray');
-%     pause(0.08);
-% end
+ % Play movie
+ for i=1:size(Ytr,1)
+     fr=reshape(Ytr(i,:),height,width);
+     imagesc(fr); colormap('gray'); title(num2str(indTr(i)))
+     pause%(0.08);
+ end
+ pause
+ for i=1:size(Yts,1)
+     fr=reshape(Yts(i,:),height,width);
+     imagesc(fr); colormap('gray'); title(num2str(indTs(i)))
+     pause%(0.08);
+ end
 %}
 
 %%
@@ -257,6 +259,9 @@ end
 if ~exist('DgtN') || ~DgtN
     options.enableDgtN = false;
 end
+if exist('scale2var1')
+    options.scale2var1 = scale2var1;
+end
 d = size(Ytr, 2);
 
 
@@ -266,7 +271,14 @@ if trainModel
     % scale = std(Ytr);
     % scale(find(scale==0)) = 1;
     %options.scaleVal = mean(std(Ytr));
-    options.scaleVal = sqrt(var(Ytr(:)));
+    if ~exist('scale2var1')
+        if ~exist('scaleVal')
+            options.scaleVal = sqrt(var(Ytr(:)));
+        else
+            options.scaleVal = scaleVal;
+        end
+    end
+    
     if fixInd
         options.fixInducing=1;
         options.fixIndices=1:size(Ytr,1);
@@ -304,10 +316,10 @@ if trainModel
         optionsDyn.regularizeMeans = regularizeMeans;
         
         kern = kernCreate(t, dynamicKern); % Default: {'rbf','white','bias'}
-           
-                
+        
+        
         %-- Initialize each element of the compound kernel (optional but
-        % recommended) 
+        % recommended)
         % ATTENTION: For the gradients we assume that the base kernel (rbf,
         % matern etc) must be the FIRST one and if a second base kernel
         % (not white or bias) exist must be the LAST one!!!!!!!!!!!!!!
@@ -335,7 +347,7 @@ if trainModel
     
     if model.N > 50 && enableParallelism
         fprintf('# Parallel computations w.r.t the datapoints!\n');
-         model.vardist.parallel = 1;
+        model.vardist.parallel = 1;
     end
     
     %%%
@@ -350,8 +362,8 @@ if trainModel
     model.beta=1/(0.01*var(model.mOrig(:)));
     modelInit = model;
     
-   % disp(model.vardist.covars)
-   % disp(model.kern.comp{1}.inputScales)
+    % disp(model.vardist.covars)
+    % disp(model.kern.comp{1}.inputScales)
     
     
     %%---
@@ -379,12 +391,12 @@ if trainModel
     
     if initVardistIters ~=0
         model.initVardist = 1;
-		model.learnBeta = 0; model.learnSigmaf = 0; % This should be merged with the initVardist field
+        model.learnBeta = 0; model.learnSigmaf = 0; % This should be merged with the initVardist field
         fprintf(1,'# Intitiliazing the model (fixed beta)...\n');
         model = vargplvmOptimise(model, display, initVardistIters); % Default: 20
         fprintf(1,'1/b = %.4d\n',1/model.beta);
         model.learnSigmaf = 1;
-         model.initVardist = 0;
+        model.initVardist = 0;
     end
     
     model.learnBeta = 1;
@@ -416,13 +428,22 @@ if trainModel
     save(fileToSave, 'prunedModel', 'prunedModelInit', 'prunedModelTr');
 else
     % Load pre-trained model
+    disp(['# Loading pre-trained model number ' num2str(experimentNo) '...'])
     capName = dataSetName;
     capName(1) = upper(capName(1));
     modelType = 'vargplvm';
     modelType(1) = upper(modelType(1));
     fileToLoad = ['dem' capName modelType num2str(experimentNo) '.mat'];
     load(fileToLoad);
-    fileToSave = fileToLoad;
+    model = vargplvmRestorePrunedModel(prunedModel, Ytr);
+    try
+        modelTr = vargplvmRestorePrunedModel(prunedModelTr, Ytr);
+    catch e
+        warning('modelTr not found! Setting modelTr = model.');
+        modelTr = model;
+    end
+    if ~exist('fileToSave'), fileToSave = fileToLoad; end
+    if exist('testReoptimise'), modelTr.dynamics.reoptimise = testReoptimise; end
 end
 
 
@@ -439,7 +460,11 @@ end
 model = modelTr;
 clear modelTr %%
 model.y = Ytr;
-model.m= gpComputeM(model); %%%
+if isfield(model, 'mOrig')
+    model.m = model.mOrig;
+else
+    model.m= gpComputeM(model); %%%
+end
 model.y=[];
 Nstar = size(YtsOriginal,1);
 %%% NOTE: If you are reloading and the restoring the "modelUpdated" you will need to:
@@ -515,10 +540,10 @@ fprintf(1,'# Error GPLVM: %d\n', errorOnlyTimes);
 % observed test images (also good for de-bugging because this should be better
 % than the onlyTimes prediction)
 
-predWithMs = 1;
+if ~exist('predWithMs'), predWithMs = 1; end
 
 if predWithMs
-    %
+    %%
     display = 1;
     indexP = [];
     Init = [];
@@ -535,52 +560,61 @@ if predWithMs
         end
     end
     
-    switch cut
-        case 'horizontally'
-            if strcmp(dataSetName,'ADN')
-                cutPoint=round(h/1.55);
-            elseif strcmp(dataSetName,'claire')
-                cutPoint=round(h/2);
-            elseif strcmp(dataSetName, 'grandma')
-                cutPoint=round(h/1.68);
-            else %missa
-                cutPoint=round(h/2)+13;
-            end
-            if exist('cutP')    cutPoint = cutP; end
-            mask = [ones(1,cutPoint) zeros(1,h-cutPoint)];
-            mask=repmat(mask, 1,w);
-            indexMissing = find(mask);
-        case 'vertically'
-            if strcmp(dataSetName,'missa')
-                indexMissing=1:round(size(Yts,2)/1.8);
-            elseif strcmp(dataSetName,'dog')
-                indexMissing = 1:round(size(Yts,2)/1.70);
-            elseif strcmp(dataSetName,'ADN')
-                indexMissing = 1:round(size(Yts,2)/1.7);
-            elseif strcmp(dataSetName,'ocean')
-                indexMissing = 1:round(size(Yts,2)/1.6);
-            elseif strcmp(dataSetName,'head')
-                indexMissing=1:round(size(Yts,2)/2.08);
-            else
-                indexMissing=1:round(size(Yts,2)/2);
-            end
+    if ~exist('indexMissing')
+        switch cut
+            case 'horizontally'
+                if strcmp(dataSetName,'ADN')
+                    cutPoint=round(h/1.55);
+                elseif strcmp(dataSetName,'claire')
+                    cutPoint=round(h/2);
+                elseif strcmp(dataSetName, 'grandma')
+                    cutPoint=round(h/1.68);
+                else %missa
+                    cutPoint=round(h/2)+13;
+                end
+                if exist('cutP'),    cutPoint = cutP; end
+                if ~isscalar(cutPoint)
+                    mask = zeros(h,1);
+                    mask(cutPoint) = 1;
+                else
+                    mask = [ones(1,cutPoint) zeros(1,h-cutPoint)];
+                end
+                mask=repmat(mask, 1,w);
+                indexMissing = find(mask);
+            case 'vertically'
+                if strcmp(dataSetName,'missa')
+                    indexMissing=1:round(size(Yts,2)/1.8);
+                elseif strcmp(dataSetName,'dog')
+                    indexMissing = 1:round(size(Yts,2)/1.70);
+                elseif strcmp(dataSetName,'ADN')
+                    indexMissing = 1:round(size(Yts,2)/1.7);
+                elseif strcmp(dataSetName,'ocean')
+                    indexMissing = 1:round(size(Yts,2)/1.6);
+                elseif strcmp(dataSetName,'head')
+                    indexMissing=1:round(size(Yts,2)/2.08);
+                else
+                    indexMissing=1:round(size(Yts,2)/2);
+                end
+        end
     end
     indexPresent = setdiff(1:model.d, indexMissing);
     
     %
     Yts = YtsOriginal;
     % See the movie after cutting some dims
-    %{
-%     Ytemp=Yts;
-%     Ytemp(:,indexMissing)=NaN;
-%     for i=1:size(Ytemp,1)
-%         fr=reshape(Ytemp(i,:),h,w);
-%         imagesc(fr);
-%         colormap('gray');
-%         pause(0.1)
-%     end
-%     clear Ytemp
-    %}
+     %{
+     Ytemp=Yts;
+     Ytemp(:,indexMissing)=NaN;
+     for i=1:size(Ytemp,1)
+         fr=reshape(Ytemp(i,:),h,w);
+         imagesc(fr);
+         colormap('gray');
+         pause(0.1)
+     end
+     clear Ytemp
+     %}
+    % return %%%%%%%%%%
+    %%
     
     mini =[];
     for i=1:size(Yts,1)
@@ -623,7 +657,7 @@ if predWithMs
     % Find the absolute error
     Testmeans = x;
     Testcovars = varx;
-    Varmu = vargplvmPosteriorMeanVar(modelUpdated, x, varx);
+    Varmu = vargplvmPosteriorMeanVar(modelUpdated, Testmeans, Testcovars);
     % Mean error per pixel
     errorFull = sum(sum( abs(Varmu(:,indexMissing) - YtsOriginal(:,indexMissing)) ))/prod(size(YtsOriginal(:,indexMissing)));
     fprintf(1,'# GPLVM Error (in the missing dims) with missing inputs:%d\n', errorFull);
@@ -638,25 +672,38 @@ if predWithMs
     fprintf(1,'# GPLVM Error (in the present dims) only times:%d\n', errorFullPr2);
     %{
      % Visualization of the reconstruction
-    %     for i=1:Nstar
-    %         subplot(1,2,1);
-    %         fr=reshape(YtsOriginal(i,:),height,width);
-    %         imagesc(fr);
-    %         colormap('gray');
-    %         subplot(1,2,2);
-    %         fr=reshape(Varmu(i,:),height,width);
-    %         imagesc(fr);
-    %         colormap('gray');
-    %         pause(0.5);
-    %     end
+         for i=1:Nstar
+             subplot(1,2,1);
+             fr=reshape(YtsOriginal(i,:),height,width);
+             imagesc(fr);
+             colormap('gray');
+             subplot(1,2,2);
+             fr=reshape(Varmu(i,:),height,width);
+             imagesc(fr);
+             colormap('gray');
+             pause(0.5);
+         end
     %}
     prunedModelUpdated = vargplvmPruneModel(modelUpdated,1);
     save([fileToSave(1:end-4) 'Pred.mat'], 'Testmeans', 'Testcovars', 'prunedModelUpdated');
     fprintf(1,'# Saved %s\n',[fileToSave(1:end-4) 'Pred.mat']);
     
     
-    %-------- NN  ----------
-    fprintf(1,'# NN prediction...\n');
+    %% -------- NN  ----------
+    meanFrame = repmat(mean(Ytr),size(YtsOriginal,1),1);
+    errMeanFrame = sum(sum(abs(meanFrame(:,indexMissing) - YtsOriginal(:,indexMissing)) ))/prod(size(YtsOriginal(:,indexMissing)));
+    fprintf(1,'# Mean Frame Error (in the missing dims) with missing inputs: %f\n', errMeanFrame);
+
+    fprintf('# Sequential NN...\n')
+    try
+        [NNpredSeq, errorsNNSeq] = NNseq(Ytr, YtsOriginal, Yts, 1:6);
+        [minEr, indMinEr] = min(errorsNNSeq);
+        fprintf(1,'# NN Seq.(%d) Error (in the missing dims) with missing inputs:%f\n', indMinEr, minEr);
+    catch e
+    end
+    
+    fprintf(1,'# Classic NN prediction...\n');
+
     mini =[];
     sortedInd = zeros(size(Yts,1), size(Ytr,1));
     for i=1:size(Yts,1)
@@ -725,6 +772,7 @@ if predWithMs
     %%%%%%%%%%%%%
     
     
+    
     %     for i=1:Nstar
     %         subplot(1,2,1);
     %         fr=reshape(YtsOriginal(i,:),height,width);
@@ -738,6 +786,16 @@ if predWithMs
     %     end
 end
 
+%% Movies
+% playMov(h,w,[],Varmu, Yts)
+% playMov(h,w,[],Varmu,NNmuPartBest)
+
 % The following causes OUTOFMEMORY exception
 % lvmVisualise(model, [], 'imageVisualise', 'imageModify', [720 1280],1,0,1);
 
+%%
+%{
+plot(modelUpdated.X(:,1), modelUpdated.X(:,2), 'x'); hold on; plot(modelUpdated.X_u(:,1), modelUpdated.X_u(:,2), 'ro'); legend('mUpdX','mUpdXu')
+figure
+plot(model.X(:,1), model.X(:,2), '+'); hold on; plot(model.X_u(:,1), model.X_u(:,2),'ro'); legend('modelX', 'modelX_u')
+%}

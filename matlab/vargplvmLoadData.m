@@ -1,4 +1,4 @@
-function [Y, lbls, Ytest, lblstest] = vargplvmLoadData(dataset, local, seedVal)
+function [Y, lbls, Ytest, lblstest] = vargplvmLoadData(dataset, local, seedVal, field)
 
 % VARGPLVMLOADDATA Load a latent variable model dataset from a local folder
 % or from the global repository. This function tries to load the file from
@@ -32,17 +32,20 @@ function [Y, lbls, Ytest, lblstest] = vargplvmLoadData(dataset, local, seedVal)
 
 % VARGPLVM
 
-if nargin > 1
+if nargin > 1 && ~isempty(local)
     searchLocally = local;
 else
     searchLocally = 1;
 end
 
-if nargin > 2
+if nargin > 2 && ~isempty(seedVal)
     randn('seed', seedVal)
     rand('seed', seedVal)
 end
 
+if nargin < 3 || isempty(field)
+    field = [];
+end
 
 
 % get directory
@@ -61,6 +64,7 @@ if searchLocally
     try
         [Y, lbls, Ytest, lblstest]= loadLocalData(dataset, localDatasetsDirectorySmall,dirSep);
         fprintf('# The requested dataset was found in the local directory (for the small files).\n');
+        Y = checkField(Y, field);
         return
     catch
         % do nothing
@@ -71,6 +75,7 @@ if searchLocally
     try
         [Y, lbls, Ytest, lblstest]=loadLocalData(dataset, localDatasetsDirectoryLarge,dirSep);
         fprintf('# The requested dataset was found in the local directory (for the large files).\n');
+        Y = checkField(Y, field);
         return
     catch
         % do nothing
@@ -89,6 +94,7 @@ try
             [Y, lbls, Ytest, lblstest] = lvmLoadData(dataset);
     end
     fprintf('# The requested dataset was loaded from the global DATASETS directory.\n');
+    Y = checkField(Y, field);
     return
 catch
     % do nothing
@@ -97,3 +103,9 @@ end
 % If everything else fails, try to just load the dataset from the current
 % dir.
 load(dataset);
+
+function Y = checkField(Y, field)
+% If Y is a struct, we might only want a specific field to load
+if ~isempty(field) && isstruct(Y) && isfield(Y, field)
+    Y = Y.(field);
+end

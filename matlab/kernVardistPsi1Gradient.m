@@ -1,14 +1,17 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi1Gradient(kern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi1Gradient(kern, vardist, Z, covGrad, learnInducing)
 
 % KERNVARDISTPSI1GRADIENT description.  
 
 % VARGPLVM
 
+if nargin < 5
+    learnInducing = 1;
+end
 
     if ~strcmp(kern.type,'cmpnd')
        % 
        fhandle = str2func([kern.type 'VardistPsi1Gradient']);
-       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern, vardist, Z, covGrad);    
+       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern, vardist, Z, covGrad, learnInducing);    
 
        % Transformations
        gKern = paramTransformPsi1(kern, gKern); 
@@ -16,14 +19,14 @@ function [gKern, gVarmeans, gVarcovars, gInd] = kernVardistPsi1Gradient(kern, va
     else % the kernel is cmpnd
        %
        fhandle = str2func([kern.comp{1}.type 'VardistPsi1Gradient']);
-       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern.comp{1}, vardist, Z, covGrad);
+       [gKern, gVarmeans, gVarcovars, gInd] = fhandle(kern.comp{1}, vardist, Z, covGrad, learnInducing);
        % Transformations
        gKern = paramTransformPsi1(kern.comp{1}, gKern); 
        %
        for i = 2:length(kern.comp)
            %
            fhandle = str2func([kern.comp{i}.type 'VardistPsi1Gradient']);
-           [gKerni, gVarmeansi, gVarcovarsi, gIndi] = fhandle(kern.comp{i}, vardist, Z, covGrad);
+           [gKerni, gVarmeansi, gVarcovarsi, gIndi] = fhandle(kern.comp{i}, vardist, Z, covGrad, learnInducing);
 
            % Transformations
            gKerni = paramTransformPsi1(kern.comp{i}, gKerni); 

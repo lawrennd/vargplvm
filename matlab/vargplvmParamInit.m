@@ -1,4 +1,4 @@
-function model = vargplvmParamInit(model,Y,X)
+function model = vargplvmParamInit(model,Y,X, options)
 
 % VARGPLVMPARAMINIT Initialize the variational GPLVM from the data
 % COPYRIGHT: Michalis Titsias 2009-2011
@@ -15,6 +15,10 @@ function model = vargplvmParamInit(model,Y,X)
 %    ind = ind(1:model.k);
 %    model.X_u = X(ind, :);
 %end
+
+if nargin < 4
+    options = [];
+end
 
 if ~strcmp(model.kern.type,'cmpnd')
    % 
@@ -58,6 +62,10 @@ else
    %
 end
 
+if  strcmp(model.kern.type,'rbfardjit')
+    model.learnSigmaf = 1;
+end
+
 % initialize inducing inputs by kmeans 
 %kmeansops = foptions;
 %kmeansops(14) = 10;
@@ -67,11 +75,31 @@ end
 %centres = model.vardist.means(ch(1:model.k),:);
 %model.X_u = kmeans(centres, model.vardist.means, kmeansops);
 
-model.beta = 1000;%/max(var(Y));
+% Initialise beta according to the desired SNR, which is computed as
+% variance_of_centered_data * beta. The relative values of the data
+% variance and the beta show how well the model fits the data or explains
+% it with noise. The closer 1/beta is to the variance the more information
+% the model attempts to explain with noise.
+if ~isempty(options) && isfield(options, 'initSNR')
+    %if isfield(model, 'mOrig')
+    %    mm = model.mOrig;
+    %else
+    %    mm = model.m;
+    %end
+    mm = Y;
+    if var(mm(:)) < 1e-8
+        warning(['Variance in data was too small. Setting beta to 1e+7'])
+        model.beta = 1e+7;
+    else
+        model.beta = 1/((1/options.initSNR * var(mm(:))));
+    end
+else
+    model.beta = 1000;%/max(var(Y));
+end
 
 
-initParams = vargplvmExtractParam(model);
+initParams = modelExtractParam(model); %vargplvmExtractParam(model);
 model.numParams = length(initParams);
 % This forces kernel computation.
-model = vargplvmExpandParam(model, initParams);
+model = modelExpandParam(model, initParams); %model = vargplvmExpandParam(model, initParams);
 

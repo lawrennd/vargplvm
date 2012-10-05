@@ -1,36 +1,42 @@
-% DEMOILVARGPLVM1 Run variational GPLVM on oil data.
-
-% VARGPLVM
 
 % Fix seeds
 randn('seed', 1e5);
 rand('seed', 1e5);
 
-if ~exist('vardistCovarsMult'), vardistCovarsMult = 0.5; end
-
 dataSetName = 'oil100';
-if ~exist('experimentNo'), experimentNo = 5; end
-printDiagram = 1;
+
+%%%%% Options
+N = 15;
+Q = 3; 
+K = 5;
+dynUsed = 1;
+learnInducing = 0;
+%%%%%%%%%
+
 
 % load data
 [Y, lbls] = lvmLoadData(dataSetName);
+Y = Y(1:N,:);
+
+
 
 % Set up model
 options = vargplvmOptions('dtcvar');
-%options.kern = {'rbfard2', 'bias', 'white'};
-options.kern = 'rbfardjit';
-options.numActive = 50; 
-%options.tieParam = 'tied';  
+options.kern = {'rbfard2', 'bias', 'white'};
+options.numActive = K; 
 
-options.optimiser = 'scg';
-latentDim = 10;
+options.optimiser = 'scg2';
+latentDim = Q;
 d = size(Y, 2);
 
 % demo using the variational inference method for the gplvm model
 model = vargplvmCreate(latentDim, d, Y, options);
 %
+model.learnInducing = learnInducing;
 model = vargplvmParamInit(model, model.m, model.X); 
-model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(model.vardist.covars));
+
+
+
 model.learnBeta=1;
 
 
@@ -57,7 +63,7 @@ model.learnBeta=1;
         
         optionsDyn.learnVariance = 1; %% NEW
         optionsDyn.kern = kern;
-        optionsDyn.vardistCovars = vardistCovarsMult; % 0.23 gives true vardist.covars around 0.5 (DEFAULT: 0.23) for the ocean dataset
+        optionsDyn.vardistCovars = 1; %vardistCovarsMult; % 0.23 gives true vardist.covars around 0.5 (DEFAULT: 0.23) for the ocean dataset
         
         % Fill in with default values whatever is not already set
         optionsDyn = vargplvmOptionsDyn(optionsDyn);
@@ -66,39 +72,7 @@ model.learnBeta=1;
         fprintf(1,'# Further calibration of the initial values...\n');
         model = vargplvmInitDynamics(model,optionsDyn);
    end
+   
+   
 
-% Optimise the model.
-iters = 1800;
-display = 1;
-
-model.beta = 1/((1/100 * var(model.m(:))));
-model.learnBeta = false; model.learnSigmaf = false; model.initVardist = true;
-model = vargplvmOptimise(model, display, 500);
-model.learnBeta = true; model.learnSigmaf = true; model.initVardist = false;
-
-
-model = vargplvmOptimise(model, display, iters);
-
-capName = dataSetName;
-capName(1) = upper(capName(1));
-modelType = model.type;
-modelType(1) = upper(modelType(1));
-save(['dem' capName modelType num2str(experimentNo) '.mat'], 'model');
-
-% order wrt to the inputScales 
-mm = vargplvmReduceModel2(model,2);
-%% plot the two largest twe latent dimensions 
-if exist('printDiagram') & printDiagram
-    try
-  lvmPrintPlot(mm, lbls, capName, experimentNo);
-    catch e
-    end
-  figure
-  bar(model.kern.inputScales);
-end
-errors = fgplvmNearestNeighbour(mm, lbls);
-fprintf('# Vargplvm errors in the 2-D projection: %d\n', errors)
-
-%%
-mmm = vargplvmReduceModel2(model, length(vargplvmRetainedScales(model)));
-fprintf('# Bound in the reduced model: %.4f\n', -vargplvmLogLikelihood(mmm));
+model = vargplvmOptimise(model, 1, 10, 'gradcheck', true);

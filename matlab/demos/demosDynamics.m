@@ -193,7 +193,7 @@ dataSetName = 'dog';
 experimentNo=65;
 indPoints=-1; latentDim=35;
 fixedBetaIters=400;
-reconstrIters = 2;
+reconstrIters = 4000;
 itNo=[1000 1000 1000 1000 1000 1000 500 500 500 500 1000 1000 1000 1000 1000 1000 1000 500 500]; %16000
 periodicPeriod = 2.8840;
 dynamicKern={'rbfperiodic','whitefixed','bias','rbf'};

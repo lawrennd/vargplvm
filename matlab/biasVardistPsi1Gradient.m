@@ -1,4 +1,4 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = biasVardistPsi1Gradient(biaskern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = biasVardistPsi1Gradient(biaskern, vardist, Z, covGrad, learnInducing)
 
 % BIASVARDISTPSI1GRADIENT Compute gradient of bias variational PSI1.
 % FORMAT

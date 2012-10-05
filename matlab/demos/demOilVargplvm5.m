@@ -7,7 +7,7 @@ randn('seed', 1e5);
 rand('seed', 1e5);
 
 dataSetName = 'oil';
-experimentNo = 1;
+experimentNo = 5;
 printDiagram = 1;
 
 % load data
@@ -15,8 +15,8 @@ printDiagram = 1;
 
 % Set up model
 options = vargplvmOptions('dtcvar');
-options.kern = {'rbfard2', 'bias', 'white'};
-%options.kern = 'rbfardjit';
+%options.kern = {'linard2', 'bias', 'white'};
+options.kern = {'rbfard2','bias','white'};
 options.numActive = 50; 
 %options.tieParam = 'tied';  
 
@@ -30,13 +30,13 @@ model = vargplvmCreate(latentDim, d, Y, options);
 model = vargplvmParamInit(model, model.m, model.X); 
 model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(model.vardist.covars));
 model.learnBeta=1;
-
+model.beta = 1/((1/100 * var(model.m(:))));
 % Optimise the model.
-iters = 2000;
+iters = 2500;
 display = 1;
 
 model = vargplvmOptimise(model, display, iters);
-
+model.info = info;
 capName = dataSetName;
 capName(1) = upper(capName(1));
 modelType = model.type;

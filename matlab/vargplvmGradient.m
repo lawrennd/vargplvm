@@ -31,3 +31,4 @@ g = - modelLogLikeGradients(model);
 %     g = g * model.T; % model.T == model.ties' * model.ties;
 % end
 % fprintf(1,'# G: %.13f\n',sum(abs(g))); %%% DEBUG
+%fprintf(1,'# G: %.13f\n', norm(g)); %%% DEBUG (close to convergence this should go -> 0)

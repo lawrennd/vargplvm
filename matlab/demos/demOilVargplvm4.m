@@ -7,7 +7,7 @@ randn('seed', 1e5);
 rand('seed', 1e5);
 
 dataSetName = 'oil';
-experimentNo = 1;
+experimentNo = 4;
 printDiagram = 1;
 
 % load data
@@ -15,8 +15,8 @@ printDiagram = 1;
 
 % Set up model
 options = vargplvmOptions('dtcvar');
-options.kern = {'rbfard2', 'bias', 'white'};
-%options.kern = 'rbfardjit';
+%options.kern = {'rbfard2', 'bias', 'white'};
+options.kern = 'rbfardjit';
 options.numActive = 50; 
 %options.tieParam = 'tied';  
 
@@ -32,8 +32,13 @@ model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(m
 model.learnBeta=1;
 
 % Optimise the model.
-iters = 2000;
+iters = 1800;
 display = 1;
+
+model.beta = 1/((1/100 * var(model.m(:))));
+model.learnBeta = false; model.learnSigmaf = false; model.initVardist = true;
+model = vargplvmOptimise(model, display, 500);
+model.learnBeta = true; model.learnSigmaf = true; model.initVardist = false;
 
 model = vargplvmOptimise(model, display, iters);
 
@@ -48,4 +53,7 @@ mm = vargplvmReduceModel(model,2);
 %% plot the two largest twe latent dimensions 
 if exist('printDiagram') & printDiagram
   lvmPrintPlot(mm, lbls, capName, experimentNo);
+  bar(model.kern.inputScales);
 end
+errors = fgplvmNearestNeighbour(mm, lbls);
+fprintf('# Vargplvm errors in the 2-D projection: %d\n', errors)

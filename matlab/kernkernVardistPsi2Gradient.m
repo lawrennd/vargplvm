@@ -1,8 +1,13 @@
-function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = kernkernVardistPsi2Gradient(kern1, kern2, vardist, Z, covGrad)
+function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = kernkernVardistPsi2Gradient(kern1, kern2, vardist, Z, covGrad, learnInducing)
 
 % KERNKERNVARDISTPSI2GRADIENT Description
   
 % VARGPLVM
+
+if nargin < 6
+    learnInducing = true;
+end
+
 if strcmp(kern2.type, kern1.type)
     error('Kern1 and Kern2 cannot be the same')
     return; 
@@ -17,10 +22,10 @@ elseif ~strcmp(kern1.type, 'white') &  ~strcmp(kern2.type, 'white')
     %
     if swap == 0
        fhandle = str2func([kern1.type kern2.type 'VardistPsi2Gradient']);
-       [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = fhandle(kern1, kern2, vardist, Z, covGrad);
+       [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = fhandle(kern1, kern2, vardist, Z, covGrad, learnInducing);
     else
        fhandle = str2func([kern2.type kern1.type 'VardistPsi2Gradient']);
-       [gKern2, gKern1, gVarmeans, gVarcovars, gInd] = fhandle(kern2, kern1, vardist, Z, covGrad);
+       [gKern2, gKern1, gVarmeans, gVarcovars, gInd] = fhandle(kern2, kern1, vardist, Z, covGrad, learnInducing);
     end
     % !!! Do not take transformation here: they applied in the kernkernVardistPsi2Gradient
     %gKern1 = paramTransformPsi2(kern1, gKern1);

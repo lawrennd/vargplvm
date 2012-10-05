@@ -42,15 +42,19 @@ else
     model.vardist = modelExpandParam(model.vardist, params(startVal:endVal)); 
 end
 
-% inducing inputs 
+% inducing inputs: if fixInducing is active, they are tied to the
+% variational means. If learnInducing exists as a field and is false, they
+% are not included at all (they are just fixed parameters).
 startVal = endVal+1;
-if model.fixInducing  
-    if isfield(model, 'dynamics') & ~isempty(model.dynamics)
-        Kt = kernCompute(model.dynamics.kern, model.dynamics.t);%%%%%%%%%%%%5
-        model.X_u = Kt*model.dynamics.vardist.means; %dynamics
-        model.X_u = model.X_u(model.inducingIndices,:);
-    else
-         model.X_u = model.vardist.means(model.inducingIndices, :); % static
+if model.fixInducing  || (isfield(model, 'learnInducing') && ~model.learnInducing)
+    if ~(isfield(model, 'learnInducing') && ~model.learnInducing) % If this is true, don't change the values at all
+        if isfield(model, 'dynamics') & ~isempty(model.dynamics)
+            Kt = kernCompute(model.dynamics.kern, model.dynamics.t);%%%%%%%%%%%%5
+            model.X_u = Kt*model.dynamics.vardist.means; %dynamics
+            model.X_u = model.X_u(model.inducingIndices,:);
+        else
+             model.X_u = model.vardist.means(model.inducingIndices, :); % static
+        end
     end
     % X_u values are taken from X values.
    % model.X_u = model.X(model.inducingIndices, :);

@@ -33,15 +33,20 @@ if length(varargin) == 2
     if strcmp(varargin{1}, 'gradcheck')
         assert(islogical(varargin{2}));
         options(9) = varargin{2};
-        if options(9)
-            [params, names] = modelExtractParam(model);
-            for i=1:length(names)
-                fprintf('%d\t%s\n', i, names{i});
+        if 0 %---------
+            if options(9)
+                [params, names] = modelExtractParam(model);
+                for i=1:length(names)
+                    fprintf('%d\t%s\n', i, names{i});
+                end
+                feval('gradchek3', params, @vargplvmObjective, @vargplvmGradient, model, names);
+                %feval('gradchek', params, @vargplvmObjective, @vargplvmGradient, model);
+            else
+                params = modelExtractParam(model);
             end
-            feval('gradchek2', params, @vargplvmObjective, @vargplvmGradient, model, names);
         else
             params = modelExtractParam(model);
-        end
+        end %-----------
     end
 else
     params = modelExtractParam(model);

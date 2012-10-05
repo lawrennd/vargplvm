@@ -1,8 +1,12 @@
 function fileName = vargplvmWriteResult(model, type, dataset, number, varargin)
 
 if ~isfield(model, 'saveName') || isempty(model.saveName)
-  dataset(1) = upper(dataset(1));
-  type(1) = upper(type(1));
+  if length(dataset) > 0
+    dataset(1) = upper(dataset(1));
+  end
+  if length(type) > 0
+    type(1) = upper(type(1));      
+  end
   fileName = ['dem' dataset type num2str(number)];
   if nargin > 4
       fileName = [fileName varargin{1}];

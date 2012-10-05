@@ -28,7 +28,7 @@ if ~exist('learnVariance'),     learnVariance =0;   end
 %if ~exist('vardistCovarsMult'),  vardistCovarsMult=1.3;                  end
 if ~exist('initX'),     initX ='ppca';   end
 if ~exist('doReconstr'),     doReconstr=1;   end
-
+if ~exist('permTestMult'), permTestMult = 5; end
 
 
 
@@ -86,13 +86,23 @@ fprintf(1,'#----------------------------------------------------\n');
 
 % Fix times:
 prevSeq = 1;
-timeStampsTraining = [];
+timeStampsTraining = []; timeStampsTrainingOrig = [];
 dt=0.05;
 for i=1:length(seq)
-    t = ([0:(seq(i)-prevSeq)].*dt)';
-    prevSeq = seq(i)+1;
+    tOrig = ([0:(seq(i)-prevSeq)].*dt)';
+    timeStampsTrainingOrig = [timeStampsTrainingOrig ;tOrig];
+    
+    t = 0;
+   % Add gaussian noise to the timestep so that time only goes forward but
+   % not necessarily in equal steps (check diff(timeStampsTraining))
+    for j=2:seq(i)-prevSeq + 1
+        t = [t; t(end) + dt + abs(randn)*dt*permTestMult];
+    end
     timeStampsTraining = [timeStampsTraining ;t];
-end;
+    
+    prevSeq = seq(i)+1;
+
+end
 timeStampsTest = ([0:size(Ytest,1)-1].*dt)';
 
 

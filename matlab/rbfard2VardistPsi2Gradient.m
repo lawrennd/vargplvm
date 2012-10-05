@@ -1,4 +1,4 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2Gradient(rbfardKern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2Gradient(rbfardKern, vardist, Z, covGrad, learnInducing)
 
 % RBFARD2VARDISTPSI2GRADIENT description.
   
@@ -10,20 +10,26 @@ catch e
     pool_open = 0;
 end
 
+if nargin < 5
+    % If learnInducing == 0, gInd will be full of zeros.
+    learnInducing = 1;
+end
+
+
 % The conditions for the parallel code to run, is the workers pool to be
 % open, the parallel flag to be active and the number of datapoints N to be
 % larger than a reasonable threshold (otherwise there is unecessary
 % thread-communication overhead).
 if pool_open && (isfield(vardist,'parallel') && vardist.parallel) && size(vardist.means,1) > 15
-    [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientPar(rbfardKern, vardist, Z, covGrad);
+    [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientPar(rbfardKern, vardist, Z, covGrad, learnInducing);
 else
-    [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientOrig(rbfardKern, vardist, Z, covGrad);
+    [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientOrig(rbfardKern, vardist, Z, covGrad, learnInducing);
 end
 
 
 
 
-function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientPar(rbfardKern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientPar(rbfardKern, vardist, Z, covGrad, learnInducing)
 % variational means
 N = size(vardist.means,1);
 %  inducing variables 
@@ -61,8 +67,10 @@ covGrad = (rbfardKern.variance^2)*(covGrad.*outKern);
 covGrad = reshape(covGrad,[M 1 M]);
 sumKern = reshape(sumKern,[M 1 M]);
 Amq = repmat(A,[M 1]);
-partInd1 = - Amq.*sum(ZmDZm.*repmat(sumKern.*covGrad,[1 Q 1]),3);
-partInd2 = zeros(M,Q);
+if learnInducing
+    partInd1 = - Amq.*sum(ZmDZm.*repmat(sumKern.*covGrad,[1 Q 1]),3);
+    partInd2 = zeros(M,Q);
+end
 
 partA1 = - 0.25*sum(sum((ZmDZm.*ZmDZm).*repmat(sumKern.*covGrad,[1 Q 1]),3),1);
 partA2 = zeros(1,Q);
@@ -129,7 +137,11 @@ parfor n=1:N
     %
 end
 
-gInd = partInd1 + 2*partInd2; 
+if learnInducing
+    gInd = partInd1 + 2*partInd2; 
+else
+    gInd = zeros(M,Q);
+end
 
 gKernlengcs = partA1 - partA2; 
 gKern = [gKernvar gKernlengcs];
@@ -153,7 +165,7 @@ gInd = gInd(:)';
 
 
 
-function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientOrig(rbfardKern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = rbfard2VardistPsi2GradientOrig(rbfardKern, vardist, Z, covGrad, learnInducing)
 % variational means
 N = size(vardist.means,1);
 %  inducing variables 
@@ -191,8 +203,10 @@ covGrad = (rbfardKern.variance^2)*(covGrad.*outKern);
 covGrad = reshape(covGrad,[M 1 M]);
 sumKern = reshape(sumKern,[M 1 M]);
 Amq = repmat(A,[M 1]);
-partInd1 = - Amq.*sum(ZmDZm.*repmat(sumKern.*covGrad,[1 Q 1]),3);
-partInd2 = zeros(M,Q);
+if learnInducing
+    partInd1 = - Amq.*sum(ZmDZm.*repmat(sumKern.*covGrad,[1 Q 1]),3);
+    partInd2 = zeros(M,Q);
+end
 
 partA1 = - 0.25*sum(sum((ZmDZm.*ZmDZm).*repmat(sumKern.*covGrad,[1 Q 1]),3),1);
 partA2 = zeros(1,Q);
@@ -230,7 +244,9 @@ for n=1:N
     % derivatives wrt inducing inputs 
     %diagCorr = diagCorr*(repmat(mu_n,[M 1]) - Z).*repmat(aDasPlus1(n,:),[M 1]);
     %partInd2 = partInd2 + Amq.*(sum(tmp,3) + diagCorr);
-    partInd2 = partInd2 + Amq.*tmp;
+    if learnInducing
+        partInd2 = partInd2 + Amq.*tmp;
+    end
     
     
     % Derivative wrt input scales  
@@ -259,7 +275,11 @@ for n=1:N
     %
 end
 
-gInd = partInd1 + 2*partInd2; 
+if learnInducing
+    gInd = partInd1 + 2*partInd2; 
+else
+    gInd = zeros(M,Q);
+end
 
 gKernlengcs = partA1 - partA2; 
 gKern = [gKernvar gKernlengcs];

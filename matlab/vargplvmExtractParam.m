@@ -60,16 +60,21 @@ else
 end
 
 
-% Inducing inputs 
+% Inducing inputs: They are included as separate parameters except if:
+% a) we fix the inducing points to the variational means 
+% b) we fix them to some initial values (not necessarily same as
+% variational means)
 if ~model.fixInducing
-    params =  [params model.X_u(:)'];
-    if returnNames 
-      for i = 1:size(model.X_u, 1)
-      for j = 1:size(model.X_u, 2)
-          X_uNames{i, j} = ['X_u(' num2str(i) ', ' num2str(j) ')'];
-      end
-      end
-      names = {names{:}, X_uNames{:}};
+    if ~isfield(model, 'learnInducing') || (isfield(model, 'learnInducing') && model.learnInducing)
+        params =  [params model.X_u(:)'];
+        if returnNames
+            for i = 1:size(model.X_u, 1)
+                for j = 1:size(model.X_u, 2)
+                    X_uNames{i, j} = ['X_u(' num2str(i) ', ' num2str(j) ')'];
+                end
+            end
+            names = {names{:}, X_uNames{:}};
+        end
     end
 end
 

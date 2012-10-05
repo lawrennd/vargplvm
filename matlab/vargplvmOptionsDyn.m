@@ -91,7 +91,7 @@ if strcmp(optionsDyn.type, 'vargpTime')
     % mostly for periodic kernels.
     if ~isfield(optionsDyn, 'regularizeMeans')
         optionsDyn.regularizeMeans = 0; 
-     end
+    end
     
 end
 

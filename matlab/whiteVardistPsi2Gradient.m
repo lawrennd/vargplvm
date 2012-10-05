@@ -1,4 +1,4 @@
-function [gKern, gVarmeans, gVarcovars, gInd] = whiteVardistPsi2Gradient(whitekern, vardist, Z, covGrad)
+function [gKern, gVarmeans, gVarcovars, gInd] = whiteVardistPsi2Gradient(whitekern, vardist, Z, covGrad, learnInducing)
 
 % WHITEVARDISTPSI2GRADIENT Compute gradient of white variational PSI2.
 % FORMAT
