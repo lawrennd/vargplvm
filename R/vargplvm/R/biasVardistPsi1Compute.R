@@ -19,8 +19,12 @@ function (biaskern, vardist, Z)
 # 
 # % VARGPLVM
 
+ # cat("biasVardist ")
+  #print(length(biaskern$variance))
+  #print(dim(vardist$means))
+  #print(dim(Z))
 K <- repmat(biaskern$variance,dim(vardist$means)[1],dim(Z)[1])
-
+#print(dim(K))
 P <- NULL
 return (list(K = K, P = P))
 }

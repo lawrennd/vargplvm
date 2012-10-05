@@ -1,7 +1,9 @@
 kernGradient <-
-  function (kern, x, matlabway = FALSE, ...) {
+  function (kern, x,matlabway = FALSE, ...) {
     funcName <- paste(kern$type, "KernGradient", sep="")
     func <- get(funcName, mode="function")
+    #cat("kernGradient ")
+    #print(funcName)
     g <- func(kern, x, matlabway = matlabway, ...)
     
     if (!matlabway)

@@ -116,6 +116,8 @@ vargplvm<-function(dataSet ="oil",
   }
 
   setwd(cwd)
-  return (mm)
+	return (list(mm = mm, lbls = lbls, capName = capName, experimentNo =experimentNo,
+				 savedir = dir5, gwd = cwd))
+	
   # ts <- toc
 }

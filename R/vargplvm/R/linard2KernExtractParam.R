@@ -1,4 +1,5 @@
-linard2KernExtractParam <- function (kern, only.values = TRUE, untransformed.values = FALSE)
+linard2KernExtractParam <- function (kern, only.values = TRUE, untransformed.values = FALSE,
+                                     matlabway = TRUE)
 {
   
   # % LINARD2KERNEXTRACTPARAM Extract parameters from the LINARD2 kernel structure.

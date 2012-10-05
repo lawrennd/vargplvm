@@ -1,4 +1,4 @@
-linard2KernCompute <- function (kern, x, x2)
+linard2KernCompute <- function (kern, x, matlabway = TRUE, x2)
 {
   
   # % LINARD2KERNCOMPUTE Compute the LINARD2 kernel given the parameters and X.
@@ -25,11 +25,15 @@ linard2KernCompute <- function (kern, x, x2)
   # 
   # % KERN
   
-  if (nargs() < 3)
+  #cat("l2kerncompute matlabway")
+  #print(dim(matlabway))
+  if (missing(x2))
+  { 
     sk <- x%*%(diag(kern$inputScales))%*%t(x)
-  else  
+  }
+  else {
     sk <- x%*%(diag(kern$inputScales))%*%t(x2)
+  }
   
-  k <- sk
-  return (k)
+  return (sk)
 }

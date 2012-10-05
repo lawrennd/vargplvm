@@ -39,9 +39,10 @@ kernExpandParam <-
     
     funcName <- paste(kern$type, "KernExpandParam", sep="")
     func <- get(funcName, mode="function")
+    
     # browser()
     kern <- func(kern, params, matlabway = matlabway)
-    
+
     return (kern)
     
   }

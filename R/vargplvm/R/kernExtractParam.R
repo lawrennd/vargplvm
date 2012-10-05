@@ -3,7 +3,7 @@ kernExtractParam <-
   untransformed.values=FALSE, matlabway = FALSE) {
     funcName <- paste(kern$type, "KernExtractParam", sep="")
     func <- get(funcName, mode="function")
-    
+
     params <- func(kern, only.values=only.values, 
     untransformed.values=untransformed.values,
     matlabway = matlabway)

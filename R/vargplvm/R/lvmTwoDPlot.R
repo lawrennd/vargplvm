@@ -82,5 +82,5 @@ lvmTwoDPlot <-
       # line([X(i-1, 1) X(i, 1)], [X(i-1, 2) X(i, 2)]) 
       # }
     }
-    
+	  plotlegend()    
   }

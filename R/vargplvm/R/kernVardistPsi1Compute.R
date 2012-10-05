@@ -14,7 +14,11 @@ if (!(kern$type == "cmpnd"))
   P <- temp$P
 } else {#% the kernel is cmpnd 
   fhandle <- paste(kern$comp[[1]]$type, "VardistPsi1Compute", sep = "")
+  #cat("function ")
+  #print(fhandle)
   temp <- do.call(fhandle, list(kern$comp[[1]], vardist, Z))
+  #cat("kvp1compute ")
+  #print(dim(temp$K))
   Psi1 <- temp$K
   P <- temp$Knovar
   for (i in 2:length(kern$comp))

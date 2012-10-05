@@ -53,24 +53,25 @@ kernCreate <-
         if ( (dim == 1) & (dim(as.matrix(X))[1] == 1) )
           dim <- X
       }
+      kernOptions <- NULL
       
-      if ( is.list(kernType) && kernType$type == "parametric" ) {
-        kernOptions <- kernType$options
-        kernType <- kernType$realType
+      if ( is.list(kernelType) && kernelType$type == "parametric" ) {
+        kernOptions <- kernelType$options
+        kernelType <- kernelType$realType
       }
       
-      if ( is.list(kernType) && ("options" %in% names(kernType)) ) {
-        kernOptions <- kernType$options
+      if ( is.list(kernelType) && ("options" %in% names(kernelType)) ) {
+        kernOptions <- kernelType$options
       }
       
-      if ( is.list(kernType) && ("complete" %in% names(kernType)) ) {
-        if ( kernType$complete == 1 ) {
-          kern <- kernType
+      if ( is.list(kernelType) && ("complete" %in% names(kernelType)) ) {
+        if ( kernelType$complete == 1 ) {
+          kern <- kernelType
         }
         
-      } else if ( is.list(kernType) ) {
+      } else if ( is.list(kernelType) ) {
         
-        kern <- list(inputDimension=dim, type=kernType$type)
+        kern <- list(inputDimension=dim, type=kernelType$type)
         
         if (!is.null(kernOptions))
           kern$options <- kernOptions
@@ -78,11 +79,11 @@ kernCreate <-
         start <- 1    
         
         if ( kern$type == "multi" ) {
-          for ( i in start:length(kernType$comp) ) {
-            if ( is.list(kernType$comp) ) {
-              iType <- kernType$comp[[i]]
+          for ( i in start:length(kernelType$comp) ) {
+            if ( is.list(kernelType$comp) ) {
+              iType <- kernelType$comp[[i]]
             } else {
-              iType <- kernType$comp[i]
+              iType <- kernelType$comp[i]
             }
             
             if ( is.list(X) ) {
@@ -97,11 +98,11 @@ kernCreate <-
           
         } else if ( kern$type %in% c("cmpnd", "tensor", "translate",
                                      "selproj") )  {
-          for ( i in start:length(kernType$comp) ) {
-            if ( is.list(kernType$comp) ) {
-              iType <- kernType$comp[[i]]
+          for ( i in start:length(kernelType$comp) ) {
+            if ( is.list(kernelType$comp) ) {
+              iType <- kernelType$comp[[i]]
             } else {
-              iType <- kernType$comp[i]
+              iType <- kernelType$comp[i]
             }
             
             if (kern$type == "selproj") {
@@ -119,20 +120,20 @@ kernCreate <-
           
         } else if ( kern$type == "exp" ) {
           ## need double check
-          if ( start == length(kernType$comp) ) {
-            kern$argument <- kernCreate(X, kernType$comp[start])
+          if ( start == length(kernelType$comp) ) {
+            kern$argument <- kernCreate(X, kernelType$comp[start])
           } else {
-            kern$argument <- kernCreate(X, kernType$comp[start:length(kernType$comp)])
+            kern$argument <- kernCreate(X, kernelType$comp[start:length(kernelType$comp)])
           }
         }
         
         kern <- kernParamInit(kern)
         
       } else {
-        kern <- list(type=kernType, inputDimension=dim)
+        kern <- list(type=kernelType, inputDimension=dim)
         
         if (!is.null(kernOptions))
-          kern$options <- kernOptions
+         kern$options <- kernOptions
         
         kern <- kernParamInit(kern)
       }

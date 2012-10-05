@@ -17,7 +17,12 @@ linard2KernDiagGradX <- function (kern, X)
 # 
 # % KERN
 # 
-
+  #cat("linard2KernDiagGradX ")
+#print(dim(X))
+#print(dim(kern$inputScales))
+ # print(summary(kern))
 gX <- 2*X*repmat(kern$inputScales, dim(X)[1], 1)
+  #cat("gX")
+  #print(dim(gX))
 return (gX)
 }

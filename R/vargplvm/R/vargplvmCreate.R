@@ -109,7 +109,6 @@ vargplvmCreate <-
     
     model$X <- X 
     
-    
     model$learnBeta <- 1  #% Newly added: deafault value for learnBeta.
     
     # % If the provided matrices are really big, the required quantities can be

@@ -1,4 +1,4 @@
-linard2KernGradient <- function (kern, x, ...)
+linard2KernGradient <- function (kern, x, matlabway = TRUE, ...)
 {
   # % LINARD2KERNGRADIENT Gradient of LINARD2 kernel's parameters.
   # % FORMAT
@@ -51,7 +51,7 @@ linard2KernGradient <- function (kern, x, ...)
   {
     k <- linard2KernCompute(kern, x)
   } else {
-    k <- linard2KernCompute(kern, x, varargin[[1]])
+    k <- linard2KernCompute(kern, x, matlabway = matlabway, varargin[[1]])
   }
   
   if (nargs() < 4)

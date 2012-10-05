@@ -1,4 +1,4 @@
-linard2KernExpandParam <- function (kern, params)
+linard2KernExpandParam <- function (kern, params, matlabway = TRUE)
 {
   
   # % LINARD2KERNEXPANDPARAM Create kernel structure from LINARD2 kernel's parameters.

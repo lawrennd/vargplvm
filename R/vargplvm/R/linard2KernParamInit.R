@@ -1,4 +1,4 @@
-linard2KernParamInit <- function(kern)
+linard2KernParamInit <- function(kern, matlabway = TRUE)
 {
 # % LINARD2KERNPARAMINIT LINARD2 kernel parameter initialisation.
 # % The automatic relevance determination version of the linear
@@ -31,7 +31,7 @@ kern$inputScales <- 0.999*matrix(1, 1, kern$inputDimension)
 kern$nParams <- kern$inputDimension 
 kern$transforms[[1]] <- list()
 kern$transforms[[1]]$index <- c(1:kern$nParams)
-kern$transforms[[1]]$type <- optimiDefaultConstraint("positive") 
+kern$transforms[[1]]$type <- optimiDefaultConstraint("positive", matlabway = TRUE) 
 
 kern$isStationary <- FALSE 
 return (kern)
