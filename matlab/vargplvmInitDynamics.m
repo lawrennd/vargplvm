@@ -117,7 +117,7 @@ for q=1:model.q
     model.dynamics.vardist.means(:,q) = Lkt'\(Lkt\X(:,q));
 end
 
-if isfield(optionsDyn, 'vardistCovars')
+if isfield(optionsDyn, 'vardistCovars') && ~isempty(optionsDyn.vardistCovars)
     if length(optionsDyn.vardistCovars) ==1
         model.dynamics.vardist.covars = 0.1*ones(model.N,model.q) + 0.001*randn(model.N,model.q);
         model.dynamics.vardist.covars(model.dynamics.vardist.covars<0.05) = 0.05;
@@ -125,6 +125,27 @@ if isfield(optionsDyn, 'vardistCovars')
     elseif size(optionsDyn.vardistCovars) == size(model.dynamics.vardist.covars)
         model.dynamics.vardist.covars = optionsDyn.vardistCovars;
     end
+else % Try to automatically find a satisfactory value for the initial reparametrized
+     % covariances (lambda) so that the median of the real covariances is
+     % as close as possible to an ideal value, eg 0.18
+    bestVdc = 0.05; bestDiff = 1000;
+    for vdc = [0.05:0.05:3]
+        model.dynamics.vardist.covars = 0.1*ones(model.N,model.q) + 0.001*randn(model.N,model.q);
+        model.dynamics.vardist.covars(model.dynamics.vardist.covars<0.05) = 0.05;
+        model.dynamics.vardist.covars = vdc * ones(size(model.dynamics.vardist.covars));
+        modelNew = vargplvmDynamicsUpdateStats(model);
+        med = median(modelNew.vardist.covars(:));
+        curDiff = abs(med - 0.18);
+        if (curDiff) < bestDiff % "Ideal" median is 0.18
+            bestVdc = vdc;
+            bestDiff = curDiff;
+        end
+    end
+    model.dynamics.vardist.covars = 0.1*ones(model.N,model.q) + 0.001*randn(model.N,model.q);
+    model.dynamics.vardist.covars(model.dynamics.vardist.covars<0.05) = 0.05;
+    model.dynamics.vardist.covars = bestVdc * ones(size(model.dynamics.vardist.covars));
+    model = vargplvmDynamicsUpdateStats(model);
+    fprintf('# Automatically calibrated lambda so that median(covars)=%.2f\n',median(model.vardist.covars(:)))
 end
 
 % smaller lengthscales for the base model
@@ -209,4 +230,11 @@ params = vargplvmExtractParam(model);
 model = vargplvmExpandParam(model, params);
 
 
+med = median(model.vardist.covars(:));
+minC = min(model.vardist.covars(:));
+maxC = max(model.vardist.covars(:));
+if med < 0.1 || med > 0.6
+   warning('!!! [Min Median Max] value of variational covariances is [%1.2f %1.2f %1.2f].\n', minC, med, maxC);
+else
+    fprintf('# [Min Median Max] value of variational covariances is [%1.2f %1.2f %1.2f].\n', minC, med, maxC);
 end

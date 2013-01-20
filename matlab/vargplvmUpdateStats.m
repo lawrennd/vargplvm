@@ -17,6 +17,8 @@ jitter = 1e-6;
 %%% Maybe we should add something like model.dynamics.X =
 %%% model.dynamics.vardist.means (if visualisation requires that).
  if isfield(model, 'dynamics') && ~isempty(model.dynamics)
+     % This actually only operates on model.dynamics. The only reason we
+     % send the whole model is that we need to get model.vardist.means.
      model = vargplvmDynamicsUpdateStats(model);
  end
 

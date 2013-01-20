@@ -6,11 +6,12 @@ rand('seed', 1e5);
 dataSetName = 'oil100';
 
 %%%%% Options
-N = 15;
-Q = 3; 
-K = 5;
-dynUsed = 1;
-learnInducing = 0;
+if ~exist('N'), N = 15; end
+if ~exist('Q'), Q = 3;  end
+if ~exist('K'), K = 5; end
+if ~exist('dynUsed'), dynUsed = 1; end
+if ~exist('learnInducing'), learnInducing = 0; end
+if ~exist('iters'), iters = 10; end
 %%%%%%%%%
 
 
@@ -74,5 +75,5 @@ model.learnBeta=1;
    end
    
    
-
-model = vargplvmOptimise(model, 1, 10, 'gradcheck', true);
+modelInit = model;
+model = vargplvmOptimise(model, 1, iters, 'gradcheck', true);

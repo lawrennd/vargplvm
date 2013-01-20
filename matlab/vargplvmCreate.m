@@ -272,8 +272,12 @@ switch options.approx
         model.fixInducing = options.fixInducing;
         if options.fixInducing
             if length(options.fixIndices)~=options.numActive
-                error(['Length of indices for fixed inducing variables must ' ...
-                    'match number of inducing variables']);
+                %error(['Length of indices for fixed inducing variables must ' ...
+                %    'match number of inducing variables']);
+                warning(['Length of indices for fixed inducing variables was NOT' ...
+                    ' equal to the number of inducing variables. This was automatically' ...
+                    ' fixed by custom fixIndices.']);
+                options.fixIndices = 1:options.numActive;
             end
             model.X_u = model.X(options.fixIndices, :);
             model.inducingIndices = options.fixIndices;
@@ -281,9 +285,13 @@ switch options.approx
             %%%NEW_: make it work even if k>N
             if model.k <= model.N
                 if ~isfield(options, 'labels')
-                    ind = randperm(model.N);
-                    ind = ind(1:model.k);
-                    model.X_u = model.X(ind, :);
+                    if ~isfield(options, 'initX_u')
+                        ind = randperm(model.N);
+                        ind = ind(1:model.k);
+                        model.X_u = model.X(ind, :);
+                    else
+                        model.X_u = options.initX_u;
+                    end
                 else
                     % in the case that class labels are supplied, make sure that inducing inputs
                     % from all classes are chosen
@@ -305,6 +313,7 @@ switch options.approx
                     model.X_u = model.X(midx,:);
                 end                    
             else
+                warning('k > N !')
                 % TODO: sample from the variational distr. (this should probably go
                 % to the dynamics as well because the vardist. changes in the initialization for the dynamics.
 

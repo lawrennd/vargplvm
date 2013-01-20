@@ -23,6 +23,14 @@ defaults.dataSetField = []; % For vargplvmLoadData
 defaults.testReoptimise = 1;
 defaults.invWidthMultDyn = 100;
 defaults.invWidthMult = 5;
+    
+
+% The values of this field are either strings, so that [@initX 'Embed']
+% is called, or it can be a matrix of an a priori computed latent space.
+% Other options for embedding:
+% 'pca','isomap2','vargplvm','fgplvm','outputs'. The last requires that
+% Q==D and initialises X=Y where the data is scaled so that it's 0 mean
+% 1 variance
 defaults.initX ='ppca';
 defaults.regularizeMeans = 0;
 defaults.initVardistIters = 0;

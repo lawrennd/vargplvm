@@ -27,7 +27,8 @@ model.dynamics.nParams = length(modelExtractParam(model.dynamics));
 model.nParams = model.nParams + model.dynamics.nParams;
 model = vargplvmExpandParam(model, params);
 
-med = median(model.vardist.covars(:));
-if med < 0.3 || med > 0.7
-   warning('!!! Median value of variational covariances is %1.2f.\n', med);
-end
+% This will be moved to "initDynamics"
+%med = median(model.vardist.covars(:));
+%if med < 0.3 || med > 0.7
+%   warning('!!! Median value of variational covariances is %1.2f.\n', med);
+%end

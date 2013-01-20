@@ -142,8 +142,9 @@ end
 
 
 
-% LL1 TERM: This only takes into account the training data and only the
-% dimensions which are missing from the test data.
+% LL1 TERM: This only takes into account the dimensions (m) from the training
+% data (no test data at all here), where (m) is the set of dimensions
+% which are missing in the test data.
 %
 ll1 = 0;
 if ~isempty(indexMissing)
@@ -162,7 +163,7 @@ end
 
 % LL2 TERM : This takes into account the whole distribution of the training
 % and test data but only for the dimensions which are partly observed in
-% the training data. Now we need to calculate the parts of the Psi
+% the test data. Now we need to calculate the parts of the Psi
 % statistics that correspond to the test data and then amend the old Psi's
 % (which were calculated above only for the training part) with these
 % values.

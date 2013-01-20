@@ -1,10 +1,11 @@
-function optionsDyn = vargplvmOptionsDyn(optionsDyn)
+function optionsDyn = vargplvmOptionsDyn(optionsDyn, X)
 % VARGPLVMOPTIONSDYN Fill in an options structure with default parameters
 % FORMAT
 % DESC takes an VARGPLVM options structure amends it with default values
 % wherever the field is empty.
 % ARG optionsDyn : the VARGPLVM structure to fill in with default values.
-% 
+% ARG X : a latent space initialised for the basic model (only used if
+% times t are not given)
 %
 % COPYRIGHT : Michalis K. Titsias, 2011
 % COPYRIGHT : Neil D. Lawrence, 2011
@@ -37,7 +38,7 @@ if strcmp(optionsDyn.type, 'vargpTime')
     % equally spaced time vector.
     if  ~isfield(optionsDyn, 't') || isempty(optionsDyn.t)
         fprintf(1, '# Time vector unknown; creating random, equally spaced time vector\n');
-        t = linspace(0, 2*pi, size(model.X, 1)+1)';
+        t = linspace(0, 2*pi, size(X, 1)+1)';
         t = t(1:end-1, 1);
         optionsDyn.t = t;
     else
