@@ -1,4 +1,4 @@
-function options = vargplvmOptions(varargin);
+function options = vargplvmOptions(varargin)
 
 % VARGPLVMOPTIONS Return default options for VARGPLVM model.
 % FORMAT
@@ -34,6 +34,10 @@ options.initX = 'ppca';
 % What prior on the latent space (only affects starting points if
 % dynamics are used.
 options.prior = 'gaussian';
+
+options.fixInducing = 0;
+options.optimiseBeta = 1;
+options.beta = 1000;
 
 % Whether or not to use back constraints
 %options.back = [];

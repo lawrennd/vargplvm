@@ -48,7 +48,9 @@ model.approx = options.approx;
 model.learnScales = options.learnScales;
 %model.scaleTransform = optimiDefaultConstraint('positive');
 
-model.optimiseBeta = options.optimiseBeta;
+if isfield(options, 'optimiseBeta')
+    model.optimiseBeta = options.optimiseBeta;
+end
 
 if isfield(options, 'betaTransform') && isstruct( options.betaTransform )
     model.betaTransform = options.betaTransform;
@@ -346,7 +348,9 @@ switch options.approx
             end
             %%%_NEW
         end
-        model.beta = options.beta;
+        if isfield(options, 'beta')
+            model.beta = options.beta;
+        end
 end
 %{
 %if model.k>model.N
