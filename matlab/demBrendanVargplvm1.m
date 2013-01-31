@@ -42,7 +42,5 @@ if exist('printDiagram') & printDiagram
   lvmPrintPlot(model, lbls, dataSetName, experimentNo);
 end
 
-% load connectivity matrix
-[void, connect] = mocapLoadTextData('run1');
 % Load the results and display dynamically.
 lvmResultsDynamic(model.type, dataSetName, experimentNo, 'image', [20 28], 1, 0, 1)
