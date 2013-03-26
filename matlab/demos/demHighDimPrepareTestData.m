@@ -48,6 +48,21 @@
                 else
                     indexMissing=1:round(size(Yts,2)/2);
                 end
+                
+                % NEW
+                if exist('cutP'),    cutPoint = cutP; end
+                if ~isscalar(cutPoint)
+                    mask = zeros(w,1);
+                    mask(cutPoint) = 1;
+                else
+                    mask = [ones(1,cutPoint) zeros(1,w-cutPoint)];
+                    if exist('randomCols') && randomCols
+                        perm = randperm(length(mask));
+                        mask = mask(perm);
+                    end
+                end
+                mask=repmat(mask, h,1);
+                indexMissing = find(mask);
         end
     end
     indexPresent = setdiff(1:model.d, indexMissing);

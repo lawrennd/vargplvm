@@ -112,6 +112,8 @@ for q=1:dynModel.q
 
     G = repmat(LambdaH_q, 1, dynModel.N).*dynModel.Kt;
     G = Lbt_q \ G; 
+    % Numerical stable way for diag(inv(inv(dynModel.Kt +
+    % diag(dynModel.vardist.covars(:,q))));
     SqOrig(:,q) = diag(dynModel.Kt) - sum(G.*G,1)';
     
 end

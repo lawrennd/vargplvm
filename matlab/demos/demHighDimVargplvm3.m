@@ -101,7 +101,7 @@ switch dataSetName
     case 'horse2'
         Y=vargplvmLoadData('horse2');
         width=320;
-        height=240;
+        height=240;        
     otherwise
         % Y might have been loaded before this script is run. Otherwise
         % call lvmLoadData
@@ -416,7 +416,8 @@ if trainModel
         fprintf(1,'1/b = %.4d\n',1/model.beta);
         modelTr = model;
         
-        fprintf(1,'# 1/b=%.4f\n var(m)=%.4f\n',1/model.beta, var(model.mOrig(:)));
+        %fprintf(1,'# 1/b=%.4f\n var(m)=%.4f\n',1/model.beta, var(model.mOrig(:)));
+        vargplvmShowSNR(model)
         
         % Save model
         fprintf(1,'# Saving %s\n',fileToSave);

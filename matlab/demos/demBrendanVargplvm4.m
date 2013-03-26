@@ -24,7 +24,7 @@ N=size(Y,1); % Set N=size(Y,1) for the full dataset
 Y = Y(1:N,:); 
 
 % training and test sets
-Ntr = round(size(Y,1)/2);
+Ntr = 1000; %round(size(Y,1)/2);
 
 % Create Permutation matrix to split randomly training and test data
 dataPerm = randperm(N); 
@@ -35,12 +35,12 @@ Yts = Y(perm(Ntr+1:end),:);  %lblsTs = lbls(perm(Ntr+1:end),:);
 
 % Set up model
 options = vargplvmOptions('dtcvar');
-options.kern = {'rbfard2', 'white'};
+options.kern = 'rbfardjit'; %{'rbfard2', 'white'};
 options.numActive = 50; % Default 50
 options.scale2var1 = 1; % scale data to have variance 1
 %options.tieParam = 'tied';  
 
-options.optimiser = 'scg';
+options.optimiser = 'scg2';
 latentDim = 30; % Default 30
 d = size(Y, 2);
 
@@ -49,11 +49,51 @@ model = vargplvmCreate(latentDim, d, Ytr, options);
 %
 model = vargplvmParamInit(model, model.m, model.X); 
 
-iters = 500; % default 1500
-display = 1;
+initVardistIters = 500;
+model.initVardist = 1; model.fixBeta = 1; 
+fprintf(1, '# Initialising var. distr of the model (%d iterations)...\n',initVardistIters);
+model = vargplvmOptimise(model, 1, initVardistIters);
 
+
+model.initVardist = 0; model.fixBeta = 0; 
+
+iters = 1500; % default 1500
+display = 1;
 fprintf(1, '# Training the model (%d iterations)...\n',iters);
-model = vargplvmOptimise(model, display, iters);
+model = vargplvmOptimise(model, 1, iters);
+
+%--
+
+% Save the results.
+%modelWriteResult(model, dataSetName, experimentNo);
+saveName = vargplvmWriteResult(model, model.type, dataSetName, experimentNo);
+fprintf('Saved %s.\n', saveName)
+
+
+%---- TMP
+fprintf(1, '# Training the model (%d iterations)...\n',iters);
+model = vargplvmOptimise(model, 1, iters);
+% Save the results.
+%modelWriteResult(model, dataSetName, experimentNo);
+saveName = vargplvmWriteResult(model, model.type, dataSetName, experimentNo);
+fprintf('Saved %s.\n', saveName)
+%----
+
+%if exist('printDiagram') & printDiagram
+%  lvmPrintPlot(model, lbls, dataSetName, experimentNo);
+%end
+
+% Load the results and display dynamically.
+%lvmResultsDynamic(model.type, dataSetName, experimentNo, 'image', [20 28], 1, 0, 1)
+
+
+% Visualise the results
+%lvmVisualise(model, lbls, 'imageVisualise', 'imageModify', [20 28], 1, 0);
+
+
+
+
+%---------------- RECONSTRUCTION ------
 
 iters = 100; %Default: 100
 display = 0;
@@ -85,11 +125,13 @@ Varmu = [];
 Varsigma = [];
 
 fprintf(1, '# Partial reconstruction of test points...\n');
+pb = myProgressBar(size(Yts,1), size(Yts,1)/10); % This will print 10 times
 
 % patrial reconstruction of test points
 for i=1:size(Yts,1)
     indexPresent = indicesPresent(i,:);
     indexP(i,:) = indexPresent;
+    pb = myProgressBar(pb,i);
     
     % initialize the latent point using the nearest neighbour 
     % from he training data
@@ -112,17 +154,5 @@ for i=1:size(Yts,1)
     [mu, sigma] = vargplvmPosteriorMeanVar(model, x, varx);
     Varmu(i,:) = mu; 
     Varsigma(i,:) = sigma; 
-    
     %
 end
-
-% Save the results.
-modelWriteResult(model, dataSetName, experimentNo);
-
-if exist('printDiagram') & printDiagram
-  lvmPrintPlot(model, lbls, dataSetName, experimentNo);
-end
-
-% Load the results and display dynamically.
-lvmResultsDynamic(model.type, dataSetName, experimentNo, 'image', [20 28], 1, 0, 1)
-

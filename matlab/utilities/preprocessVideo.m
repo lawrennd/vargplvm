@@ -18,6 +18,13 @@ function [Y, height, width] = preprocessVideo(videoFile, width, height, form, op
 % VARGPLVM
 
 
+% In UNIX, Matlab can only handle raw avi. To create this, use:
+% ffmpeg -i Video.mpg -pix_fmt rgb24 -vcodec rawvideo -qscale 1 -an Video.avi
+
+% Cropping:
+% Visualise the first frame. Then type: I = imcrop(); Do the selection on
+% the figure, right click and click "copy positiobn". That's the crop
+% vector to use. (ie set options.cropVector = <paste>)
 
 %baseDir = 'datasets/';
 %baseDir=[];

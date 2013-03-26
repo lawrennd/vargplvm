@@ -35,7 +35,9 @@ if nargin > 2
     end
 end
 
-globalOpt.initSNR = options.initSNR;
+if ~isfield(options, 'initSNR') && isfield(options, 'beta')
+    globalOpt.betaInit = options.beta;
+end
 
 latentDim = dims;
 d = size(Y, 2);

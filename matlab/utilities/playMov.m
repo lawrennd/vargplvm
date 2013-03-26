@@ -111,6 +111,7 @@ fntSz=18;
                     k = k+1;
                     imagesc(fr);
                     colormap('gray');
+                    drawnow;
                     pause(p(1))
                 end
                 if isfield(options, 'saveMovie') && options.saveMovie
@@ -162,6 +163,7 @@ fntSz=18;
                  imagesc(fr);
                  colormap('gray');
             end
+            drawnow;
             if exist('indices')
                 if indices(i)
                     title(['Frame: ' num2str(i) ' (Training)'], 'Color','b','FontSize',fntSz)

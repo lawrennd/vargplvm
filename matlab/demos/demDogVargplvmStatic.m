@@ -22,8 +22,9 @@ if predWithMs
     fprintf(1, '# Partial reconstruction of test points...\n');
     % w=360; % width
     % h=288; % height
-    w=width; h=height;
     
+    %% OLD
+    %{
     if ~exist('cut')
         cut = 'vertically';
         if strcmp(dataSetName,'missa') || strcmp(dataSetName,'ADN') || strcmp(dataSetName,'claire')
@@ -80,6 +81,14 @@ if predWithMs
      clear Ytemp
     %}
     %% %%%%%%%%%%%%%%
+    
+    
+    %}
+    
+    %%-- NEW:
+    demHighDimPrepareTestData
+    %%--
+    
     mini =[];
     for i=1:size(Yts,1)
         % initialize the latent points using the nearest neighbour

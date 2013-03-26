@@ -19,7 +19,7 @@ options.kern = {'rbfard2', 'bias', 'white'};
 options.numActive = 50; 
 %options.tieParam = 'tied';  
 
-options.optimiser = 'scg';
+options.optimiser = 'scg2';
 latentDim = 10;
 d = size(Y, 2);
 
@@ -33,6 +33,10 @@ model.vardist.covars = 0.5*ones(size(model.vardist.covars)) + 0.001*randn(size(m
 % Optimise the model.
 iters = 2000; % Default: 2000
 display = 1;
+
+%---
+%model.kern.comp{1}.inputScales = model.kern.comp{1}.inputScales./ model.kern.comp{1}.inputScales;
+%---
 
 model = vargplvmOptimise(model, display, iters);
 

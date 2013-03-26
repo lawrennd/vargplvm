@@ -1,15 +1,25 @@
-function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = rbfard2linard2VardistPsi2Gradient(rbfardKern, linardKern, vardist, Z, covGrad)
+function [gKern1, gKern2, gVarmeans, gVarcovars, gInd] = rbfard2linard2VardistPsi2Gradient(rbfardKern, linardKern, vardist, Z, covGrad, learnInducing)
 
 % RBFARD2LINARD2VARDISTPSI2GRADIENT description
   
 % VARGPLVM
-  
+
+if nargin < 6
+    learnInducing = 1;
+end
+
 % variational means
 N = size(vardist.means,1);
 %  inducing variables 
 [M Q] = size(Z); 
 
 [Psi2, Pnovar, Psi1] = rbfard2linard2VardistPsi2Compute(rbfardKern, linardKern, vardist, Z);
+
+%-- New: preallocation
+    gVarmeans = zeros(N,Q);
+    gVarcovars = zeros(N,Q);
+    gInd = zeros(M,Q);
+%---
 
 % inverse variances
 A1 = rbfardKern.inputScales;
@@ -94,15 +104,17 @@ for q=1:Q
     Q1term = ( Psi1'*(S_q./AAS) )*Z(:,q)'*A1(q)*A2(q);  
     Q2term = sum( ( Psi1./repmat(AAS,1,M) ).*( repmat(Z(:,q)',N,1).*repmat(S_q,1,M)*A1(q)*A2(q) + repmat(Mu_q,1,M)*A2(q) ), 1);
     %
-    for m=1:M
-    %  
-       Bterm = (vardist.covars./(AA1.*vardist.covars + 1))*sparse(diag(Z(m,:).*A1.*A2))*Z'...
-              + (vardist.means./(AA1.*vardist.covars + 1))*sparse(diag(A2))*Z';        
-      
-       Indtmp =  sum(repmat(DerPsi1(:,m),1,M).*Bterm ,1) + Q1term(m,:) + Q2term; 
-                 
-       gInd(m,q) = sum(sum(covGrad(m,:).*Indtmp));
-    %
+    if learnInducing
+        for m=1:M
+            %
+            Bterm = (vardist.covars./(AA1.*vardist.covars + 1))*sparse(diag(Z(m,:).*A1.*A2))*Z'...
+                + (vardist.means./(AA1.*vardist.covars + 1))*sparse(diag(A2))*Z';
+            
+            Indtmp =  sum(repmat(DerPsi1(:,m),1,M).*Bterm ,1) + Q1term(m,:) + Q2term;
+            
+            gInd(m,q) = sum(sum(covGrad(m,:).*Indtmp));
+            %
+        end
     end
     %
 end

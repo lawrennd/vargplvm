@@ -29,10 +29,14 @@ if model.N > 50 && globalOpt.enableParallelism
 end
 
 %%%
-if model.DgtN
-    model.beta = 1/((1/globalOpt.initSNR * var(model.mOrig(:))));
+if ~isfield(globalOpt, 'beta') || isempty(globalOpt.betaInit)
+    if model.DgtN
+        model.beta = 1/((1/globalOpt.initSNR * var(model.mOrig(:))));
+    else
+        model.beta = 1/((1/globalOpt.initSNR * var(model.m(:))));
+    end
 else
-    model.beta = 1/((1/globalOpt.initSNR * var(model.m(:))));
+    model.beta = globalOpt.betaInit;
 end
 
 %%% NEW
