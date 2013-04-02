@@ -1,7 +1,14 @@
-                                     % model, pruneModel, saveModel, {initVardistIters, itNo}, display
-                                     % OR
-                                     % model, pruneModel, globalOpt % Take all values from globalOpt struct
 function model = vargplvmOptimiseModel(model, varargin)
+
+% VARGPLVMOPTIMISEMODEL Optimise a varglpvm model (wrapper)
+% SEEALSO: vargplvmOptimise
+% COPYRIGHT: Andreas C. Damianou, 2012
+% VARGPLVM
+
+
+% model, pruneModel, saveModel, {initVardistIters, itNo}, display
+% OR
+% model, pruneModel, globalOpt % Take all values from globalOpt struct
 
 pruneModel = true;
 saveModel = true;

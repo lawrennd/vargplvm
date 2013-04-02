@@ -1,3 +1,8 @@
+% DEMDIMREDVARGPLVM A simple demonstration of dimensionality reduction for
+% the Bayesian GP-LVM
+% COPYRIGHT: Andreas C. Damianou, 2012
+% VARGPLVM
+
 % Fix seeds
 randn('seed', 1e5);
 rand('seed', 1e5);
@@ -118,16 +123,16 @@ display = 1;
 fprintf(1,'# Intitiliazing the model (fixed beta) %d iterations...\n',300);
 model = vargplvmOptimise(model, display, 300);
 disp('# Saving model after optimising beta...')
-modelWriteResult(model, dataSetName, experimentNo);
+%modelWriteResult(model, dataSetName, experimentNo);
 
 % Optimise the model.
 model.learnBeta = 1;
-iters = 8000; % Default: 1000
+iters = 200; % Default: 1000
 fprintf(1,'# Optimising the model for %d iterations...\n',iters);
 model = vargplvmOptimise(model, display, iters);
 % Save the results.
 fprintf(1,'# Saving model after doing %d iterations\n',iters)
-modelWriteResult(model, dataSetName, experimentNo);
+%modelWriteResult(model, dataSetName, experimentNo);
 
 
 %--------- SIMPLE EVALUATION -----

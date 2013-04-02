@@ -1,10 +1,16 @@
+function [X, sigma2, W, model, modelInitVardist] = vargplvmEmbed(Y, dims, varargin)
+% VARGPLVMEMBED Embed given data Y into a lower dimensional structure with Bayesian GPLVM
+% 
+% COPYRIGHT: Andreas C. Damianou, 2012
+% 
+% VARGPLVM
+
 % [X, sigma2, W, model, modelInitVardist] = vargplvmEmbed(Y, dims, varargin)
 %
 % varargin = {options, initIters, iters, display, optionsDyn}
 % To do dynamical embedding, just call the function with all arguments in
 % varargin (even if empty values are given, ie
 % [..]=vargplvmEmbed(Y, dims, [],[],[],[],[]);
-function [X, sigma2, W, model, modelInitVardist] = vargplvmEmbed(Y, dims, varargin)
 
 vargplvm_init;
 

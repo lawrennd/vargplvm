@@ -1,5 +1,8 @@
 function printGlobalOptions(globalOpt)
 
+% PRINTGLOBALOPTIONS
+% VARGPLVM
+
 fprintf(1,'\n#----------------------------------------------------\n');
 fprintf(1,'# Dataset: %s\n',globalOpt.dataSetName);
 fprintf(1,'# ExperimentNo: %d\n', globalOpt.experimentNo);

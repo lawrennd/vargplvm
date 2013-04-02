@@ -1,7 +1,9 @@
+function vargplvmPlotMat(X, inds)
+% VARGPLVMPLOTMAT
 % Plot in subplots each of the dimensions of a matrix (or cell matrix) X.
 % If argument inds is provited, only the according dimensions will be
 % plotted
-function vargplvmPlotMat(X, inds)
+% VARGPLVM
 
 if iscell(X)
     Xnew = [];

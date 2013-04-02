@@ -1,5 +1,9 @@
 function model = vargplvmModelInit(model, globalOpt)
 
+% VARGPLVMMODELINIT Initialise a vargplvm model given global demo options
+% COPYRIGHT: Andreas C. Damianou, 2012
+% SEEALSO: vargplvmCreate
+% VARGPLVM
 
 if globalOpt.DgtN
     model.mOrig = model.m;

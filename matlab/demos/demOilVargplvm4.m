@@ -1,4 +1,4 @@
-% DEMOILVARGPLVM1 Run variational GPLVM on oil data.
+% DEMOILVARGPLVM4 Run variational GPLVM on oil data.
 
 % VARGPLVM
 

@@ -18,7 +18,7 @@ function [expNo, keynames, values] = globalExperimentNumber(demoType, dataType, 
 
 % COPYRIGHT : Andreas C. Damianou, 2011
 
-% 
+% VARGPLVM
 
 
 % constant:

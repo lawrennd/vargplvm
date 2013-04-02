@@ -1,3 +1,6 @@
+% DEMHIGHDIMVARGPLVMSTATIC
+% VARGPLVM
+
 %%% Than can replace demDogVargplvmStatic.m and demMissaVargplvmStatic.m
 
 if ~exist('predWithMs'), predWithMs = 1; end

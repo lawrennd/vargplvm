@@ -1,3 +1,5 @@
+function [model, newHeight, newWidth] = vargplvmReduceVidModel(model, height, width, varargin)
+
 % VARGPLVMREDUCEVIDMODEL Take a model computed on a video dataset and return a model which is computed on
 % the same video but with lower resolution
 % DESC Take a model computed on a video dataset and return a model which is computed on
@@ -6,7 +8,6 @@
 % VARGPLVM
 
 % varargin may include "factor1" and "factor2" optionally
-function [model, newHeight, newWidth] = vargplvmReduceVidModel(model, height, width, varargin)
 
 [model.m, newHeight, newWidth] = vargplvmReduceVideo(model.m, height, width, varargin{:});
 [model.scale, newHeight, newWidth] = vargplvmReduceVideo(model.scale, height, width, varargin{:});

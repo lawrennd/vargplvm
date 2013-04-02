@@ -1,3 +1,11 @@
+function [X, sigma2, W, model, modelInitVardist] = vargplvmEmbed2(Y, dims, varargin)
+% VARGPLVMEMBED2 Embed given data Y into a lower dimensional manifold with Bayesian GP-LVM
+%
+% COPYRIGHT: Andreas C. Damianou, 2012
+%
+% VARGPLVM
+
+
 % [X, sigma2, W, model, modelInitVardist] = vargplvmEmbed(Y, dims, varargin)
 %
 % varargin = {options, initIters, iters, display, optionsDyn}
@@ -6,7 +14,6 @@
 % [..]=vargplvmEmbed2(Y, dims, [],[],[],[],[]);
 %
 % Like vargplvmEmbed but also has (optional) dynamics
-function [X, sigma2, W, model, modelInitVardist] = vargplvmEmbed2(Y, dims, varargin)
 
 vargplvm_init;
 

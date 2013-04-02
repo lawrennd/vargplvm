@@ -1,3 +1,5 @@
+% This function is not used anywhere...
+
 function best = initVardistCovars
 clear
 best = -1; bestVal = -1;

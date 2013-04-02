@@ -1,5 +1,8 @@
 function retainedScales = vargplvmRetainedScales(model, thresh)
 
+% VARGPLVMRETAINEDSCALES A small wrapper that shows which scales are switched off after Bayesian optimisation with Bayesian GP-LVM
+% VARGPLVM
+
 if nargin < 2
     thresh = 0.005;
 end

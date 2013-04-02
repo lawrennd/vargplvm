@@ -1,5 +1,5 @@
 %
-%	DEMWALKSITJOGVARGPLVMDYN: Demo of for the walksitjog mocap dataset testing the
+%	DEMWALKSITJOGVARGPLVMDYN1: Demo of for the walksitjog mocap dataset testing the
 % dynamics of vargplvm.
 %	
   

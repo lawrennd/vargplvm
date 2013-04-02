@@ -1,4 +1,4 @@
-% DEMCMU35GPLVMVARGPLVM3 Run variational GPLVM with dynamics on CMU35 data.
+% DEMCMU35GPLVMVARGPLVMPERMTEST Run variational GPLVM with dynamics on CMU35 data - permutation test to test the bound.
 %
 % COPYRIGHT :  Andreas C. Damianou, Michalis K. Titsias, 2011
 %

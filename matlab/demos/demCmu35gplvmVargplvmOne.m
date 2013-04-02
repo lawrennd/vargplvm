@@ -1,9 +1,5 @@
-% Only one sequence!
-
-% DEMCMU35GPLVMVARGPLVM2 Run variational GPLVM with dynamics on CMU35 data.
-% Exactly as the demo no1 but we use also a bias part for the cmpd dynamics
-% kernel.
-
+% DEMCMU35GPLVMVARGPLVMONE Run variational GPLVM with dynamics on CMU35 data, only 1 sequence.
+%
 % VARGPLVM
 
 

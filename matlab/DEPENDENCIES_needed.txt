@@ -11,6 +11,7 @@ mltools
 NDLUTIL0p162
 NOISE0p141
 PRIOR0p22
+MATLAB
 
 % The above packages can be obtained from:
 % http://staffwww.dcs.shef.ac.uk/people/N.Lawrence/software.html

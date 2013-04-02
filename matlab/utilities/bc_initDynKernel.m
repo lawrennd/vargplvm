@@ -1,4 +1,6 @@
 function kern = bc_initDynKernel(kern, globalOpt, optionsDyn, indexInComp)
+% BC_INITDYNKERNEL Initialise a dynamics kernel
+% VARGPLVM
 
 X = optionsDyn.t;
 

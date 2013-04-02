@@ -3,7 +3,7 @@ function h = vargplvmPrintPlot(model, lbls, capName, experimentNo, writeFile, sk
 % VARGPLVMPRINTPLOT Print latent space for learnt model.
 %
 % h = vargplvmPrintPlot(model, lbls, capName, experimentNo)
-%
+% VARGPLVM
 
 if nargin < 6
     skipPng = false;

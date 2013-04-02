@@ -1,6 +1,6 @@
 function [mu, varsigma] = vargplvmPosteriorMeanVarPar(model, X, varX);
 
-% VARGPLVMPOSTERIORMEANVAR Mean and variances of the posterior at points given by X.
+% VARGPLVMPOSTERIORMEANVARPAR Mean and variances of the posterior at points given by X, parallel version.
 % FORMAT
 % DESC returns the posterior mean and variance for a given set of
 % points.
@@ -10,7 +10,7 @@ function [mu, varsigma] = vargplvmPosteriorMeanVarPar(model, X, varX);
 % RETURN mu : the mean of the posterior distribution.
 % RETURN sigma : the variances of the posterior distributions.
 %
-% SEEALSO : gpPosteriorMeanVar, vargplvmCreate
+% SEEALSO : vargplvmPosteriorMeanVar, gpPosteriorMeanVar, vargplvmCreate
 %
 % COPYRIGHT : Michalis K. Titsias and Neil D. Lawrence, 2009, 2011
 

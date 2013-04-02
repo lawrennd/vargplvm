@@ -1,3 +1,6 @@
+% DEMHIGHDIMPREPARETESTDATA
+% VARGPLVM
+
     % w=360; % width
     % h=288; % height
     w=width; h=height;

@@ -1,5 +1,8 @@
 function SNR = vargplvmShowSNR(model, displ)
 
+% VARGPLVMSHOWSNR A simple wrapper to display the Signal to Noise Ratio of an optimised varglpvm model.
+% VARGPLVM
+
 if nargin < 2
     displ = true;
 end
