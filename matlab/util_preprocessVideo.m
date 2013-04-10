@@ -1,5 +1,5 @@
-function [Y, height, width] = preprocessVideo(videoFile, width, height, form, options)
-% PREPROCESSVIDEO Transform video files of various types into 2-D matrices.
+function [Y, height, width] = util_preprocessVideo(videoFile, width, height, form, options)
+% UTIL_PREPROCESSVIDEO Transform video files of various types into 2-D matrices.
 % DESC This function transformes video files of various types (namely: avi, yuv, ras) to 2-D matrices.
 % The function uses MATLAB's aviread and inherits all of its limitations (e.g. in UNIX
 % systems it can only handle uncompressed avi files).

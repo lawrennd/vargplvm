@@ -1,4 +1,4 @@
-% VARGPLVMCROPVIDEO   
+% UTIL_VARGPLVMCROPVIDEO   
 % Note: plot one frame and write "imcrop" on the console. Select the region
 % you want to keep and right click -> copy position. this is the cropVector.
 % The newHeight and width may be +-1 of

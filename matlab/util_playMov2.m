@@ -1,4 +1,4 @@
-function playMov2(h, w, options, Y1)
+function util_playMov2(h, w, options, Y1)
 
 
 if ~isfield(options,'imFormat')

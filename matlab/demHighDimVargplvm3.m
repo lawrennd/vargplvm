@@ -474,6 +474,7 @@ Nstar = size(YtsOriginal,1);
 %%
 
 % Prediction using the only information in the test time points
+fprintf(1, '# Predicting only with the test time points...\n')
 [Testmeans2 Testcovars2] = vargplvmPredictPoint(model.dynamics, timeStampsTest);
 Varmu2 = vargplvmPosteriorMeanVar(model, Testmeans2, Testcovars2);
 % Mean absolute error per pixel

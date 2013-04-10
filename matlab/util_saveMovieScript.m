@@ -1,4 +1,4 @@
-% SAVEMOVIESCRIPT A demonstration on the use of playMov.m for saving a
+% UTIL_SAVEMOVIESCRIPT A demonstration on the use of playMov.m for saving a
 % movie.
 % DESC Demonstration of how playMov function can be used to save a movie as an
 % avi and/or as a set of frames. Also showing how a logo can be placed. The
@@ -7,7 +7,7 @@
 %
 % COPYRIGHT: Andreas C. Damianou, 2011
 %
-% SEEALSO : preprocessVideo.m, playMov.m
+% SEEALSO : util_preprocessVideo.m, util_playMov.m
 
 % VARGPLVM
 

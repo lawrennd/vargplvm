@@ -76,6 +76,7 @@ itNo=[1000 2000 5000 8000 4000];
 dynamicKern={'rbf','white','bias'};
 whiteVar = 0.1;  vardistCovarsMult=1.7;
 dataSetSplit = 'randomBlocks';
+% DgtN = 1; % Uncomment for the faster version
 if retrainModels
     demHighDimVargplvm3
 elseif rePredict
@@ -105,6 +106,7 @@ vardistCovarsMult=1.6;
 dataSetSplit = 'blocks';
 blockSize = 4; whiteVar = 0.1;
 msk = [48 63 78 86 96 111 118];
+% DgtN = 1; % Uncomment for the faster version
 if retrainModels
     demHighDimVargplvm3
 elseif rePredict
@@ -151,6 +153,7 @@ dataToKeep = 60; dataSetSplit = 'custom';
 indTr = [1:60];
 indTs = 60; % We don't really reconstruct in this experiment
 learnSecondVariance = 0;
+% DgtN = 1; % Uncomment for the faster version
 if retrainModels
     demHighDimVargplvm3
 end

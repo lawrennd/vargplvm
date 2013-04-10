@@ -1,4 +1,4 @@
-function [Y, height, width] = datasetFromImages(baseDir, selDirs)
+function [Y, height, width] = util_datasetFromImages(baseDir, selDirs)
 
 % Create the dataset out of the images.
 
