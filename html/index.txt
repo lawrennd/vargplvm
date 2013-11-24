@@ -19,6 +19,10 @@
 
 RELEASEINFORMATION
 
+Software now extended with shared variational GP-LVM (manifold relevance determination). And dependency on GPmat toolbox introduced (instead of old list of toolboxes).
+
+<h4>Version 0.2</h4>
+
 The released software now includes dynamical models.
 
 <h4>Version 0.14</h4>
