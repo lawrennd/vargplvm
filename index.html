@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>vargplvm by lawrennd</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>vargplvm</h1>
+        <p>Variational Bayesian GP-LVM model in MATLAB.</p>
+
+        <p class="view"><a href="https://github.com/lawrennd/vargplvm">View the Project on GitHub <small>lawrennd/vargplvm</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/lawrennd/vargplvm/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/lawrennd/vargplvm/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/lawrennd/vargplvm">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="bayesian-gp-lvm-model" class="anchor" href="#bayesian-gp-lvm-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bayesian GP-LVM model</h1>
+
+<p>This page describes examples of how to use the variational approximation to the Bayesian GP-LVM model.</p>
+
+<h2>
+<a id="release-information" class="anchor" href="#release-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>Release Information</h2>
+
+<p><strong>Current release is 0.2</strong>.</p>
+
+<p>As well as downloading the VARGPLVM software you need to obtain the toolboxes specified below. <strong>These can be downloaded using the <em>same</em> password you get from registering for the VARGPLVM software.</strong></p>
+
+<p>|-----------------------------------------------|-------------|
+| <strong>Toolbox</strong>                                   | <strong>Version</strong> |
+| <a href="/netlab/downloadFiles/vrs3p3">NETLAB</a>        | 3.3         |
+| <a href="/prior/downloadFiles/vrs0p22">PRIOR</a>         | 0.22        |
+| <a href="/optimi/downloadFiles/vrs0p132">OPTIMI</a>      | 0.132       |
+| <a href="/datasets/downloadFiles/vrs0p1371">DATASETS</a> | 0.1371      |
+| <a href="/mltools/downloadFiles/vrs0p138">MLTOOLS</a>    | 0.138       |
+| <a href="/kern/downloadFiles/vrs0p227">KERN</a>          | 0.227       |
+| <a href="/ndlutil/downloadFiles/vrs0p162">NDLUTIL</a>    | 0.162       |
+| <a href="/mocap/downloadFiles/vrs0p136">MOCAP</a>        | 0.136       |
+| <a href="/gp/downloadFiles/vrs0p137">GP</a>              | 0.137       |
+| <a href="/noise/downloadFiles/vrs0p141">NOISE</a>        | 0.141       |</p>
+
+<p>The released software now includes dynamical models.</p>
+
+<h4>
+<a id="version-014" class="anchor" href="#version-014" aria-hidden="true"><span class="octicon octicon-link"></span></a>Version 0.14</h4>
+
+<p>This release includes improved numerical stability on the gradient and bound computations which finds better solutions under the optimizer. Derived and implemented by Andreas Damianou and Michalis Titsias.</p>
+
+<h4>
+<a id="version-01" class="anchor" href="#version-01" aria-hidden="true"><span class="octicon octicon-link"></span></a>Version 0.1</h4>
+
+<p>This release is for the AISTATS 2010 submission.</p>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<h3>
+<a id="oil-data" class="anchor" href="#oil-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Oil Data</h3>
+
+<p>The 'oil data' is commonly used as a bench mark for visualisation algorithms. For more details on the data see <a href="http://www.ncrg.aston.ac.uk/GTM/3PhaseData.html">this page</a>. In all of the following examples 50 inducing points were used.</p>
+
+<h4>
+<a id="standard-dataset" class="anchor" href="#standard-dataset" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard dataset</h4>
+
+<p>The script <code>demOilVargplvm1.m</code> runs the Bayesian GP-LVM Model on this dataset, giving the results shown on the left of the figure that follows. The visualization was achieved by keeping the most dominant latent dimensions (2 and 3) which have the largest inverse lengthscale value. Dimension 2 is plotted on the <em>y</em>-axis and 3 and on the <em>x</em>-axis. The script <code>demOilVargplvm2.m</code> is similar but there are missing outputs from test points; the model attempts to reconstruct these missing outputs. The result is shown on the right of the figure.
+<img src="demOilVargplvm1.png" alt=""><img src="demOilVargplvm2.png" alt="">
+ <em>Left</em>: Bayesian GP-LVM on the oil data without missing outputs. The phases of flow are shown as green circles, blue crosses and red plusses. <em>Right</em>: Similar but in this case 50% of the outputs are missing and the model attempts to reconstruct them.</p>
+
+<h4>
+<a id="100-inducing-points" class="anchor" href="#100-inducing-points" aria-hidden="true"><span class="octicon octicon-link"></span></a>100 Inducing Points</h4>
+
+<p>The script <code>demOil100Vargplvm1.m</code> runs the Bayesian GP-LVM Model on the Oil Data with only 100 points in the active set, giving the result on the figure below.
+<img src="demOil100Vargplvm1.png" alt="">
+ Bayesian GP-LVM on the oil data using 100 inducing points.</p>
+
+<h3>
+<a id="loop-closure-in-robotics" class="anchor" href="#loop-closure-in-robotics" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loop Closure in Robotics</h3>
+
+<p>In on-going work with Dieter Fox and Brian Ferris at the University of Washington we are interested in loop closure for robotic navigation, included as an example is a data set of a robot completing a loop while reading wireless access point signal strengths. The script <code>demRobotWirelessVargplvm1.m</code> runs the Bayesian GP-LVM Model on this dataset in order to produce a neat track and close the loop, as can be seen on the figure shown below.</p>
+
+<p><img src="demRobotWirelessVargplvm1.png" alt="">
+ Use of the Bayesian GP-LVM Model to obtain loop closure in a robot navigation example.</p>
+
+<h3>
+<a id="frey-faces-data" class="anchor" href="#frey-faces-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Frey Faces Data</h3>
+
+<p>In this dataset, we try to exploit the ability of the model to reconstruct partially observed test data. Therefore, when the model is trained only half of the image pixels are assumed to be observed. After training on 1000 images, each partially observed test image was processed separately and the missing pixels were predicted as shown on the figures below. The code to obtain the following figures was based on the <code>demBrendanVargplvm3.m</code> script.</p>
+
+<p><img src="demBrendanTestImag1_3.png" alt=""><img src="demBrendanTestImag2_3.png" alt=""><img src="demBrendanTestImag4_3.png" alt=""><img src="demBrendanTestImag127_3.png" alt=""><img src="demBrendanTestImag11_3.png" alt=""><img src="demBrendanTestImag24_3.png" alt=""><img src="demBrendanTestImag51_3.png" alt=""><img src="demBrendanTestImag62_3.png" alt=""></p>
+
+<p><img src="demBrendanTestImag1WithMissing_3.png" alt=""><img src="demBrendanTestImag2WithMissing_3.png" alt=""><img src="demBrendanTestImag4WithMissing_3.png" alt=""><img src="demBrendanTestImag127WithMissing_3.png" alt=""><img src="demBrendanTestImag11WithMissing_3.png" alt=""><img src="demBrendanTestImag24WithMissing_3.png" alt=""><img src="demBrendanTestImag51WithMissing_3.png" alt=""><img src="demBrendanTestImag62WithMissing_3.png" alt=""></p>
+
+<p><img src="demBrendanTestImag1Reconst_3.png" alt=""><img src="demBrendanTestImag2Reconst_3.png" alt=""><img src="demBrendanTestImag4Reconst_3.png" alt=""><img src="demBrendanTestImag127Reconst_3.png" alt=""><img src="demBrendanTestImag11Reconst_3.png" alt=""><img src="demBrendanTestImag24Reconst_3.png" alt=""><img src="demBrendanTestImag51Reconst_3.png" alt=""><img src="demBrendanTestImag62Reconst_3.png" alt=""></p>
+
+<p>Examples of reconstruction of partially observed test images in Frey faces by applying the Bayesian GP-LVM. Each column corresponds to a test image. In every column, the top panel shows the true test image, the middle panel the partially observed image (where missing pixels are shown in black) and the bottom image is the reconstructed image.</p>
+
+<h3>
+<a id="dynamical-systems-modelling" class="anchor" href="#dynamical-systems-modelling" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dynamical Systems Modelling</h3>
+
+<p>The Bayesian GPLVM model has been extended with dynamics in a fully Bayesian framework, where a temporal prior is placed on the latent space and the latent points are integrated out. This makes the model suitable for robust modelling of dynamical systems, such as motion capture data or video sequences. Given that the model is generative, the method can also be used to produce novel sequences. The script <code>demosDynamics.m</code> reproduces the corresponding experiments. The first diagram below demonstrates the ability of the method to reconstruct partially observed frames taken from a video sequence. The second diagram shows an image which is generated without giving partial information, apart from a time interval for inter- or extrapolation. The video used for that experiment expressed strong periodicity, which allowed the model to be trained on 60 frames and then produce a novel video sequence for any given time interval (in the particular experiment for times 61 to 100). The complete videos generated for these experiments can be found <a href="http://staffwww.dcs.shef.ac.uk/people/A.Damianou/varFiles/paper/supplementary/">here</a>.</p>
+
+<p><img src="missaGpdsPredFrame17.png" alt=""></p>
+
+<p>Reconstructing a partially observed frame.</p>
+
+<p><img src="dogGeneration_frame14.png" alt=""></p>
+
+<p>One of the frames that belong to a video sequence which is generated by the model.</p>
+
+<p>Page updated on Tue Nov 22 00:39:27 2011</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/lawrennd">lawrennd</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-62968536-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
